@@ -20,7 +20,7 @@ MAX_RETRIES = 3
 GIVE_UP_THRESHOLD = 10
 
 
-class RecordHandler:
+class RecordHandler:  # pylint:disable=too-few-public-methods
     """
     This class is responsible for consuming new dune records and missing values from previous runs
     it attempts to fetch content for them and filters them into "found" and "not found" as necessary
@@ -116,25 +116,6 @@ class RecordHandler:
         self._handle_missing_records(max_retries)
         return self.found, self.not_found
 
-    def write_to_disk(self, file_manager: FileIO, filename: str) -> None:
-        """
-        Does all appropriate file writes for a single run of the app data sync job
-        Write new records, missing records and last sync block.
-        """
-        # Write the most recent data and also record the block_from,
-        # so that next run will know where to start
-        file_manager.write_ndjson(data=self.found, name=filename)
-        # When not_found is empty, we want to overwrite the file (hence skip_empty=False)
-        # This happens when all records in the file have attempts exceeding GIVE_UP_THRESHOLD
-        file_manager.write_ndjson(
-            self.not_found, self.config.missing_files_name, skip_empty=False
-        )
-        # Write last sync block only after the data has been written.
-        file_manager.write_csv(
-            data=[{self.config.sync_column: str(self.block_range.block_to)}],
-            name=self.config.sync_file,
-        )
-
 
 async def get_block_range(
     file_manager: FileIO, dune: DuneFetcher, last_block_file: str, column: str
@@ -181,7 +162,6 @@ def get_missing_data(file_manager: FileIO, missing_fname: str) -> list[DuneRecor
 
 async def sync_app_data(dune: DuneFetcher, config: AppDataSyncConfig) -> None:
     """App Data Sync Logic"""
-    log.info(f"Using configuration {config}")
     # TODO - assert legit configuration before proceeding!
     table_name = config.table_name
     file_manager = FileIO(config.volume_path / table_name)
@@ -203,7 +183,7 @@ async def sync_app_data(dune: DuneFetcher, config: AppDataSyncConfig) -> None:
     found, not_found = data_handler.fetch_content_and_filter(MAX_RETRIES)
 
     content_filename = f"cow_{block_range.block_to}.json"
-    data_handler.write_to_disk(file_manager, filename=content_filename)
+    file_manager.write_ndjson(data=found, name=content_filename)
 
     if len(found) > 0:
         success = upload_file(
@@ -213,6 +193,16 @@ async def sync_app_data(dune: DuneFetcher, config: AppDataSyncConfig) -> None:
             object_key=f"{table_name}/{content_filename}",
         )
         if success:
+            # Only write these if upload was successful.
+            file_manager.write_csv(
+                data=[{config.sync_column: str(block_range.block_to)}],
+                name=config.sync_file,
+            )
+            # When not_found is empty, we want to overwrite the file (hence skip_empty=False)
+            # This happens when number of attempts exceeds GIVE_UP_THRESHOLD
+            file_manager.write_ndjson(
+                not_found, config.missing_files_name, skip_empty=False
+            )
             log.info(
                 f"App Data Sync for block range {BlockRange} complete: "
                 f"synced {len(found)} records with {len(not_found)} missing"
