@@ -5,19 +5,12 @@ Components for syncing off-chain data with Dune Community Sources
 # Local Development
 
 
-1. clone repo
-2. Several Makefile commands:
-```shell
-make install
-```
-```shell
-make check # (runs black, pylint and mypy --strict)
-```
-```shell
-make test # Runs all tests
-```
+1. Clone Repo `git clone git@github.com:cowprotocol/dune-sync.git`
+2. Several Makefile Commands `make XXX`
+Key make commands are; `install, check, test`
 
-## Docker
+
+# Docker
 ### Build
 ```shell
 docker build -t local_dune_sync .
