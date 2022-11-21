@@ -59,7 +59,7 @@ class OrderbookFetcher:
         """
         Fetches the latest mutually synced block from orderbook databases (with REORG protection)
         """
-        barn, prod = cls._query_both_dbs(open_query("sql/latest_block.sql"))
+        barn, prod = cls._query_both_dbs(open_query("orderbook/latest_block.sql"))
         assert len(barn) == 1 == len(prod), "Expecting single record"
         return min(int(barn["latest"][0]), int(prod["latest"][0])) - REORG_THRESHOLD
 
@@ -69,7 +69,7 @@ class OrderbookFetcher:
         Fetches and validates Orderbook Reward DataFrame as concatenation from Prod and Staging DB
         """
         cow_reward_query = (
-            open_query("sql/order_rewards.sql")
+            open_query("orderbook/order_rewards.sql")
             .replace("{{start_block}}", str(block_range.block_from))
             .replace("{{end_block}}", str(block_range.block_to))
         )
