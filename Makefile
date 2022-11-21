@@ -32,3 +32,13 @@ check:
 
 test:
 	python -m pytest tests
+
+run:
+	python -m src.main
+
+build-image:
+	docker build -t local_dune_sync .
+
+run-local:
+	make build-image
+	docker run -v ${PWD}data:/app/data --env-file .env local_dune_sync
