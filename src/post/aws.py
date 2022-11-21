@@ -26,7 +26,7 @@ def upload_file(
             key=object_key,
             extra_args={"ACL": "bucket-owner-full-control"},
         )
-        logging.info(f"successfully uploaded {file_name} to {bucket} with response")
+        logging.info(f"successfully uploaded {file_name} to {bucket}")
         return True
     except S3UploadFailedError as err:
         logging.error(err)

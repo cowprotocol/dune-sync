@@ -2,6 +2,7 @@
 import json
 import logging.config
 import os.path
+import sys
 
 from dune_client.file.interface import FileIO
 from dune_client.types import DuneRecord
@@ -28,19 +29,25 @@ class RecordHandler:
 
     def __init__(
         self,
+        file_manager: FileIO,
         new_rows: list[DuneRecord],
-        missing_values: list[DuneRecord],
         block_range: BlockRange,
         config: AppDataSyncConfig,
     ):
+        self.file_manager = file_manager
         self.config = config
         self.block_range = block_range
 
-        self.found: list[dict[str, str]] = []
-        self.not_found: list[dict[str, str]] = []
+        self._found: list[dict[str, str]] = []
+        self._not_found: list[dict[str, str]] = []
 
         self.new_rows = new_rows
-        self.missing_values = missing_values
+        try:
+            self.missing_values = self.file_manager.load_ndjson(
+                config.missing_files_name
+            )
+        except FileNotFoundError:
+            self.missing_values = []
 
     def _handle_new_records(self, max_retries: int) -> None:
         # Drain the dune_results into "found" and "not found" categories
@@ -55,7 +62,7 @@ class RecordHandler:
                 # Row is modified and added found items
                 log.debug(f"Found content for {app_hash} at CID {cid}")
                 row["content"] = app_data
-                self.found.append(row)
+                self._found.append(row)
             else:
                 # Unmodified row added to not_found items
                 log.debug(
@@ -63,7 +70,7 @@ class RecordHandler:
                 )
                 # Dune Records are string dicts.... :(
                 row["attempts"] = str(max_retries)
-                self.not_found.append(row)
+                self._not_found.append(row)
 
     def _handle_missing_records(self, max_retries: int) -> None:
         while self.missing_values:
@@ -77,7 +84,7 @@ class RecordHandler:
                 log.debug(
                     f"Found previously missing content hash {row['app_hash']} at CID {cid}"
                 )
-                self.found.append(
+                self._found.append(
                     {
                         "app_hash": app_hash,
                         "first_seen_block": row["first_seen_block"],
@@ -88,7 +95,7 @@ class RecordHandler:
                 log.debug(
                     f"No content found after {attempts} attempts for {app_hash} assuming NULL."
                 )
-                self.found.append(
+                self._found.append(
                     {
                         "app_hash": app_hash,
                         "first_seen_block": row["first_seen_block"],
@@ -100,7 +107,23 @@ class RecordHandler:
                     f"Still no content found for {app_hash} at CID {cid} after {attempts} attempts"
                 )
                 row.update({"attempts": str(attempts)})
-                self.not_found.append(row)
+                self._not_found.append(row)
+
+    def _write_found_content(self, content_filename: str) -> None:
+        assert len(self.new_rows) == 0, "Must call _handle_new_records first!"
+        self.file_manager.write_ndjson(data=self._found, name=content_filename)
+
+    def _write_sync_data(self) -> None:
+        # Only write these if upload was successful.
+        self.file_manager.write_csv(
+            data=[{self.config.sync_column: str(self.block_range.block_to)}],
+            name=self.config.sync_file,
+        )
+        # When not_found is empty, we want to overwrite the file (hence skip_empty=False)
+        # This happens when number of attempts exceeds GIVE_UP_THRESHOLD
+        self.file_manager.write_ndjson(
+            self._not_found, self.config.missing_files_name, skip_empty=False
+        )
 
     def fetch_content_and_filter(
         self, max_retries: int
@@ -114,26 +137,38 @@ class RecordHandler:
             f"Attempting to recover missing {len(self.missing_values)} records from previous run"
         )
         self._handle_missing_records(max_retries)
-        return self.found, self.not_found
+        return self._found, self._not_found
 
-    def write_to_disk(self, file_manager: FileIO, filename: str) -> None:
+    def write_and_upload_content(self) -> None:
         """
-        Does all appropriate file writes for a single run of the app data sync job
-        Write new records, missing records and last sync block.
+        - Writes self.found to persistent volume,
+        - attempts to upload to AWS and
+        - records last sync block on volume.
         """
-        # Write the most recent data and also record the block_from,
-        # so that next run will know where to start
-        file_manager.write_ndjson(data=self.found, name=filename)
-        # When not_found is empty, we want to overwrite the file (hence skip_empty=False)
-        # This happens when all records in the file have attempts exceeding GIVE_UP_THRESHOLD
-        file_manager.write_ndjson(
-            self.not_found, self.config.missing_files_name, skip_empty=False
-        )
-        # Write last sync block only after the data has been written.
-        file_manager.write_csv(
-            data=[{self.config.sync_column: str(self.block_range.block_to)}],
-            name=self.config.sync_file,
-        )
+        content_filename = f"cow_{self.block_range.block_to}.json"
+        self._write_found_content(content_filename)
+
+        if len(self._found) > 0:
+            config = self.config
+            success = upload_file(
+                s3_client=get_s3_client(profile=config.aws_role),
+                file_name=os.path.join(self.file_manager.path, content_filename),
+                bucket=config.aws_bucket,
+                object_key=f"{config.table_name}/{content_filename}",
+            )
+            if success:
+                log.info(
+                    f"App Data Sync for block range {self.block_range} complete: "
+                    f"synced {len(self._found)} records with {len(self._not_found)} missing"
+                )
+            else:
+                sys.exit(1)
+        else:
+            log.info(
+                f"No new App Data for block range {self.block_range}: no sync necessary"
+            )
+
+        self._write_sync_data()
 
 
 async def get_block_range(
@@ -150,11 +185,11 @@ async def get_block_range(
         block_from = int(file_manager.load_singleton(last_block_file, "csv")[column])
     except FileNotFoundError:
         log.warning(
-            f"block range file {last_block_file} not found, using genesis block {block_from}"
+            f"last sync file {last_block_file} not found, using genesis block {block_from}"
         )
     except KeyError as err:
         message = (
-            f"block range file {last_block_file} does not contain column header {column}, "
+            f"last sync file {last_block_file} does not contain column header {column}, "
             f"exiting to avoid duplication"
         )
         log.error(message)
@@ -168,20 +203,8 @@ async def get_block_range(
     )
 
 
-def get_missing_data(file_manager: FileIO, missing_fname: str) -> list[DuneRecord]:
-    """
-    Loads missing records from file (aka previous run) if there are any.
-    Otherwise, assumes there are none.
-    """
-    try:
-        return file_manager.load_ndjson(missing_fname)
-    except FileNotFoundError:
-        return []
-
-
 async def sync_app_data(dune: DuneFetcher, config: AppDataSyncConfig) -> None:
     """App Data Sync Logic"""
-    log.info(f"Using configuration {config}")
     # TODO - assert legit configuration before proceeding!
     table_name = config.table_name
     file_manager = FileIO(config.volume_path / table_name)
@@ -193,29 +216,11 @@ async def sync_app_data(dune: DuneFetcher, config: AppDataSyncConfig) -> None:
     )
 
     data_handler = RecordHandler(
+        file_manager,
         new_rows=await dune.get_app_hashes(block_range),
-        missing_values=get_missing_data(
-            file_manager, missing_fname=config.missing_files_name
-        ),
         block_range=block_range,
         config=config,
     )
-    found, not_found = data_handler.fetch_content_and_filter(MAX_RETRIES)
-
-    content_filename = f"cow_{block_range.block_to}.json"
-    data_handler.write_to_disk(file_manager, filename=content_filename)
-
-    if len(found) > 0:
-        success = upload_file(
-            s3_client=get_s3_client(profile=config.aws_role),
-            file_name=os.path.join(file_manager.path, content_filename),
-            bucket=config.aws_bucket,
-            object_key=f"{table_name}/{content_filename}",
-        )
-        if success:
-            log.info(
-                f"App Data Sync for block range {BlockRange} complete: "
-                f"synced {len(found)} records with {len(not_found)} missing"
-            )
-    else:
-        log.info(f"No new App Data for block range {BlockRange}: no sync necessary")
+    data_handler.fetch_content_and_filter(MAX_RETRIES)
+    data_handler.write_and_upload_content()
+    log.info("app_data sync run completed successfully")
