@@ -27,7 +27,7 @@ if __name__ == "__main__":
             config=AppDataSyncConfig(
                 aws_role=os.environ["AWS_ROLE"],
                 aws_bucket=os.environ["AWS_BUCKET"],
-                volume_path=PROJECT_ROOT / Path("data"),
+                volume_path=PROJECT_ROOT / Path(os.environ.get("VOLUME_PATH", "data")),
             ),
         )
     )
