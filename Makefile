@@ -39,6 +39,6 @@ run:
 build-image:
 	docker build -t local_dune_sync .
 
-run-local:
-	make build-image
-	docker run -v ${PWD}data:/app/data --env-file .env local_dune_sync
+run-image:
+	echo "using ${PWD}/data"
+	docker run -v ${PWD}/data:/app/data --env-file .env local_dune_sync

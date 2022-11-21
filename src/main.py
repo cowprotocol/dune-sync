@@ -17,6 +17,7 @@ log.setLevel(logging.DEBUG)
 
 GIVE_UP_THRESHOLD = 10
 
+PROJECT_ROOT = Path(__file__).parent.parent
 
 if __name__ == "__main__":
     load_dotenv()
@@ -26,7 +27,7 @@ if __name__ == "__main__":
             config=AppDataSyncConfig(
                 aws_role=os.environ["AWS_ROLE"],
                 aws_bucket=os.environ["AWS_BUCKET"],
-                volume_path=Path(os.environ["VOLUME_PATH"]).absolute(),
+                volume_path=PROJECT_ROOT / Path(os.environ.get("VOLUME_PATH", "data")),
             ),
         )
     )
