@@ -30,7 +30,7 @@ class OrderbookEnv(Enum):
 
 
 @dataclass
-class DualEnvDataframe:
+class OrderbookFetcher:
     """
     A pair of Dataframes primarily intended to store query results
     from production and staging orderbook databases

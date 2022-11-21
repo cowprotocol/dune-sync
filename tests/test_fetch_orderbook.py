@@ -3,22 +3,22 @@ import unittest
 
 import pandas as pd
 
-from src.fetch.orderbook import DualEnvDataframe
+from src.fetch.orderbook import OrderbookFetcher
 from src.models.block_range import BlockRange
 
 
 class MyTestCase(unittest.TestCase):
     def test_latest_block_reasonable(self):
-        self.assertGreater(DualEnvDataframe.get_latest_block(), 16020300)
+        self.assertGreater(OrderbookFetcher.get_latest_block(), 16020300)
 
     def test_latest_block_increasing(self):
-        latest_block = DualEnvDataframe.get_latest_block()
-        self.assertGreaterEqual(DualEnvDataframe.get_latest_block(), latest_block)
+        latest_block = OrderbookFetcher.get_latest_block()
+        self.assertGreaterEqual(OrderbookFetcher.get_latest_block(), latest_block)
 
     def test_get_order_rewards(self):
         block_number = 16000000
         block_range = BlockRange(block_number, block_number + 50)
-        rewards_df = DualEnvDataframe.get_orderbook_rewards(block_range)
+        rewards_df = OrderbookFetcher.get_orderbook_rewards(block_range)
         expected = pd.DataFrame(
             {
                 "order_uid": [
