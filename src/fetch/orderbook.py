@@ -40,10 +40,10 @@ class OrderbookFetcher:
     def _pg_engine(db_env: OrderbookEnv) -> Engine:
         """Returns a connection to postgres database"""
         load_dotenv()
+        port = os.environ.get("DB_PORT", 5432)
+        user = os.environ["DB_USER"]
+        database = os.environ["DB_NAME"]
         host = os.environ[f"{db_env}_ORDERBOOK_HOST"]
-        port = os.environ[f"{db_env}_ORDERBOOK_PORT"]
-        database = os.environ[f"{db_env}_ORDERBOOK_DB"]
-        user = os.environ[f"{db_env}_ORDERBOOK_USER"]
         password = os.environ[f"{db_env}_ORDERBOOK_PASSWORD"]
         db_string = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}"
         return create_engine(db_string)
