@@ -33,3 +33,10 @@ jobs:
           pip install -r requirements/dev.txt
       - name: Tests
         run: python -m pytest tests
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          PROD_ORDERBOOK_HOST: ${{ secrets.PROD_ORDERBOOK_HOST }}
+          PROD_ORDERBOOK_PASSWORD: ${{ secrets.PROD_ORDERBOOK_PASSWORD }}
+          BARN_ORDERBOOK_HOST: ${{ secrets.BARN_ORDERBOOK_HOST }}
+          BARN_ORDERBOOK_PASSWORD: ${{ secrets.BARN_ORDERBOOK_PASSWORD }}
