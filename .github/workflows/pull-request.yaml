@@ -20,7 +20,7 @@ jobs:
         run: black --check ./
       - name: Type Check (mypy)
         run: mypy src --strict
-  unit-tests:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
