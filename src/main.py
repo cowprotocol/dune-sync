@@ -6,6 +6,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from src.environment import PROJECT_ROOT
 from src.sync import sync_app_data
 from src.fetch.dune import DuneFetcher
 from src.sync.config import AppDataSyncConfig
@@ -17,7 +18,6 @@ log.setLevel(logging.DEBUG)
 
 GIVE_UP_THRESHOLD = 10
 
-PROJECT_ROOT = Path(__file__).parent.parent
 
 if __name__ == "__main__":
     load_dotenv()

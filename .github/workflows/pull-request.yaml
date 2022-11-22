@@ -20,7 +20,7 @@ jobs:
         run: black --check ./
       - name: Type Check (mypy)
         run: mypy src --strict
-  unit-tests:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -31,5 +31,10 @@ jobs:
       - name: Install Requirements
         run:
           pip install -r requirements/dev.txt
-      - name: Tests
-        run: python -m pytest tests
+      - name: Unit Tests
+        run: python -m pytest tests/unit
+      - name: Integration Tests
+        run: python -m pytest tests/integration
+        env:
+          PROD_DB_URL: ${{ secrets.PROD_DB_URL }}
+          BARN_DB_URL: ${{ secrets.BARN_DB_URL }}
