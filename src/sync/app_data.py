@@ -152,7 +152,7 @@ class RecordHandler:
             config = self.config
             success = upload_file(
                 s3_client=get_s3_client(profile=config.aws_role),
-                file_name=os.path.join(self.file_manager.path, content_filename),
+                filename=os.path.join(self.file_manager.path, content_filename),
                 bucket=config.aws_bucket,
                 object_key=f"{config.table_name}/{content_filename}",
             )
