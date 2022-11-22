@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from pandas import DataFrame
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import ProgrammingError
 
 from src.models.block_range import BlockRange
 from src.utils import open_query
@@ -40,18 +41,25 @@ class OrderbookFetcher:
     def _pg_engine(db_env: OrderbookEnv) -> Engine:
         """Returns a connection to postgres database"""
         load_dotenv()
-        port = os.environ.get("DB_PORT", 5432)
-        user = os.environ["DB_USER"]
-        database = os.environ["DB_NAME"]
-        host = os.environ[f"{db_env}_ORDERBOOK_HOST"]
-        password = os.environ[f"{db_env}_ORDERBOOK_PASSWORD"]
-        db_string = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}"
+        db_url = os.environ[f"{db_env}_DB_URL"]
+        db_string = f"postgresql+psycopg2://{db_url}"
         return create_engine(db_string)
+
+    @staticmethod
+    def _exec_query(query: str, engine: Engine) -> DataFrame:
+        try:
+            return pd.read_sql(
+                sql=query.replace("{{reward_table}}", "order_execution"), con=engine
+            )
+        except ProgrammingError:
+            return pd.read_sql(
+                sql=query.replace("{{reward_table}}", "order_rewards"), con=engine
+            )
 
     @classmethod
     def _query_both_dbs(cls, query: str) -> tuple[DataFrame, DataFrame]:
-        barn = pd.read_sql(sql=query, con=cls._pg_engine(OrderbookEnv.PROD))
-        prod = pd.read_sql(sql=query, con=cls._pg_engine(OrderbookEnv.BARN))
+        barn = cls._exec_query(query, engine=cls._pg_engine(OrderbookEnv.BARN))
+        prod = cls._exec_query(query, engine=cls._pg_engine(OrderbookEnv.PROD))
         return barn, prod
 
     @classmethod
