@@ -4,6 +4,7 @@ import logging.config
 import os.path
 import sys
 
+from boto3.exceptions import S3UploadFailedError
 from dune_client.file.interface import FileIO
 from dune_client.types import DuneRecord
 
@@ -16,6 +17,7 @@ from src.sync.config import AppDataSyncConfig
 log = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s %(message)s")
 log.setLevel(logging.DEBUG)
+
 
 MAX_RETRIES = 3
 GIVE_UP_THRESHOLD = 10
@@ -150,18 +152,19 @@ class RecordHandler:
 
         if len(self._found) > 0:
             config = self.config
-            success = upload_file(
-                s3_client=get_s3_client(profile=config.aws_role),
-                filename=os.path.join(self.file_manager.path, content_filename),
-                bucket=config.aws_bucket,
-                object_key=f"{config.table_name}/{content_filename}",
-            )
-            if success:
+            try:
+                upload_file(
+                    client=get_s3_client(profile=config.aws_role),
+                    filename=os.path.join(self.file_manager.path, content_filename),
+                    bucket=config.aws_bucket,
+                    object_key=f"{config.table_name}/{content_filename}",
+                )
                 log.info(
                     f"App Data Sync for block range {self.block_range} complete: "
                     f"synced {len(self._found)} records with {len(self._not_found)} missing"
                 )
-            else:
+            except S3UploadFailedError as err:
+                logging.error(err)
                 sys.exit(1)
         else:
             log.info(
