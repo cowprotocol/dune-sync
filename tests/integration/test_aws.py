@@ -20,11 +20,11 @@ class TestAWSConnection(unittest.TestCase):
         # role=
         # aws_secret_access_key=
         # aws_access_key_id=
-        self.profile = os.environ.get("AWS_ROLE", "dune-sync")
+        self.profile = os.environ.get("AWS_PROFILE", "dune-sync")
 
         # Must be provided!
-        self.bucket = os.environ["AWS_BUCKET"]
-        self.role = os.environ["AWS_ROLE"]
+        self.bucket = os.environ["AWS_BUCKET_NAME"]
+        # self.role = os.environ["AWS_ROLE"]
 
     def test_get_client(self):
         s3_client = get_s3_client(self.profile)
@@ -34,7 +34,8 @@ class TestAWSConnection(unittest.TestCase):
 
     def test_upload_file(self):
         s3_resource = get_assumed_role(
-            role_arn=os.environ["AWS_ROLE"],
+            internal_role=os.environ["INTERNAL_ROLE"],
+            external_role=os.environ["EXTERNAL_ROLE"]
         )
 
         empty_file = "file.json"
@@ -53,7 +54,8 @@ class TestAWSConnection(unittest.TestCase):
     def test_assumed_role(self):
         load_dotenv()
         s3_resource = get_assumed_role(
-            role_arn=os.environ["AWS_ROLE"],
+            internal_role=os.environ["INTERNAL_ROLE"],
+            external_role=os.environ["EXTERNAL_ROLE"]
         )
         # TODO - figure out how to assert this is a legit connection:
         # # Use the Amazon S3 resource object that is now configured with the

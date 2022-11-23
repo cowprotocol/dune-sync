@@ -7,29 +7,31 @@ from boto3.s3.transfer import S3Transfer
 from botocore.client import BaseClient
 
 
-def get_assumed_role(role_arn: str) -> ServiceResource:
+def get_assumed_role(internal_role: str, external_role: str) -> ServiceResource:
     """
     Borrowed from AWS documentation
     https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-api.html
     """
-    # create an STS client object that represents a live connection to the
-    # STS service
     sts_client = boto3.client("sts")
 
-    # Call the assume_role method of the STSConnection object and pass the role
-    # ARN and a role session name.
-    assumed_role_object = sts_client.assume_role(
-        RoleArn=role_arn,
-        RoleSessionName="AssumeRoleSession1",
+    internal_assumed_role_object = sts_client.assume_role(
+        RoleArn=internal_role,
+        RoleSessionName="OuterSession",
+    )
+    credentials = internal_assumed_role_object["Credentials"]
+    sts_client = boto3.client(
+        "sts",
+        aws_access_key_id=credentials["AccessKeyId"],
+        aws_secret_access_key=credentials["SecretAccessKey"],
+        aws_session_token=credentials["SessionToken"],
     )
 
-    # From the response that contains the assumed role, get the temporary
-    # credentials that can be used to make subsequent API calls
-    credentials = assumed_role_object["Credentials"]
+    external_assumed_role_object = sts_client.assume_role(
+        RoleArn=external_role,
+        RoleSessionName="InnerSession",
+    )
+    credentials = external_assumed_role_object["Credentials"]
 
-    # Use the temporary credentials that AssumeRole returns to make a
-    # connection to Amazon S3
-    # TODO - The types returned from boto3 are pretty weak. Manual casting is not great!
     s3_resource: ServiceResource = boto3.resource(
         "s3",
         aws_access_key_id=credentials["AccessKeyId"],
