@@ -80,17 +80,16 @@ class AWSClient:
     def delete_file(self, bucket: str, object_key: str) -> bool:
         """Delete a file from an S3 bucket
 
-        :param bucket: Bucket to download from
+        :param bucket: Bucket to delete from
         :param object_key: S3 object key. For our purposes, this would
                            be f"{table_name}/cow_{latest_block_number}.json"
         :return: True if file was deleted, else raises
         """
-        # TODO - get these types right!
-        self.service_resource.Object(  # type: ignore
+        # TODO - types! error: "BaseClient" has no attribute "delete_object"
+        self.s3_client.delete_object(  # type: ignore
             Bucket=bucket,
             Key=object_key,
-            extra_args={"ACL": "bucket-owner-full-control"},
-        ).delete()
+        )
         logging.info(f"successfully deleted {object_key} from {bucket}")
         return True
 
