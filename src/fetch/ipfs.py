@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 import requests
-from multiformats_cid.cid import from_bytes  # type: ignore
+from multiformats_cid.cid import from_bytes
 
 
 class Cid:
