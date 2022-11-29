@@ -2,71 +2,48 @@ import os
 import unittest
 from pathlib import Path
 
-
-from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 
-from src.post.aws import get_s3_client, upload_file, get_assumed_role
+from src.post.aws import AWSClient
 
 
 class TestAWSConnection(unittest.TestCase):
     def setUp(self) -> None:
         load_dotenv()
-        # This should be an aws profile name to something like this:
-        # Assumes you have the following credentials set in ~/.aws/credentials
-
-        # [dune-sync]
-        # custom_aws_user_name=
-        # role=
-        # aws_secret_access_key=
-        # aws_access_key_id=
-        self.profile = os.environ.get("AWS_PROFILE", "dune-sync")
-
-        # Must be provided!
-        self.bucket = os.environ["AWS_BUCKET_NAME"]
-        # self.role = os.environ["AWS_ROLE"]
-
-    def test_get_client(self):
-        s3_client = get_s3_client(self.profile)
-        # TODO - assert that client is legit!
-        self.assertIsNotNone(s3_client)
-        self.assertTrue(False)
-
-    def test_upload_file(self):
-        s3_resource = get_assumed_role(
-            internal_role=os.environ["INTERNAL_ROLE"],
-            external_role=os.environ["EXTERNAL_ROLE"]
+        self.bucket = os.environ["AWS_BUCKET"]
+        self.aws_client = AWSClient(
+            internal_role=os.environ["AWS_INTERNAL_ROLE"],
+            external_role=os.environ["AWS_EXTERNAL_ROLE"],
+            external_id=os.environ["AWS_EXTERNAL_ID"],
         )
+        self.empty_file = "file.json"
+        self.key = f"test/{self.empty_file}"
+        Path(self.empty_file).touch()
 
-        empty_file = "file.json"
-        Path(empty_file).touch()
-        try:
-            success = upload_file(
-                client=s3_resource.meta.client,
-                filename=empty_file,
-                bucket=os.environ["AWS_BUCKET"],
-                object_key=f"test/{empty_file}",
-            )
-        except Exception as err:
-            os.remove(Path(empty_file))
-            raise Exception(err)
+    def tearDown(self) -> None:
+        os.remove(Path(self.empty_file))
 
     def test_assumed_role(self):
-        load_dotenv()
-        s3_resource = get_assumed_role(
-            internal_role=os.environ["INTERNAL_ROLE"],
-            external_role=os.environ["EXTERNAL_ROLE"]
-        )
-        # TODO - figure out how to assert this is a legit connection:
-        # # Use the Amazon S3 resource object that is now configured with the
-        # # credentials to access your S3 buckets.
-        # ServiceResource has no attribute buckets.
+        s3_resource = self.aws_client._assume_role()
         self.assertIsNotNone(s3_resource.buckets)
 
-        # THIS IS NOT GOOD.
-        with self.assertRaises(ClientError):
-            for bucket in s3_resource.buckets.all():
-                print(bucket)
+    def test_upload_file(self):
+        success = self.aws_client.upload_file(
+            filename=self.empty_file,
+            bucket=self.bucket,
+            object_key=f"test/{self.empty_file}",
+        )
+        self.assertTrue(success)
+
+    def test_download_file(self):
+        success = self.aws_client.download_file(
+            filename=self.empty_file, bucket=self.bucket, object_key=self.key
+        )
+        self.assertTrue(success)
+
+    def test_delete_file(self):
+        success = self.aws_client.delete_file(bucket=self.bucket, object_key=self.key)
+        self.assertTrue(success)
 
 
 if __name__ == "__main__":

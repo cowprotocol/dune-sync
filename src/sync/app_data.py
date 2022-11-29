@@ -11,7 +11,7 @@ from dune_client.types import DuneRecord
 from src.fetch.dune import DuneFetcher
 from src.fetch.ipfs import Cid
 from src.models.block_range import BlockRange
-from src.post.aws import upload_file, get_s3_client
+from src.post.aws import AWSClient
 from src.sync.config import AppDataSyncConfig
 
 log = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ MAX_RETRIES = 3
 GIVE_UP_THRESHOLD = 10
 
 
-class RecordHandler:
+class RecordHandler:  # pylint:disable=too-many-instance-attributes
     """
     This class is responsible for consuming new dune records and missing values from previous runs
     it attempts to fetch content for them and filters them into "found" and "not found" as necessary
@@ -39,7 +39,11 @@ class RecordHandler:
         self.file_manager = file_manager
         self.config = config
         self.block_range = block_range
-
+        self.aws_client = AWSClient(
+            internal_role=config.aws.internal_role,
+            external_role=config.aws.external_role,
+            external_id=config.aws.external_id,
+        )
         self._found: list[dict[str, str]] = []
         self._not_found: list[dict[str, str]] = []
 
@@ -153,10 +157,9 @@ class RecordHandler:
         if len(self._found) > 0:
             config = self.config
             try:
-                upload_file(
-                    client=get_s3_client(profile=config.aws_role),
+                self.aws_client.upload_file(
                     filename=os.path.join(self.file_manager.path, content_filename),
-                    bucket=config.aws_bucket,
+                    bucket=config.aws.bucket,
                     object_key=f"{config.table_name}/{content_filename}",
                 )
                 log.info(

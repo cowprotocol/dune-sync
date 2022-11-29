@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from src.environment import PROJECT_ROOT
 from src.sync import sync_app_data
 from src.fetch.dune import DuneFetcher
-from src.sync.config import AppDataSyncConfig
+from src.sync.config import AppDataSyncConfig, AWSData
 
 log = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -25,8 +25,12 @@ if __name__ == "__main__":
         sync_app_data(
             dune=DuneFetcher(os.environ["DUNE_API_KEY"]),
             config=AppDataSyncConfig(
-                aws_role=os.environ["AWS_ROLE"],
-                aws_bucket=os.environ["AWS_BUCKET"],
+                aws=AWSData(
+                    internal_role=os.environ["AWS_INTERNAL_ROLE"],
+                    external_role=os.environ["AWS_EXTERNAL_ROLE"],
+                    external_id=os.environ["AWS_EXTERNAL_ID"],
+                    bucket=os.environ["AWS_BUCKET"],
+                ),
                 volume_path=PROJECT_ROOT / Path(os.environ.get("VOLUME_PATH", "data")),
             ),
         )
