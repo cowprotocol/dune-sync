@@ -33,7 +33,7 @@ class AWSClient:
 
         internal_assumed_role_object = sts_client.assume_role(
             RoleArn=self.internal_role,
-            RoleSessionName="OuterSession",
+            RoleSessionName="InternalSession",
         )
         credentials = internal_assumed_role_object["Credentials"]
         sts_client = boto3.client(
@@ -45,7 +45,7 @@ class AWSClient:
 
         external_assumed_role_object = sts_client.assume_role(
             RoleArn=self.external_role,
-            RoleSessionName="InnerSession",
+            RoleSessionName="ExternalSession",
             ExternalId=self.external_id,
         )
         credentials = external_assumed_role_object["Credentials"]
