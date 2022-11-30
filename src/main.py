@@ -26,6 +26,9 @@ class SyncTable(Enum):
     APP_DATA = "app_data"
     ORDER_REWARDS = "order_rewards"
 
+    def __str__(self) -> str:
+        return str(self.value)
+
 
 def script_args() -> argparse.Namespace:
     """Parse runtime arguments"""
@@ -33,6 +36,7 @@ def script_args() -> argparse.Namespace:
     parser.add_argument(
         "--sync-table",
         type=SyncTable,
+        required=True,
         choices=list(SyncTable),
     )
     parser.add_argument(
@@ -56,7 +60,7 @@ if __name__ == "__main__":
 
     args = script_args()
     sync_table = args.sync_table
-
+    # TODO - pass dry-run into runners!
     if sync_table == SyncTable.APP_DATA:
         asyncio.run(
             sync_app_data(
@@ -78,3 +82,5 @@ if __name__ == "__main__":
                 table_name=str(sync_table),
             ),
         )
+    else:
+        log.error(f"unsupported sync_table '{sync_table}'")

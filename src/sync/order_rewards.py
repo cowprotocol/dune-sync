@@ -33,7 +33,7 @@ class RecordHandler:  # pylint:disable=too-few-public-methods
 
         self.file_path = config.volume_path / config.table_name
         self.content_filename = f"cow_{block_range.block_to}.json"
-
+        log.info(f"Handling {len(order_rewards)} new records")
         self.order_rewards = order_rewards
 
     def _write_found_content(self) -> None:
@@ -54,7 +54,7 @@ class RecordHandler:  # pylint:disable=too-few-public-methods
             writer.writeheader()
             writer.writerows([{column: str(self.block_range.block_to)}])
 
-    def write_and_upload_content(self, dry_run: bool = True) -> None:
+    def write_and_upload_content(self, dry_run: bool = False) -> None:
         """
         - Writes self.order_rewards to persistent volume,
         - attempts to upload to AWS and
@@ -94,7 +94,6 @@ def sync_order_rewards(fetcher: OrderbookFetcher, config: SyncConfig) -> None:
         ),
         block_to=fetcher.get_latest_block(),
     )
-
     record_handler = RecordHandler(
         block_range, config, order_rewards=fetcher.get_orderbook_rewards(block_range)
     )
