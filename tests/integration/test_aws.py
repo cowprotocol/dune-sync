@@ -3,6 +3,7 @@ import unittest
 from os.path import exists
 from pathlib import Path
 
+import pytest
 from dotenv import load_dotenv
 
 from src.post.aws import AWSClient
@@ -11,12 +12,15 @@ from src.post.aws import AWSClient
 class TestAWSConnection(unittest.TestCase):
     def setUp(self) -> None:
         load_dotenv()
-        self.bucket = os.environ["AWS_BUCKET"]
-        self.aws_client = AWSClient(
-            internal_role=os.environ["AWS_INTERNAL_ROLE"],
-            external_role=os.environ["AWS_EXTERNAL_ROLE"],
-            external_id=os.environ["AWS_EXTERNAL_ID"],
-        )
+        try:
+            self.bucket = os.environ["AWS_BUCKET"]
+            self.aws_client = AWSClient(
+                internal_role=os.environ["AWS_INTERNAL_ROLE"],
+                external_role=os.environ["AWS_EXTERNAL_ROLE"],
+                external_id=os.environ["AWS_EXTERNAL_ID"],
+            )
+        except KeyError:
+            pytest.skip("Insufficient ENV envs (AWS_*)")
         self.empty_file = "file.json"
         self.key = f"test/{self.empty_file}"
 
