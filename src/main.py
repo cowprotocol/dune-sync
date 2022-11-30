@@ -52,8 +52,9 @@ class ScriptArgs:
             help="Flag indicating whether script should not post files to AWS or not",
             default=False,
         )
-        self.sync_table: SyncTable = args.sync_table
-        self.dry_run: bool = args.dry_run
+        arguments = parser.parse_args()
+        self.sync_table: SyncTable = arguments.sync_table
+        self.dry_run: bool = arguments.dry_run
 
 
 if __name__ == "__main__":
