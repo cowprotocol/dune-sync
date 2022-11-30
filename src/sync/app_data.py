@@ -146,7 +146,7 @@ class RecordHandler:  # pylint:disable=too-many-instance-attributes
         self._handle_missing_records(max_retries)
         return self._found, self._not_found
 
-    def write_and_upload_content(self) -> None:
+    def write_and_upload_content(self, dry_run: bool) -> None:
         """
         - Writes self._found to persistent volume,
         - attempts to upload to AWS and
@@ -154,7 +154,7 @@ class RecordHandler:  # pylint:disable=too-many-instance-attributes
         """
         self._write_found_content()
 
-        if len(self._found) > 0:
+        if len(self._found) > 0 and not dry_run:
             aws_login_and_upload(
                 config=self.config,
                 path=self.file_manager.path,
@@ -173,7 +173,7 @@ class RecordHandler:  # pylint:disable=too-many-instance-attributes
 
 
 async def sync_app_data(
-    dune: DuneFetcher, config: SyncConfig, missing_file_name: str
+    dune: DuneFetcher, config: SyncConfig, missing_file_name: str, dry_run: bool
 ) -> None:
     """App Data Sync Logic"""
     # TODO - assert legit configuration before proceeding!
@@ -197,5 +197,5 @@ async def sync_app_data(
         missing_file_name=missing_file_name,
     )
     data_handler.fetch_content_and_filter(MAX_RETRIES)
-    data_handler.write_and_upload_content()
+    data_handler.write_and_upload_content(dry_run)
     log.info("app_data sync run completed successfully")

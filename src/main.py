@@ -3,6 +3,7 @@ import argparse
 import asyncio
 import logging.config
 import os
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
@@ -30,22 +31,29 @@ class SyncTable(Enum):
         return str(self.value)
 
 
-def script_args() -> argparse.Namespace:
-    """Parse runtime arguments"""
-    parser = argparse.ArgumentParser("Dune Community Sources Sync")
-    parser.add_argument(
-        "--sync-table",
-        type=SyncTable,
-        required=True,
-        choices=list(SyncTable),
-    )
-    parser.add_argument(
-        "--dry-run",
-        type=bool,
-        help="Flag indicating whether script should not post files to AWS or not",
-        default=False,
-    )
-    return parser.parse_args()
+@dataclass
+class ScriptArgs:
+    """Runtime arguments' parser/initializer"""
+
+    dry_run: bool
+    sync_table: SyncTable
+
+    def __init__(self) -> None:
+        parser = argparse.ArgumentParser("Dune Community Sources Sync")
+        parser.add_argument(
+            "--sync-table",
+            type=SyncTable,
+            required=True,
+            choices=list(SyncTable),
+        )
+        parser.add_argument(
+            "--dry-run",
+            type=bool,
+            help="Flag indicating whether script should not post files to AWS or not",
+            default=False,
+        )
+        self.sync_table: SyncTable = args.sync_table
+        self.dry_run: bool = args.dry_run
 
 
 if __name__ == "__main__":
@@ -58,29 +66,30 @@ if __name__ == "__main__":
     )
     volume_path = PROJECT_ROOT / Path(os.environ.get("VOLUME_PATH", "data"))
 
-    args = script_args()
-    sync_table = args.sync_table
+    args = ScriptArgs()
     # TODO - pass dry-run into runners!
-    if sync_table == SyncTable.APP_DATA:
+    if args.sync_table == SyncTable.APP_DATA:
         asyncio.run(
             sync_app_data(
                 dune=DuneFetcher(os.environ["DUNE_API_KEY"]),
                 config=SyncConfig(
                     aws,
                     volume_path,
-                    table_name=str(sync_table),
+                    table_name=str(args.sync_table),
                 ),
                 missing_file_name="missing_app_hashes.json",
+                dry_run=args.dry_run,
             )
         )
-    elif sync_table == SyncTable.ORDER_REWARDS:
+    elif args.sync_table == SyncTable.ORDER_REWARDS:
         sync_order_rewards(
             fetcher=OrderbookFetcher(),
             config=SyncConfig(
                 aws,
                 volume_path,
-                table_name=str(sync_table),
+                table_name=str(args.sync_table),
             ),
+            dry_run=args.dry_run,
         )
     else:
-        log.error(f"unsupported sync_table '{sync_table}'")
+        log.error(f"unsupported sync_table '{args.sync_table}'")

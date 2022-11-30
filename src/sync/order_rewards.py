@@ -54,11 +54,12 @@ class RecordHandler:  # pylint:disable=too-few-public-methods
             writer.writeheader()
             writer.writerows([{column: str(self.block_range.block_to)}])
 
-    def write_and_upload_content(self, dry_run: bool = False) -> None:
+    def write_and_upload_content(self, dry_run: bool) -> None:
         """
         - Writes self.order_rewards to persistent volume,
         - attempts to upload to AWS and
         - records last sync block on volume.
+        When dryrun flag is enabled, does not upload to IPFS.
         """
         self._write_found_content()
 
@@ -80,7 +81,9 @@ class RecordHandler:  # pylint:disable=too-few-public-methods
         self._write_sync_data()
 
 
-def sync_order_rewards(fetcher: OrderbookFetcher, config: SyncConfig) -> None:
+def sync_order_rewards(
+    fetcher: OrderbookFetcher, config: SyncConfig, dry_run: bool
+) -> None:
     """App Data Sync Logic"""
     # TODO - assert legit configuration before proceeding!
     table_name = config.table_name
@@ -98,5 +101,5 @@ def sync_order_rewards(fetcher: OrderbookFetcher, config: SyncConfig) -> None:
         block_range, config, order_rewards=fetcher.get_orderbook_rewards(block_range)
     )
 
-    record_handler.write_and_upload_content()
+    record_handler.write_and_upload_content(dry_run)
     log.info("order_rewards sync run completed successfully")
