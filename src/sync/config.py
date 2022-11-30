@@ -4,14 +4,23 @@ from pathlib import Path
 
 
 @dataclass
+class AWSData:
+    """Data Class containing AWS specific details"""
+
+    internal_role: str
+    external_role: str
+    external_id: str
+    bucket: str
+
+
+@dataclass
 class AppDataSyncConfig:
     """
     This data class contains all the credentials and volume paths
     required to sync with both a persistent volume and Dune's S3 Buckets.
     """
 
-    aws_role: str
-    aws_bucket: str
+    aws: AWSData
     volume_path: Path
     table_name: str = "app_data"
     # File System
