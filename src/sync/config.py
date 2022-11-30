@@ -14,7 +14,7 @@ class AWSData:
 
 
 @dataclass
-class AppDataSyncConfig:
+class SyncConfig:
     """
     This data class contains all the credentials and volume paths
     required to sync with both a persistent volume and Dune's S3 Buckets.
@@ -22,8 +22,14 @@ class AppDataSyncConfig:
 
     aws: AWSData
     volume_path: Path
-    table_name: str = "app_data"
+    table_name: str
     # File System
-    missing_files_name: str = "missing_app_hashes.json"
     sync_file: str = "sync_block.csv"
     sync_column: str = "last_synced_block"
+
+
+@dataclass
+class AppDataSyncConfig(SyncConfig):
+    """Additional data field for app data sync."""
+
+    missing_files_name: str = "missing_app_hashes.json"
