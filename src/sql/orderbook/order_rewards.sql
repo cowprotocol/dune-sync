@@ -17,7 +17,7 @@ with trade_hashes as (SELECT solver,
                           -- trades & settlements between barn and prod DB
                                    on settlement.tx_from = auction_transaction.tx_from
                                        and settlement.tx_nonce = auction_transaction.tx_nonce
-                      where block_number between {{start_block}} and {{end_block}})
+                      where block_number > {{start_block}} and block_number <= {{end_block}})
 
 -- Most efficient column order for sorting would be having tx_hash or order_uid first
 select concat('0x', encode(trade_hashes.order_uid, 'hex')) as order_uid,
