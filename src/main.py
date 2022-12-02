@@ -59,10 +59,10 @@ class ScriptArgs:
 if __name__ == "__main__":
     load_dotenv()
     aws = AWSData(
-        internal_role=os.environ["AWS_INTERNAL_ROLE"],
-        external_role=os.environ["AWS_EXTERNAL_ROLE"],
-        external_id=os.environ["AWS_EXTERNAL_ID"],
-        bucket=os.environ["AWS_BUCKET"],
+        internal_role=os.environ.get("AWS_INTERNAL_ROLE", "AWS_INTERNAL_ROLE"),
+        external_role=os.environ.get("AWS_EXTERNAL_ROLE", "AWS_EXTERNAL_ROLE"),
+        external_id=os.environ.get("AWS_EXTERNAL_ID", "AWS_EXTERNAL_ID"),
+        bucket=os.environ.get("AWS_BUCKET", "AWS_BUCKET"),
     )
     volume_path = Path(os.environ["VOLUME_PATH"])
 
