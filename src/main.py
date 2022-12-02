@@ -58,15 +58,10 @@ class ScriptArgs:
 
 if __name__ == "__main__":
     load_dotenv()
-    aws = AWSData(
-        internal_role=os.environ["AWS_INTERNAL_ROLE"],
-        external_role=os.environ["AWS_EXTERNAL_ROLE"],
-        external_id=os.environ["AWS_EXTERNAL_ID"],
-        bucket=os.environ["AWS_BUCKET"],
-    )
     volume_path = Path(os.environ["VOLUME_PATH"])
-
     args = ScriptArgs()
+    aws = AWSData.empty() if args.dry_run else AWSData.new_from_environment()
+
     if args.sync_table == SyncTable.APP_DATA:
         asyncio.run(
             sync_app_data(

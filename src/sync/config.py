@@ -1,6 +1,10 @@
 """Configuration details for sync jobs"""
+from __future__ import annotations
+import os
 from dataclasses import dataclass
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 
 @dataclass
@@ -11,6 +15,27 @@ class AWSData:
     external_role: str
     external_id: str
     bucket: str
+
+    @classmethod
+    def new_from_environment(cls) -> AWSData:
+        """Class construct from environment variables"""
+        load_dotenv()
+        return cls(
+            internal_role=os.environ["AWS_INTERNAL_ROLE"],
+            external_role=os.environ["AWS_EXTERNAL_ROLE"],
+            external_id=os.environ["AWS_EXTERNAL_ID"],
+            bucket=os.environ["AWS_BUCKET"],
+        )
+
+    @classmethod
+    def empty(cls) -> AWSData:
+        """Empty class constructor"""
+        return cls(
+            internal_role="",
+            external_role="",
+            external_id="",
+            bucket="",
+        )
 
 
 @dataclass
