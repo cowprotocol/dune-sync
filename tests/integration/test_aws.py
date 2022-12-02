@@ -18,6 +18,7 @@ class TestAWSConnection(unittest.TestCase):
                 internal_role=os.environ["AWS_INTERNAL_ROLE"],
                 external_role=os.environ["AWS_EXTERNAL_ROLE"],
                 external_id=os.environ["AWS_EXTERNAL_ID"],
+                bucket=os.environ["AWS_BUCKET"],
             )
         except KeyError:
             pytest.skip("Insufficient ENV envs (AWS_*)")
@@ -38,7 +39,6 @@ class TestAWSConnection(unittest.TestCase):
         Path(self.empty_file).touch()
         self.aws_client.upload_file(
             filename=self.empty_file,
-            bucket=self.bucket,
             object_key=f"test/{self.empty_file}",
         )
         os.remove(Path(self.empty_file))
@@ -47,7 +47,6 @@ class TestAWSConnection(unittest.TestCase):
         Path(self.empty_file).touch()
         success = self.aws_client.upload_file(
             filename=self.empty_file,
-            bucket=self.bucket,
             object_key=f"test/{self.empty_file}",
         )
         self.assertTrue(success)
@@ -61,7 +60,6 @@ class TestAWSConnection(unittest.TestCase):
 
         success = self.aws_client.download_file(
             filename=self.empty_file,
-            bucket=self.bucket,
             object_key=self.key,
         )
         self.assertTrue(success)
@@ -70,7 +68,7 @@ class TestAWSConnection(unittest.TestCase):
 
     def test_delete_file(self):
         self.create_upload_remove()
-        success = self.aws_client.delete_file(bucket=self.bucket, object_key=self.key)
+        success = self.aws_client.delete_file(object_key=self.key)
         self.assertTrue(success)
 
 

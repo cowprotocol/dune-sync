@@ -42,11 +42,11 @@ def aws_login_and_upload(config: SyncConfig, path: Path | str, filename: str) ->
         internal_role=config.aws.internal_role,
         external_role=config.aws.external_role,
         external_id=config.aws.external_id,
+        bucket=config.aws.bucket,
     )
     try:
         return aws_client.upload_file(
             filename=os.path.join(path, filename),
-            bucket=config.aws.bucket,
             object_key=f"{config.table_name}/{filename}",
         )
     except S3UploadFailedError as err:
