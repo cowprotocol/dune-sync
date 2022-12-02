@@ -4,17 +4,18 @@ TODO - Move reusable components into dune-client:
     https://github.com/cowprotocol/dune-bridge/issues/40
 """
 import asyncio
-import logging
 import sys
-
-from requests import HTTPError
 
 from dune_client.client import DuneClient
 from dune_client.query import Query
 from dune_client.types import DuneRecord
+from requests import HTTPError
 
 from src.dune_queries import QUERIES
+from src.logger import set_log
 from src.models.block_range import BlockRange
+
+log = set_log(__name__)
 
 
 class DuneFetcher:
@@ -30,17 +31,11 @@ class DuneFetcher:
         Class constructor.
         Builds DuneClient from `api_key` along with a logger and FileIO object.
         """
-        # It's a bit weird that the DuneClient also declares a log like this,
-        # but it also doesn't make sense to inherit that log. Not sure what's best practise here.
-        self.log = logging.getLogger(__name__)
-        logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s %(message)s")
-        # TODO - use runtime parameter. https://github.com/cowprotocol/dune-bridge/issues/41
-        self.log.setLevel(logging.DEBUG)
         self.dune = DuneClient(api_key)
 
     async def fetch(self, query: Query) -> list[DuneRecord]:
         """Async Dune Fetcher with some exception handling."""
-        self.log.debug(f"Executing {query}")
+        log.debug(f"Executing {query}")
 
         try:
             # Tried to use the AsyncDuneClient, without success:
@@ -50,7 +45,7 @@ class DuneFetcher:
             )
             if response.state.is_complete():
                 response_rows = response.get_rows()
-                self.log.debug(
+                log.debug(
                     f"Got {len(response_rows)} results for execution {response.execution_id}"
                 )
                 return response_rows
@@ -58,10 +53,10 @@ class DuneFetcher:
             message = (
                 f"query execution {response.execution_id} incomplete {response.state}"
             )
-            self.log.error(message)
+            log.error(message)
             raise RuntimeError(f"no results for {message}")
         except HTTPError as err:
-            self.log.error(f"Got {err} - Exiting")
+            log.error(f"Got {err} - Exiting")
             sys.exit()
 
     async def latest_app_hash_block(self) -> int:

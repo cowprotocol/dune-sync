@@ -1,10 +1,13 @@
 """Aws S3 Bucket functionality (namely upload_file)"""
-import logging
 
 import boto3
 from boto3.resources.base import ServiceResource
 from boto3.s3.transfer import S3Transfer
 from botocore.client import BaseClient
+
+from src.logger import set_log
+
+log = set_log(__name__)
 
 
 class AWSClient:
@@ -16,7 +19,6 @@ class AWSClient:
         self.internal_role = internal_role
         self.external_role = external_role
         self.external_id = external_id
-
         self.service_resource = self._assume_role()
         self.s3_client = self._get_s3_client(self.service_resource)
 
@@ -74,7 +76,7 @@ class AWSClient:
             key=object_key,
             extra_args={"ACL": "bucket-owner-full-control"},
         )
-        logging.info(f"successfully uploaded {filename} to {bucket}")
+        log.debug(f"uploaded {filename} to {bucket}")
         return True
 
     def delete_file(self, bucket: str, object_key: str) -> bool:
@@ -90,7 +92,7 @@ class AWSClient:
             Bucket=bucket,
             Key=object_key,
         )
-        logging.info(f"successfully deleted {object_key} from {bucket}")
+        log.debug(f"deleted {object_key} from {bucket}")
         return True
 
     def download_file(self, filename: str, bucket: str, object_key: str) -> bool:
@@ -107,5 +109,5 @@ class AWSClient:
             bucket=bucket,
             key=object_key,
         )
-        logging.info(f"successfully downloaded {filename} from {bucket}")
+        log.debug(f"downloaded {filename} from {bucket}")
         return True

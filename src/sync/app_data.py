@@ -1,20 +1,18 @@
 """Main Entry point for app_hash sync"""
 import json
-import logging.config
 
 from dune_client.file.interface import FileIO
 from dune_client.types import DuneRecord
 
 from src.fetch.dune import DuneFetcher
 from src.fetch.ipfs import Cid
+from src.logger import set_log
 from src.models.block_range import BlockRange
 from src.post.aws import AWSClient
 from src.sync.common import last_sync_block, aws_login_and_upload
 from src.sync.config import SyncConfig
 
-log = logging.getLogger(__name__)
-logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s %(message)s")
-log.setLevel(logging.DEBUG)
+log = set_log(__name__)
 
 
 MAX_RETRIES = 3
