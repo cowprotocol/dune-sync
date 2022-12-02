@@ -9,7 +9,7 @@ from src.environment import LOG_LEVEL
 def set_log(name: str) -> Logger:
     """
     Instantiates and returns a logger with the name defined by the caller.
-    Used by any file which wants to inherit the global log level configuration 
+    Used by any file which wants to inherit the global log level configuration
     and assigns the desired naming convention (usually `__name__`)
     """
 
