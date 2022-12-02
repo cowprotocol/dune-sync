@@ -7,10 +7,11 @@ from pathlib import Path
 from dune_client.file.interface import FileIO
 from s3transfer import S3UploadFailedError
 
+from src.logger import set_log
 from src.post.aws import AWSClient
 from src.sync.config import SyncConfig
 
-log = logging.getLogger(__name__)
+log = set_log(__name__)
 
 
 def last_sync_block(
