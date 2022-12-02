@@ -9,10 +9,9 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from src.environment import PROJECT_ROOT
+from src.fetch.dune import DuneFetcher
 from src.fetch.orderbook import OrderbookFetcher
 from src.sync import sync_app_data
-from src.fetch.dune import DuneFetcher
 from src.sync.config import SyncConfig, AWSData
 from src.sync.order_rewards import sync_order_rewards
 
@@ -65,10 +64,9 @@ if __name__ == "__main__":
         external_id=os.environ["AWS_EXTERNAL_ID"],
         bucket=os.environ["AWS_BUCKET"],
     )
-    volume_path = PROJECT_ROOT / Path(os.environ.get("VOLUME_PATH", "data"))
+    volume_path = Path(os.environ["VOLUME_PATH"])
 
     args = ScriptArgs()
-    # TODO - pass dry-run into runners!
     if args.sync_table == SyncTable.APP_DATA:
         asyncio.run(
             sync_app_data(
