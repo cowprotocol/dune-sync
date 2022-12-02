@@ -51,23 +51,25 @@ class RecordHandler(ABC):  # pylint: disable=too-few-public-methods
         When dryrun flag is enabled, does not upload to IPFS.
         """
         self._write_found_content()
-        if dry_run:
-            log.info(
-                "DRY-RUN: New records written to volume, but not posted to AWS. "
-                "Not updating last sync block."
-            )
-            return
-
         if self._num_records() > 0:
-            aws_login_and_upload(
-                config=self.config,
-                path=self.file_path,
-                filename=self.content_filename,
-            )
             log.info(
-                f"{self.name} sync for block range {self.block_range} complete: "
-                f"synced {self._num_records()} records"
+                f"attempting to post {self._num_records()} new {self.name} "
+                f"records for block range {self.block_range}"
             )
+            if dry_run:
+                log.info(
+                    "DRY-RUN-ENABLED: New records written to volume, but not posted to AWS."
+                )
+            else:
+                aws_login_and_upload(
+                    config=self.config,
+                    path=self.file_path,
+                    filename=self.content_filename,
+                )
+                log.info(
+                    f"{self.name} sync for block range {self.block_range} complete: "
+                    f"synced {self._num_records()} records"
+                )
         else:
             log.info(
                 f"No new {self.name} for block range {self.block_range}: no sync necessary"
