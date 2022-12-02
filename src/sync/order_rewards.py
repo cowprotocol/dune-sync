@@ -11,6 +11,7 @@ from src.models.block_range import BlockRange
 from src.sync.common import last_sync_block
 from src.sync.config import SyncConfig
 from src.sync.record_handler import RecordHandler
+from src.sync.upload_handler import UploadHandler
 
 log = set_log(__name__)
 
@@ -29,17 +30,17 @@ class OrderbookDataHandler(RecordHandler):  # pylint:disable=too-few-public-meth
         log.info(f"Handling {len(order_rewards)} new records")
         self.order_rewards = order_rewards
 
-    def _num_records(self) -> int:
+    def num_records(self) -> int:
         return len(self.order_rewards)
 
-    def _write_found_content(self) -> None:
+    def write_found_content(self) -> None:
         self.order_rewards.to_json(
             os.path.join(self.file_path, self.content_filename),
             orient="records",
             lines=True,
         )
 
-    def _write_sync_data(self) -> None:
+    def write_sync_data(self) -> None:
         # Only write these if upload was successful.
         config = self.config
         column = config.sync_column
@@ -70,6 +71,5 @@ def sync_order_rewards(
     record_handler = OrderbookDataHandler(
         block_range, config, order_rewards=fetcher.get_orderbook_rewards(block_range)
     )
-
-    record_handler.write_and_upload_content(dry_run)
+    UploadHandler(record_handler).write_and_upload_content(dry_run)
     log.info("order_rewards sync run completed successfully")
