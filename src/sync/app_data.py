@@ -11,6 +11,7 @@ from src.models.block_range import BlockRange
 from src.sync.common import last_sync_block
 from src.sync.config import SyncConfig
 from src.sync.record_handler import RecordHandler
+from src.sync.upload_handler import UploadHandler
 
 log = set_log(__name__)
 
@@ -46,7 +47,7 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
         except FileNotFoundError:
             self.missing_values = []
 
-    def _num_records(self) -> int:
+    def num_records(self) -> int:
         assert len(self.new_rows) == 0, (
             "this function call is not allowed until self.new_rows have been processed! "
             "call fetch_content_and_filter first"
@@ -113,11 +114,11 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
                 row.update({"attempts": str(attempts)})
                 self._not_found.append(row)
 
-    def _write_found_content(self) -> None:
+    def write_found_content(self) -> None:
         assert len(self.new_rows) == 0, "Must call _handle_new_records first!"
         self.file_manager.write_ndjson(data=self._found, name=self.content_filename)
 
-    def _write_sync_data(self) -> None:
+    def write_sync_data(self) -> None:
         # Only write these if upload was successful.
         self.file_manager.write_csv(
             data=[{self.config.sync_column: str(self.block_range.block_to)}],
@@ -169,5 +170,5 @@ async def sync_app_data(
         missing_file_name=missing_file_name,
     )
     data_handler.fetch_content_and_filter(MAX_RETRIES)
-    data_handler.write_and_upload_content(dry_run)
+    UploadHandler(data_handler).write_and_upload_content(dry_run)
     log.info("app_data sync run completed successfully")

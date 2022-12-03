@@ -1,15 +1,8 @@
 """Shared methods between both sync scripts."""
-import logging
-import os
-import sys
-from pathlib import Path
 
 from dune_client.file.interface import FileIO
-from s3transfer import S3UploadFailedError
 
 from src.logger import set_log
-from src.post.aws import AWSClient
-from src.sync.config import SyncConfig
 
 log = set_log(__name__)
 
@@ -34,21 +27,3 @@ def last_sync_block(
         raise RuntimeError(message) from err
 
     return block_from
-
-
-def aws_login_and_upload(config: SyncConfig, path: Path | str, filename: str) -> bool:
-    """Creates AWS client session and attempts to upload file"""
-    aws_client = AWSClient(
-        internal_role=config.aws.internal_role,
-        external_role=config.aws.external_role,
-        external_id=config.aws.external_id,
-        bucket=config.aws.bucket,
-    )
-    try:
-        return aws_client.upload_file(
-            filename=os.path.join(path, filename),
-            object_key=f"{config.table_name}/{filename}",
-        )
-    except S3UploadFailedError as err:
-        logging.error(err)
-        sys.exit(1)
