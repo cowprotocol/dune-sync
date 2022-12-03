@@ -10,7 +10,7 @@ from boto3.s3.transfer import S3Transfer
 from botocore.client import BaseClient
 
 from src.logger import set_log
-from src.sync.tables import SyncTable
+from src.models.tables import SyncTable
 
 log = set_log(__name__)
 

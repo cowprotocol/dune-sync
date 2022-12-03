@@ -13,7 +13,7 @@ from src.fetch.orderbook import OrderbookFetcher
 from src.sync import sync_app_data
 from src.sync.config import SyncConfig, AWSData
 from src.sync.order_rewards import sync_order_rewards
-from src.sync.tables import SyncTable
+from src.models.tables import SyncTable
 
 log = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s %(message)s")
