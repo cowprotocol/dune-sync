@@ -2,18 +2,21 @@
 import csv
 import os.path
 
-from dune_client.file.interface import FileIO
 from pandas import DataFrame
 
 from src.fetch.orderbook import OrderbookFetcher
 from src.logger import set_log
 from src.models.block_range import BlockRange
+from src.models.tables import SyncTable
+from src.post.aws import AWSClient
 from src.sync.common import last_sync_block
 from src.sync.config import SyncConfig
 from src.sync.record_handler import RecordHandler
 from src.sync.upload_handler import UploadHandler
 
 log = set_log(__name__)
+
+SYNC_TABLE = SyncTable.ORDER_REWARDS
 
 
 class OrderbookDataHandler(RecordHandler):  # pylint:disable=too-few-public-methods
@@ -25,8 +28,7 @@ class OrderbookDataHandler(RecordHandler):  # pylint:disable=too-few-public-meth
     def __init__(
         self, block_range: BlockRange, config: SyncConfig, order_rewards: DataFrame
     ):
-
-        super().__init__(block_range, config)
+        super().__init__(block_range, SYNC_TABLE, config)
         log.info(f"Handling {len(order_rewards)} new records")
         self.order_rewards = order_rewards
 
@@ -34,6 +36,11 @@ class OrderbookDataHandler(RecordHandler):  # pylint:disable=too-few-public-meth
         return len(self.order_rewards)
 
     def write_found_content(self) -> None:
+        path = self.file_path
+        if not os.path.exists(path):
+            log.info(f"creating write path {path}")
+            os.makedirs(path)
+
         self.order_rewards.to_json(
             os.path.join(self.file_path, self.content_filename),
             orient="records",
@@ -53,17 +60,14 @@ class OrderbookDataHandler(RecordHandler):  # pylint:disable=too-few-public-meth
 
 
 def sync_order_rewards(
-    fetcher: OrderbookFetcher, config: SyncConfig, dry_run: bool
+    aws: AWSClient, fetcher: OrderbookFetcher, config: SyncConfig, dry_run: bool
 ) -> None:
     """App Data Sync Logic"""
-    # TODO - assert legit configuration before proceeding!
-    table_name = config.table_name
 
     block_range = BlockRange(
         block_from=last_sync_block(
-            file_manager=FileIO(config.volume_path / table_name),
-            last_block_file=config.sync_file,
-            column=config.sync_column,
+            aws,
+            table=SYNC_TABLE,
             genesis_block=15719994,  # First Recorded Order Reward block
         ),
         block_to=fetcher.get_latest_block(),
@@ -71,5 +75,7 @@ def sync_order_rewards(
     record_handler = OrderbookDataHandler(
         block_range, config, order_rewards=fetcher.get_orderbook_rewards(block_range)
     )
-    UploadHandler(record_handler).write_and_upload_content(dry_run)
+    UploadHandler(aws, record_handler, table=SYNC_TABLE).write_and_upload_content(
+        dry_run
+    )
     log.info("order_rewards sync run completed successfully")

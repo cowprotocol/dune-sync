@@ -8,6 +8,8 @@ from src.fetch.dune import DuneFetcher
 from src.fetch.ipfs import Cid
 from src.logger import set_log
 from src.models.block_range import BlockRange
+from src.models.tables import SyncTable
+from src.post.aws import AWSClient
 from src.sync.common import last_sync_block
 from src.sync.config import SyncConfig
 from src.sync.record_handler import RecordHandler
@@ -18,6 +20,7 @@ log = set_log(__name__)
 
 MAX_RETRIES = 3
 GIVE_UP_THRESHOLD = 10
+SYNC_TABLE = SyncTable.APP_DATA
 
 
 class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attributes
@@ -34,7 +37,7 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
         config: SyncConfig,
         missing_file_name: str,
     ):
-        super().__init__(block_range, config)
+        super().__init__(block_range, SYNC_TABLE, config)
         self.file_manager = file_manager
 
         self._found: list[dict[str, str]] = []
@@ -146,29 +149,29 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
 
 
 async def sync_app_data(
-    dune: DuneFetcher, config: SyncConfig, missing_file_name: str, dry_run: bool
+    aws: AWSClient,
+    dune: DuneFetcher,
+    config: SyncConfig,
+    missing_file_name: str,
+    dry_run: bool,
 ) -> None:
     """App Data Sync Logic"""
-    # TODO - assert legit configuration before proceeding!
-    table_name = config.table_name
-    file_manager = FileIO(config.volume_path / table_name)
     block_range = BlockRange(
         block_from=last_sync_block(
-            file_manager,
-            last_block_file=config.sync_file,
-            column=config.sync_column,
+            aws,
+            table=SYNC_TABLE,
             genesis_block=12153262,  # First App Hash Block
         ),
         block_to=await dune.latest_app_hash_block(),
     )
 
     data_handler = AppDataHandler(
-        file_manager,
+        file_manager=FileIO(config.volume_path / str(SYNC_TABLE)),
         new_rows=await dune.get_app_hashes(block_range),
         block_range=block_range,
         config=config,
         missing_file_name=missing_file_name,
     )
     data_handler.fetch_content_and_filter(MAX_RETRIES)
-    UploadHandler(data_handler).write_and_upload_content(dry_run)
+    UploadHandler(aws, data_handler, table=SYNC_TABLE).write_and_upload_content(dry_run)
     log.info("app_data sync run completed successfully")

@@ -4,30 +4,21 @@ import asyncio
 import logging.config
 import os
 from dataclasses import dataclass
-from enum import Enum
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 from src.fetch.dune import DuneFetcher
 from src.fetch.orderbook import OrderbookFetcher
+from src.post.aws import AWSClient
 from src.sync import sync_app_data
-from src.sync.config import SyncConfig, AWSData
+from src.sync.config import SyncConfig
 from src.sync.order_rewards import sync_order_rewards
+from src.models.tables import SyncTable
 
 log = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s %(message)s")
 log.setLevel(logging.DEBUG)
-
-
-class SyncTable(Enum):
-    """Enum for Deployment Supported Table Sync"""
-
-    APP_DATA = "app_data"
-    ORDER_REWARDS = "order_rewards"
-
-    def __str__(self) -> str:
-        return str(self.value)
 
 
 @dataclass
@@ -60,29 +51,23 @@ if __name__ == "__main__":
     load_dotenv()
     volume_path = Path(os.environ["VOLUME_PATH"])
     args = ScriptArgs()
-    aws = AWSData.empty() if args.dry_run else AWSData.new_from_environment()
-
+    aws = AWSClient.new_from_environment()
+    config = SyncConfig(volume_path)
     if args.sync_table == SyncTable.APP_DATA:
         asyncio.run(
             sync_app_data(
+                aws,
                 dune=DuneFetcher(os.environ["DUNE_API_KEY"]),
-                config=SyncConfig(
-                    aws,
-                    volume_path,
-                    table_name=str(args.sync_table),
-                ),
+                config=config,
                 missing_file_name="missing_app_hashes.json",
                 dry_run=args.dry_run,
             )
         )
     elif args.sync_table == SyncTable.ORDER_REWARDS:
         sync_order_rewards(
+            aws,
             fetcher=OrderbookFetcher(),
-            config=SyncConfig(
-                aws,
-                volume_path,
-                table_name=str(args.sync_table),
-            ),
+            config=config,
             dry_run=args.dry_run,
         )
     else:
