@@ -11,15 +11,13 @@ from src.models.block_range import BlockRange
 from src.models.tables import SyncTable
 from src.post.aws import AWSClient
 from src.sync.common import last_sync_block
-from src.sync.config import SyncConfig
+from src.sync.config import SyncConfig, AppDataSyncConfig
 from src.sync.record_handler import RecordHandler
 from src.sync.upload_handler import UploadHandler
 
 log = set_log(__name__)
 
 
-MAX_RETRIES = 3
-GIVE_UP_THRESHOLD = 10
 SYNC_TABLE = SyncTable.APP_DATA
 
 
@@ -80,7 +78,7 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
                 row["attempts"] = str(max_retries)
                 self._not_found.append(row)
 
-    def _handle_missing_records(self, max_retries: int) -> None:
+    def _handle_missing_records(self, max_retries: int, give_up_threshold: int) -> None:
         while self.missing_values:
             row = self.missing_values.pop()
             app_hash = row["app_hash"]
@@ -99,7 +97,7 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
                         "content": app_data,
                     }
                 )
-            elif app_data is None and attempts > GIVE_UP_THRESHOLD:
+            elif app_data is None and attempts > give_up_threshold:
                 log.debug(
                     f"No content found after {attempts} attempts for {app_hash} assuming NULL."
                 )
@@ -134,7 +132,7 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
         )
 
     def fetch_content_and_filter(
-        self, max_retries: int
+        self, max_retries: int, give_up_threshold: int
     ) -> tuple[list[DuneRecord], list[DuneRecord]]:
         """
         Run loop fetching app_data for hashes,
@@ -144,15 +142,14 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
         log.info(
             f"Attempting to recover missing {len(self.missing_values)} records from previous run"
         )
-        self._handle_missing_records(max_retries)
+        self._handle_missing_records(max_retries, give_up_threshold)
         return self._found, self._not_found
 
 
 async def sync_app_data(
     aws: AWSClient,
     dune: DuneFetcher,
-    config: SyncConfig,
-    missing_file_name: str,
+    config: AppDataSyncConfig,
     dry_run: bool,
 ) -> None:
     """App Data Sync Logic"""
@@ -170,8 +167,10 @@ async def sync_app_data(
         new_rows=await dune.get_app_hashes(block_range),
         block_range=block_range,
         config=config,
-        missing_file_name=missing_file_name,
+        missing_file_name=config.missing_files_name,
     )
-    data_handler.fetch_content_and_filter(MAX_RETRIES)
+    data_handler.fetch_content_and_filter(
+        max_retries=config.max_retries, give_up_threshold=config.give_up_threshold
+    )
     UploadHandler(aws, data_handler, table=SYNC_TABLE).write_and_upload_content(dry_run)
     log.info("app_data sync run completed successfully")
