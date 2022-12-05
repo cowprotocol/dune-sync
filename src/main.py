@@ -12,7 +12,7 @@ from src.fetch.dune import DuneFetcher
 from src.fetch.orderbook import OrderbookFetcher
 from src.post.aws import AWSClient
 from src.sync import sync_app_data
-from src.sync.config import SyncConfig
+from src.sync.config import SyncConfig, AppDataSyncConfig
 from src.sync.order_rewards import sync_order_rewards
 from src.models.tables import SyncTable
 
@@ -52,14 +52,19 @@ if __name__ == "__main__":
     volume_path = Path(os.environ["VOLUME_PATH"])
     args = ScriptArgs()
     aws = AWSClient.new_from_environment()
-    config = SyncConfig(volume_path)
     if args.sync_table == SyncTable.APP_DATA:
         asyncio.run(
             sync_app_data(
                 aws,
                 dune=DuneFetcher(os.environ["DUNE_API_KEY"]),
-                config=config,
-                missing_file_name="missing_app_hashes.json",
+                config=AppDataSyncConfig(
+                    volume_path=volume_path,
+                    missing_files_name="missing_app_hashes.json",
+                    max_retries=int(os.environ.get("APP_DATA_MAX_RETRIES", 3)),
+                    give_up_threshold=int(
+                        os.environ.get("APP_DATA_GIVE_UP_THRESHOLD", 100)
+                    ),
+                ),
                 dry_run=args.dry_run,
             )
         )
@@ -67,7 +72,7 @@ if __name__ == "__main__":
         sync_order_rewards(
             aws,
             fetcher=OrderbookFetcher(),
-            config=config,
+            config=SyncConfig(volume_path),
             dry_run=args.dry_run,
         )
     else:
