@@ -128,6 +128,5 @@ class TestAWSConnection(unittest.TestCase):
         self.assertEqual([], aws.existing_files().get(table))
 
 
-
 if __name__ == "__main__":
     unittest.main()

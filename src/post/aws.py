@@ -71,7 +71,9 @@ class BucketStructure:
         Constructor from results of ServiceResource.Buckets
         """
         # Initialize empty lists (incase the directories contain nothing)
-        grouped_files = defaultdict(list[BucketFileObject])
+        grouped_files: dict[str, list[BucketFileObject]] = defaultdict(
+            list[BucketFileObject]
+        )
         for bucket_obj in bucket_objects:
             object_key = bucket_obj.key
             path, _ = object_key.split("/")
