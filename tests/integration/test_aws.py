@@ -25,7 +25,7 @@ class TestAWSConnection(unittest.TestCase):
         self.key = f"test/{self.empty_file}"
 
     def tearDown(self) -> None:
-        self.aws_client.close_session()
+        self.aws_client.s3_client.close()
         try:
             os.remove(Path(self.empty_file))
             self.aws_client.delete_file(self.key)
@@ -106,6 +106,7 @@ class TestAWSConnection(unittest.TestCase):
         self.assertEqual(1, aws.last_sync_block(table))
         # cleanup
         aws.delete_file(object_key)
+        os.remove(Path(block_indexed_filename))
 
     def test_delete_all(self):
         table = "test"
@@ -119,11 +120,13 @@ class TestAWSConnection(unittest.TestCase):
                 filename=block_indexed_filename,
                 object_key=f"{table}/{block_indexed_filename}",
             )
+            os.remove(Path(block_indexed_filename))
 
         self.assertEqual(n, len(aws.existing_files().get(table)))
 
         aws.delete_all(table)
         self.assertEqual([], aws.existing_files().get(table))
+
 
 
 if __name__ == "__main__":
