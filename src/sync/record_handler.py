@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 
 from src.logger import set_log
 from src.models.block_range import BlockRange
+from src.models.tables import SyncTable
 from src.sync.config import SyncConfig
 
 log = set_log(__name__)
@@ -21,12 +22,13 @@ class RecordHandler(ABC):  # pylint: disable=too-few-public-methods
     def __init__(
         self,
         block_range: BlockRange,
+        table: SyncTable,
         config: SyncConfig,
     ):
         self.config = config
         self.block_range = block_range
 
-        self.name = config.table_name
+        self.name = str(table)
         self.file_path = config.volume_path / self.name
         self.content_filename = f"cow_{block_range.block_to}.json"
 

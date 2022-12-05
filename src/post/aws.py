@@ -1,6 +1,7 @@
 """Aws S3 Bucket functionality (namely upload_file)"""
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import Any
 
@@ -8,6 +9,7 @@ import boto3
 from boto3.resources.base import ServiceResource
 from boto3.s3.transfer import S3Transfer
 from botocore.client import BaseClient
+from dotenv import load_dotenv
 
 from src.logger import set_log
 from src.models.tables import SyncTable
@@ -61,7 +63,6 @@ class BucketStructure:
         """
         Constructor from results of ServiceResource.Buckets
         """
-        print(type(bucket_objects))
         # Initialize empty lists (incase the directories contain nothing)
         grouped_files: dict[SyncTable, list[BucketFileObject]] = {
             table: [] for table in list(SyncTable)
@@ -69,19 +70,22 @@ class BucketStructure:
         for bucket_obj in bucket_objects:
             object_key = bucket_obj.key
             path, _ = object_key.split("/")
-            if path in grouped_files.keys():
-                grouped_files[SyncTable(path)].append(
-                    BucketFileObject.from_key(object_key)
-                )
-            else:
+            try:
+                table = SyncTable(path)
+                grouped_files[table].append(BucketFileObject.from_key(object_key))
+            except ValueError:
+                # Catches any unrecognized filepath.
                 log.warning(f"Found unexpected file {object_key}")
         log.debug(f"loaded bucket filesystem: {grouped_files}")
 
         return cls(files=grouped_files)
 
     def get(self, table: SyncTable) -> list[BucketFileObject]:
-        """Returns the list of files under `table`"""
-        return self.files[table]
+        """
+        Returns the list of files under `table`
+            - returns empty list if none available.
+        """
+        return self.files.get(table, [])
 
 
 class AWSClient:
@@ -99,6 +103,17 @@ class AWSClient:
 
         self.service_resource = self._assume_role()
         self.s3_client = self._get_s3_client(self.service_resource)
+
+    @classmethod
+    def new_from_environment(cls) -> AWSClient:
+        """Constructs an instance of AWSClient from environment variables"""
+        load_dotenv()
+        return cls(
+            internal_role=os.environ["AWS_INTERNAL_ROLE"],
+            external_role=os.environ["AWS_EXTERNAL_ROLE"],
+            external_id=os.environ["AWS_EXTERNAL_ID"],
+            bucket=os.environ["AWS_BUCKET"],
+        )
 
     @staticmethod
     def _get_s3_client(s3_resource: ServiceResource) -> BaseClient:
@@ -198,18 +213,18 @@ class AWSClient:
         bucket_objects = bucket.objects.all()
         return BucketStructure.from_bucket_collection(bucket_objects)
 
-    def last_sync_block(self, table_name: str) -> int:
+    def last_sync_block(self, table: SyncTable) -> int:
         """
         Based on the existing bucket files,
         the last sync block is uniquely determined from the file names.
         """
         try:
-            table_files = self.existing_files().get(SyncTable(table_name))
+            table_files = self.existing_files().get(table)
             return max(file_obj.block for file_obj in table_files)
-
-        except KeyError as err:
-            raise ValueError(
-                f"Invalid table_name {table_name}, please chose from {SyncTable.supported_tables()}"
+        except ValueError as err:
+            # Raised when table_files = []
+            raise FileNotFoundError(
+                f"Could not determine last sync block for {table} files. No files."
             ) from err
 
     def delete_all(self, table_name: str) -> None:

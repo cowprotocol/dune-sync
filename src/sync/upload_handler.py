@@ -5,13 +5,14 @@ import sys
 from s3transfer import S3UploadFailedError
 
 from src.logger import set_log
+from src.models.tables import SyncTable
 from src.post.aws import AWSClient
 from src.sync.record_handler import RecordHandler
 
 log = set_log(__name__)
 
 
-class UploadHandler:
+class UploadHandler:  # pylint: disable=too-few-public-methods
     """
     Given an instance of Record handler, ensures that
      - files are written locally,
@@ -20,32 +21,21 @@ class UploadHandler:
     in the appropriate order.
     """
 
-    def __init__(self, record_handler: RecordHandler):
+    def __init__(self, aws: AWSClient, record_handler: RecordHandler, table: SyncTable):
+        self.aws = aws
         self.record_handler = record_handler
-
-    def get_aws_client(self) -> AWSClient:
-        """
-        Returns AWS client according to the configuration of self.record_handler
-        """
-        aws_config = self.record_handler.config.aws
-        return AWSClient(
-            internal_role=aws_config.internal_role,
-            external_role=aws_config.external_role,
-            external_id=aws_config.external_id,
-            bucket=aws_config.bucket,
-        )
+        self.table = str(table)
 
     def _aws_login_and_upload(self) -> bool:
         """Creates AWS client session and attempts to upload file"""
-        path, filename, table_name = (
+        path, filename = (
             self.record_handler.file_path,
             self.record_handler.content_filename,
-            self.record_handler.config.table_name,
         )
         try:
-            return self.get_aws_client().upload_file(
+            return self.aws.upload_file(
                 filename=os.path.join(path, filename),
-                object_key=f"{table_name}/{filename}",
+                object_key=f"{self.table}/{filename}",
             )
         except S3UploadFailedError as err:
             log.error(err)
