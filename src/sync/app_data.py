@@ -118,17 +118,17 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
     def write_found_content(self) -> None:
         assert len(self.new_rows) == 0, "Must call _handle_new_records first!"
         self.file_manager.write_ndjson(data=self._found, name=self.content_filename)
+        # When not_found is empty, we want to overwrite the file (hence skip_empty=False)
+        # This happens when number of attempts exceeds GIVE_UP_THRESHOLD
+        self.file_manager.write_ndjson(
+            self._not_found, self.missing_file_name, skip_empty=False
+        )
 
     def write_sync_data(self) -> None:
         # Only write these if upload was successful.
         self.file_manager.write_csv(
             data=[{self.config.sync_column: str(self.block_range.block_to)}],
             name=self.config.sync_file,
-        )
-        # When not_found is empty, we want to overwrite the file (hence skip_empty=False)
-        # This happens when number of attempts exceeds GIVE_UP_THRESHOLD
-        self.file_manager.write_ndjson(
-            self._not_found, self.missing_file_name, skip_empty=False
         )
 
     def fetch_content_and_filter(

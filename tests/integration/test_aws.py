@@ -25,7 +25,6 @@ class TestAWSConnection(unittest.TestCase):
         self.key = f"test/{self.empty_file}"
 
     def tearDown(self) -> None:
-        self.aws_client.s3_client.close()
         try:
             os.remove(Path(self.empty_file))
             self.aws_client.delete_file(self.key)
