@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 import os
+from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 import boto3
 from boto3.resources.base import ServiceResource
@@ -28,7 +29,7 @@ class BucketFileObject:
 
     path: str
     name: str
-    block: int
+    block: Optional[int]
 
     @classmethod
     def from_key(cls, object_key: str) -> BucketFileObject:
@@ -37,10 +38,16 @@ class BucketFileObject:
         more meaningful parts from which it can be reconstructed
         """
         path, name = object_key.split("/")
+
+        try:
+            block = int(name.strip("cow_").strip(".json"))
+        except ValueError:
+            # File structure does not satisfy block indexing!
+            block = None
         return cls(
             path,
             name,  # Keep the full reference (for delete)
-            block=int(name.strip("cow_").strip(".json")),
+            block,
         )
 
     @property
@@ -56,7 +63,7 @@ class BucketFileObject:
 class BucketStructure:
     """Representation of the bucket directory structure"""
 
-    files: dict[SyncTable, list[BucketFileObject]]
+    files: dict[str, list[BucketFileObject]]
 
     @classmethod
     def from_bucket_collection(cls, bucket_objects: Any) -> BucketStructure:
@@ -64,28 +71,26 @@ class BucketStructure:
         Constructor from results of ServiceResource.Buckets
         """
         # Initialize empty lists (incase the directories contain nothing)
-        grouped_files: dict[SyncTable, list[BucketFileObject]] = {
-            table: [] for table in list(SyncTable)
-        }
+        grouped_files = defaultdict(list[BucketFileObject])
         for bucket_obj in bucket_objects:
             object_key = bucket_obj.key
             path, _ = object_key.split("/")
-            try:
-                table = SyncTable(path)
-                grouped_files[table].append(BucketFileObject.from_key(object_key))
-            except ValueError:
+            grouped_files[path].append(BucketFileObject.from_key(object_key))
+            if path not in SyncTable.supported_tables():
                 # Catches any unrecognized filepath.
                 log.warning(f"Found unexpected file {object_key}")
+
         log.debug(f"loaded bucket filesystem: {grouped_files}")
 
         return cls(files=grouped_files)
 
-    def get(self, table: SyncTable) -> list[BucketFileObject]:
+    def get(self, table: SyncTable | str) -> list[BucketFileObject]:
         """
         Returns the list of files under `table`
             - returns empty list if none available.
         """
-        return self.files.get(table, [])
+        table_str = str(table) if isinstance(table, SyncTable) else table
+        return self.files.get(table_str, [])
 
 
 class AWSClient:
@@ -213,27 +218,28 @@ class AWSClient:
         bucket_objects = bucket.objects.all()
         return BucketStructure.from_bucket_collection(bucket_objects)
 
-    def last_sync_block(self, table: SyncTable) -> int:
+    def last_sync_block(self, table: SyncTable | str) -> int:
         """
         Based on the existing bucket files,
         the last sync block is uniquely determined from the file names.
         """
+        table_str = str(table) if isinstance(table, SyncTable) else table
         try:
-            table_files = self.existing_files().get(table)
-            return max(file_obj.block for file_obj in table_files)
+            table_files = self.existing_files().get(table_str)
+            return max(file_obj.block for file_obj in table_files if file_obj.block)
         except ValueError as err:
             # Raised when table_files = []
             raise FileNotFoundError(
                 f"Could not determine last sync block for {table} files. No files."
             ) from err
 
-    def delete_all(self, table_name: str) -> None:
+    def delete_all(self, table: SyncTable | str) -> None:
         """Deletes all files within the supported tables directory"""
         try:
-            table_files = self.existing_files().get(SyncTable(table_name))
+            table_files = self.existing_files().get(table)
             for file_data in table_files:
                 self.delete_file(file_data.object_key)
         except KeyError as err:
             raise ValueError(
-                f"Invalid table_name {table_name}, please chose from {SyncTable.supported_tables()}"
+                f"Invalid table_name {table}, please chose from {SyncTable.supported_tables()}"
             ) from err

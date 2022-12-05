@@ -66,7 +66,6 @@ def sync_order_rewards(
 
     block_range = BlockRange(
         block_from=last_sync_block(
-            # TODO - we should always use this.
             aws,
             table=SYNC_TABLE,
             genesis_block=15719994,  # First Recorded Order Reward block
