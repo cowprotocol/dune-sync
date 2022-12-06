@@ -1,10 +1,17 @@
 """IPFS CID (de)serialization"""
 from __future__ import annotations
 
+import asyncio
 from typing import Any, Optional
 
+import aiohttp
 import requests
 from multiformats_cid.cid import from_bytes
+
+from src.logger import set_log
+from src.models.app_data_content import FoundContent, NotFoundContent
+
+log = set_log(__name__)
 
 
 class Cid:
@@ -49,3 +56,55 @@ class Cid:
             except requests.exceptions.ReadTimeout:
                 attempts += 1
         return None
+
+    @classmethod
+    async def fetch_many(
+        cls, missing_rows: list[dict[str, str]], max_retries: int = 3
+    ) -> tuple[list[FoundContent], list[NotFoundContent]]:
+        """Async AppData Fetching"""
+        found, not_found = [], []
+        async with aiohttp.ClientSession() as session:
+            while missing_rows:
+                row = missing_rows.pop()
+                app_hash = row["app_hash"]
+                cid = cls(app_hash)
+                attempts = 0
+                previous_attempts = int(row.get("attempts", 0))
+                content = None
+                while attempts < max_retries:
+                    try:
+                        async with session.get(cid.url(), timeout=1) as response:
+                            content = await response.json()
+                            if previous_attempts:
+                                log.debug(
+                                    f"Found previously missing content hash {app_hash} at CID {cid}"
+                                )
+                            else:
+                                log.debug(f"Found content for {app_hash} at CID {cid}")
+                            found.append(
+                                FoundContent(
+                                    app_hash=app_hash,
+                                    first_seen_block=int(row["first_seen_block"]),
+                                    content=content,
+                                )
+                            )
+                            break
+                    except asyncio.TimeoutError:
+                        attempts += 1
+
+                if not content:
+                    total_attempts = previous_attempts + max_retries
+                    base_message = f"no content found for {app_hash} at CID {cid} after"
+                    if previous_attempts:
+                        log.debug(f"still {base_message} {total_attempts} attempts")
+                    else:
+                        log.debug(f"{base_message} {max_retries} retries")
+
+                    not_found.append(
+                        NotFoundContent(
+                            app_hash=app_hash,
+                            first_seen_block=int(row["first_seen_block"]),
+                            attempts=total_attempts,
+                        )
+                    )
+            return found, not_found

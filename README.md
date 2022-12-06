@@ -32,5 +32,5 @@ You will need to attach a volume and have an env file configuration. This exampl
 - and assumes `.env` file is in `$PWD`
 
 ```shell
-docker run -v ${PWD}/data:/app/data --env-file .env docker pull ghcr.io/cowprotocol/dune-sync:latest
+docker run -v ${PWD}/data:/app/data --env-file .env ghcr.io/cowprotocol/dune-sync:latest
 ```
