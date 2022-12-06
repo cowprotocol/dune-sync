@@ -1,10 +1,8 @@
 """Models for Found and Not Found App Data Content. Also, responsible for type conversion"""
 from __future__ import annotations
-import json
+
 from dataclasses import dataclass
 from typing import Any
-
-from dune_client.types import DuneRecord
 
 
 @dataclass
@@ -24,12 +22,12 @@ class FoundContent:
             content=row["content"],
         )
 
-    def as_dune_record(self) -> DuneRecord:
+    def as_dune_record(self) -> dict[str, Any]:
         """Converts to DuneRecord type"""
         return {
             "app_hash": self.app_hash,
-            "first_seen_block": str(self.first_seen_block),
-            "content": json.dumps(self.content),
+            "first_seen_block": self.first_seen_block,
+            "content": self.content,
         }
 
 
@@ -49,13 +47,13 @@ class NotFoundContent:
         return cls(
             app_hash=row["app_hash"],
             first_seen_block=int(row["first_seen_block"]),
-            attempts=row["attempts"],
+            attempts=int(row["attempts"]),
         )
 
-    def as_dune_record(self) -> DuneRecord:
+    def as_dune_record(self) -> dict[str, Any]:
         """Converts to DuneRecord type"""
         return {
             "app_hash": self.app_hash,
-            "first_seen_block": str(self.first_seen_block),
-            "attempts": str(self.attempts),
+            "first_seen_block": self.first_seen_block,
+            "attempts": self.attempts,
         }
