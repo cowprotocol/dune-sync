@@ -108,9 +108,6 @@ class AWSClient:
         self.external_id = external_id
         self.bucket = bucket
 
-        self.service_resource = self._assume_role()
-        self.s3_client = self._get_s3_client(self.service_resource)
-
     @classmethod
     def new_from_environment(cls) -> AWSClient:
         """Constructs an instance of AWSClient from environment variables"""
@@ -169,8 +166,8 @@ class AWSClient:
                            be f"{table_name}/cow_{latest_block_number}.json"
         :return: True if file was uploaded, else raises
         """
-
-        S3Transfer(self.s3_client).upload_file(
+        s3_client = self._get_s3_client(self._assume_role())
+        S3Transfer(s3_client).upload_file(
             filename=filename,
             bucket=self.bucket,
             key=object_key,
@@ -187,7 +184,8 @@ class AWSClient:
         :return: True if file was deleted, else raises
         """
         # TODO - types! error: "BaseClient" has no attribute "delete_object"
-        self.s3_client.delete_object(  # type: ignore
+        s3_client = self._get_s3_client(self._assume_role())
+        s3_client.delete_object(  # type: ignore
             Bucket=self.bucket,
             Key=object_key,
         )
@@ -202,7 +200,8 @@ class AWSClient:
                            be f"{table_name}/cow_{latest_block_number}.json"
         :return: True if file was downloaded, else raises
         """
-        S3Transfer(self.s3_client).download_file(
+        s3_client = self._get_s3_client(self._assume_role())
+        S3Transfer(s3_client).download_file(
             filename=filename,
             bucket=self.bucket,
             key=object_key,
@@ -215,7 +214,8 @@ class AWSClient:
         Returns an object representing the bucket file
         structure with sync block metadata
         """
-        bucket = self.service_resource.Bucket(self.bucket)  # type: ignore
+        service_resource = self._assume_role()
+        bucket = service_resource.Bucket(self.bucket)  # type: ignore
 
         bucket_objects = bucket.objects.all()
         return BucketStructure.from_bucket_collection(bucket_objects)
