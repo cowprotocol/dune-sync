@@ -34,3 +34,28 @@ You will need to attach a volume and have an env file configuration. This exampl
 ```shell
 docker run -v ${PWD}/data:/app/data --env-file .env ghcr.io/cowprotocol/dune-sync:latest
 ```
+
+
+### Breaking Changes
+
+Whenever the schema changes, we must coordinate with Dune that the data must be dropped and the table rebuilt.
+For this we have implemented a feature flag `--hard-reset True` which can be called to delete all data from their 
+buckets and our backup volume. This should only be run whilst in coordination with their team about the changes. 
+They will "stop the stream", drop the table on their side and restart the stream. 
+In the event that a hard reset is performed without the proper coordination, 
+it is likely that duplicate records will appear in their production environment (i.e. the interface). 
+
+So, the process is:
+
+- Contact a Dune Team Member (@dsalv)
+- Mention that we need to rebuild table XYZ (because of a schema change)
+- Once they are aware/prepared run
+```shell
+docker run -v ${PWD}/data:/app/data \
+    --env-file .env \
+    ghcr.io/cowprotocol/dune-sync \
+    --sync-table SYNC_TABLE \
+    --hard-reset True
+```
+
+This will empty the buckets and repopulate with the appropriate changes.
