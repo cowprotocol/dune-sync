@@ -81,7 +81,8 @@ class Cid:
                                 )
                             else:
                                 log.debug(
-                                    f"Found content for {app_hash} at CID {cid} ({attempts + 1} trys)"
+                                    f"Found content for {app_hash} at "
+                                    f"CID {cid} ({attempts + 1} trys)"
                                 )
                             found.append(
                                 FoundContent(
