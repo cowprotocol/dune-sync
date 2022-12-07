@@ -97,9 +97,6 @@ class Cid:
                             break
                     except asyncio.TimeoutError:
                         attempts += 1
-                    except Exception as err:
-                        log.error(f"unexpected error {err} -- requires investigation, retrying anyway")
-                        attempts += 1
 
                 if not content:
                     total_attempts = previous_attempts + max_retries
