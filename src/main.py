@@ -48,7 +48,7 @@ class ScriptArgs:
             "--hard-reset",
             type=bool,
             help="Flag indicating whether the existing sync table data should "
-                 "be deleted from the bucket and rebuilt from scratch",
+            "be deleted from the bucket and rebuilt from scratch",
             default=False,
         )
         arguments, _ = parser.parse_known_args()
