@@ -1,5 +1,4 @@
 """Main Entry point for app_hash sync"""
-import json
 
 from dune_client.file.interface import FileIO
 from dune_client.types import DuneRecord
@@ -7,6 +6,7 @@ from dune_client.types import DuneRecord
 from src.fetch.dune import DuneFetcher
 from src.fetch.ipfs import Cid
 from src.logger import set_log
+from src.models.app_data_content import FoundContent, NotFoundContent
 from src.models.block_range import BlockRange
 from src.models.tables import SyncTable
 from src.post.aws import AWSClient
@@ -38,8 +38,8 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
         super().__init__(block_range, SYNC_TABLE, config)
         self.file_manager = file_manager
 
-        self._found: list[dict[str, str]] = []
-        self._not_found: list[dict[str, str]] = []
+        self._found: list[FoundContent] = []
+        self._not_found: list[NotFoundContent] = []
 
         self.new_rows = new_rows
         self.missing_file_name = missing_file_name
@@ -55,73 +55,44 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
         )
         return len(self._found)
 
-    def _handle_new_records(self, max_retries: int) -> None:
+    async def _handle_new_records(self, max_retries: int) -> None:
         # Drain the dune_results into "found" and "not found" categories
-        while self.new_rows:
-            row = self.new_rows.pop()
-            app_hash = row["app_hash"]
-            cid = Cid(app_hash)
-            app_data = cid.get_content(max_retries)
+        self._found, self._not_found = await Cid.fetch_many(self.new_rows, max_retries)
 
-            # Here it would be nice if python we more like rust!
-            if app_data is not None:
-                # Row is modified and added found items
-                log.debug(f"Found content for {app_hash} at CID {cid}")
-                row["content"] = app_data
-                self._found.append(row)
-            else:
-                # Unmodified row added to not_found items
-                log.debug(
-                    f"No content found for {app_hash} at CID {cid} after {max_retries} retries"
-                )
-                # Dune Records are string dicts.... :(
-                row["attempts"] = str(max_retries)
-                self._not_found.append(row)
-
-    def _handle_missing_records(self, max_retries: int, give_up_threshold: int) -> None:
-        while self.missing_values:
-            row = self.missing_values.pop()
-            app_hash = row["app_hash"]
-            cid = Cid(app_hash)
-            app_data = cid.get_content(max_retries)
-            attempts = int(row["attempts"]) + max_retries
-
-            if app_data is not None:
-                log.debug(
-                    f"Found previously missing content hash {row['app_hash']} at CID {cid}"
-                )
-                self._found.append(
-                    {
-                        "app_hash": app_hash,
-                        "first_seen_block": row["first_seen_block"],
-                        "content": app_data,
-                    }
-                )
-            elif app_data is None and attempts > give_up_threshold:
+    async def _handle_missing_records(
+        self, max_retries: int, give_up_threshold: int
+    ) -> None:
+        found, not_found = await Cid.fetch_many(self.missing_values, max_retries)
+        while found:
+            self._found.append(found.pop())
+        while not_found:
+            row = not_found.pop()
+            app_hash, attempts = row.app_hash, row.attempts
+            if attempts > give_up_threshold:
                 log.debug(
                     f"No content found after {attempts} attempts for {app_hash} assuming NULL."
                 )
                 self._found.append(
-                    {
-                        "app_hash": app_hash,
-                        "first_seen_block": row["first_seen_block"],
-                        "content": json.dumps({}),
-                    }
+                    FoundContent(
+                        app_hash=app_hash,
+                        first_seen_block=row.first_seen_block,
+                        content={},
+                    )
                 )
             else:
-                log.debug(
-                    f"Still no content found for {app_hash} at CID {cid} after {attempts} attempts"
-                )
-                row.update({"attempts": str(attempts)})
                 self._not_found.append(row)
 
     def write_found_content(self) -> None:
         assert len(self.new_rows) == 0, "Must call _handle_new_records first!"
-        self.file_manager.write_ndjson(data=self._found, name=self.content_filename)
+        self.file_manager.write_ndjson(
+            data=[x.as_dune_record() for x in self._found], name=self.content_filename
+        )
         # When not_found is empty, we want to overwrite the file (hence skip_empty=False)
         # This happens when number of attempts exceeds GIVE_UP_THRESHOLD
         self.file_manager.write_ndjson(
-            self._not_found, self.missing_file_name, skip_empty=False
+            data=[x.as_dune_record() for x in self._not_found],
+            name=self.missing_file_name,
+            skip_empty=False,
         )
 
     def write_sync_data(self) -> None:
@@ -131,19 +102,18 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
             name=self.config.sync_file,
         )
 
-    def fetch_content_and_filter(
+    async def fetch_content_and_filter(
         self, max_retries: int, give_up_threshold: int
-    ) -> tuple[list[DuneRecord], list[DuneRecord]]:
+    ) -> None:
         """
         Run loop fetching app_data for hashes,
         separates into (found and not found), returning the pair.
         """
-        self._handle_new_records(max_retries)
+        await self._handle_new_records(max_retries)
         log.info(
             f"Attempting to recover missing {len(self.missing_values)} records from previous run"
         )
-        self._handle_missing_records(max_retries, give_up_threshold)
-        return self._found, self._not_found
+        await self._handle_missing_records(max_retries, give_up_threshold)
 
 
 async def sync_app_data(
@@ -169,7 +139,7 @@ async def sync_app_data(
         config=config,
         missing_file_name=config.missing_files_name,
     )
-    data_handler.fetch_content_and_filter(
+    await data_handler.fetch_content_and_filter(
         max_retries=config.max_retries, give_up_threshold=config.give_up_threshold
     )
     UploadHandler(aws, data_handler, table=SYNC_TABLE).write_and_upload_content(dry_run)
