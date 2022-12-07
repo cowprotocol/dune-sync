@@ -50,7 +50,7 @@ class TestIPFS(unittest.TestCase):
             },
             Cid(
                 "3d876de8fcd70969349c92d731eeb0482fe8667ceca075592b8785081d630b9a"
-            ).get_content(),
+            ).get_content(max_retries=10),
         )
 
         self.assertEqual(

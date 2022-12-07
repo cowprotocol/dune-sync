@@ -80,7 +80,9 @@ class Cid:
                                     f"Found previously missing content hash {app_hash} at CID {cid}"
                                 )
                             else:
-                                log.debug(f"Found content for {app_hash} at CID {cid}")
+                                log.debug(
+                                    f"Found content for {app_hash} at CID {cid} ({attempts + 1} trys)"
+                                )
                             found.append(
                                 FoundContent(
                                     app_hash=app_hash,
