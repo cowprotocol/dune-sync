@@ -55,6 +55,9 @@ class Cid:
                 return response.json()
             except requests.exceptions.ReadTimeout:
                 attempts += 1
+            except requests.exceptions.JSONDecodeError as err:
+                attempts += 1
+                log.warning(f"unexpected error {err} retrying...")
         return None
 
     @classmethod
@@ -93,6 +96,9 @@ class Cid:
                             )
                             break
                     except asyncio.TimeoutError:
+                        attempts += 1
+                    except Exception as err:
+                        log.error(f"unexpected error {err} -- requires investigation, retrying anyway")
                         attempts += 1
 
                 if not content:

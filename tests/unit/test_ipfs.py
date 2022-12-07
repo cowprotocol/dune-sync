@@ -34,7 +34,7 @@ class TestIPFS(unittest.TestCase):
             "0000000000000000000000000000000000000000000000000000000000000000"
         )
 
-        self.assertEqual(None, null_cid.get_content())
+        self.assertEqual(None, null_cid.get_content(max_retries=10))
 
     def test_get_content(self):
         self.assertEqual(
