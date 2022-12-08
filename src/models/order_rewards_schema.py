@@ -12,6 +12,7 @@ class OrderRewards:
     """
     This class provides a transformation interface for the Dataframe we fetch from the orderbook
     """
+
     @classmethod
     def from_pdf_to_dune_records(cls, rewards_df: DataFrame) -> list[dict[str, Any]]:
         """Converts Pandas DataFrame into the expected stream type for Dune"""
