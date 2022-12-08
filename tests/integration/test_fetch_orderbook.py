@@ -33,6 +33,7 @@ class MyTestCase(unittest.TestCase):
                     "0xb6f7df8a1114129f7b61f2863b3f81b3620e95f73e5b769a62bb7a87ab6983f4",
                     "0x2ce77009e78c291cdf39eb6f8ddf7e2c3401b4f962ef1240bdac47e632f8eb7f",
                 ],
+                "surplus_fee": [None, None],
                 "amount": [40.70410, 39.00522],
                 "safe_liquidity": [None, None],
             }
