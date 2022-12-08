@@ -1,12 +1,12 @@
 """Main Entry point for app_hash sync"""
-import csv
-import os.path
 
+from dune_client.file.interface import FileIO
 from pandas import DataFrame
 
 from src.fetch.orderbook import OrderbookFetcher
 from src.logger import set_log
 from src.models.block_range import BlockRange
+from src.models.order_rewards_schema import OrderRewards
 from src.models.tables import SyncTable
 from src.post.aws import AWSClient
 from src.sync.common import last_sync_block
@@ -26,37 +26,31 @@ class OrderbookDataHandler(RecordHandler):  # pylint:disable=too-few-public-meth
     """
 
     def __init__(
-        self, block_range: BlockRange, config: SyncConfig, order_rewards: DataFrame
+        self,
+        file_manager: FileIO,
+        block_range: BlockRange,
+        config: SyncConfig,
+        order_rewards: DataFrame,
     ):
         super().__init__(block_range, SYNC_TABLE, config)
         log.info(f"Handling {len(order_rewards)} new records")
-        self.order_rewards = order_rewards
+        self.file_manager = file_manager
+        self.order_rewards = OrderRewards.from_pdf_to_dune_records(order_rewards)
 
     def num_records(self) -> int:
         return len(self.order_rewards)
 
     def write_found_content(self) -> None:
-        path = self.file_path
-        if not os.path.exists(path):
-            log.info(f"creating write path {path}")
-            os.makedirs(path)
-
-        self.order_rewards.to_json(
-            os.path.join(self.file_path, self.content_filename),
-            orient="records",
-            lines=True,
+        self.file_manager.write_ndjson(
+            data=self.order_rewards, name=self.content_filename
         )
 
     def write_sync_data(self) -> None:
         # Only write these if upload was successful.
-        config = self.config
-        column = config.sync_column
-        with open(
-            os.path.join(self.file_path, config.sync_file), "w", encoding="utf-8"
-        ) as sync_file:
-            writer = csv.DictWriter(sync_file, fieldnames=[column], lineterminator="\n")
-            writer.writeheader()
-            writer.writerows([{column: str(self.block_range.block_to)}])
+        self.file_manager.write_csv(
+            data=[{self.config.sync_column: str(self.block_range.block_to)}],
+            name=self.config.sync_file,
+        )
 
 
 def sync_order_rewards(
@@ -73,7 +67,10 @@ def sync_order_rewards(
         block_to=fetcher.get_latest_block(),
     )
     record_handler = OrderbookDataHandler(
-        block_range, config, order_rewards=fetcher.get_orderbook_rewards(block_range)
+        file_manager=FileIO(config.volume_path / str(SYNC_TABLE)),
+        block_range=block_range,
+        config=config,
+        order_rewards=fetcher.get_orderbook_rewards(block_range),
     )
     UploadHandler(aws, record_handler, table=SYNC_TABLE).write_and_upload_content(
         dry_run
