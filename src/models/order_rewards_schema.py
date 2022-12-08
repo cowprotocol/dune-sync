@@ -47,10 +47,7 @@ class OrderRewards:
 
     @classmethod
     def from_pdf_to_dune_records(cls, rewards_df: DataFrame) -> list[dict[str, Any]]:
-        """
-        The above two methods require two iterations of the entire record set
-        while this one combines both and requires only one.
-        """
+        """Converts Pandas DataFrame into the expected stream type for Dune"""
         return [
             {
                 "order_uid": row["order_uid"],
