@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 from pandas import DataFrame
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
-from sqlalchemy.exc import ProgrammingError
 
 from src.models.block_range import BlockRange
 from src.utils import open_query
@@ -45,21 +44,10 @@ class OrderbookFetcher:
         db_string = f"postgresql+psycopg2://{db_url}"
         return create_engine(db_string)
 
-    @staticmethod
-    def _exec_query(query: str, engine: Engine) -> DataFrame:
-        try:
-            return pd.read_sql(
-                sql=query.replace("{{reward_table}}", "order_execution"), con=engine
-            )
-        except ProgrammingError:
-            return pd.read_sql(
-                sql=query.replace("{{reward_table}}", "order_rewards"), con=engine
-            )
-
     @classmethod
     def _query_both_dbs(cls, query: str) -> tuple[DataFrame, DataFrame]:
-        barn = cls._exec_query(query, engine=cls._pg_engine(OrderbookEnv.BARN))
-        prod = cls._exec_query(query, engine=cls._pg_engine(OrderbookEnv.PROD))
+        barn = pd.read_sql(query, con=cls._pg_engine(OrderbookEnv.BARN))
+        prod = pd.read_sql(query, con=cls._pg_engine(OrderbookEnv.PROD))
         return barn, prod
 
     @classmethod
