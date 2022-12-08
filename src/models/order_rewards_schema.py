@@ -28,9 +28,6 @@ class OrderRewards:
                 tx_hash=row["tx_hash"],
                 solver=row["solver"],
                 data={
-                    # This seems like a hack. I need to experiment with Decimal type
-                    # CAST("18446744073709001111111111" AS DECIMAL(38,0));
-                    # but this can be done on the spellbook side.
                     "surplus_fee": str(row["surplus_fee"]),
                     "amount": float(row["amount"]),
                     "safe_liquidity": row["safe_liquidity"],
