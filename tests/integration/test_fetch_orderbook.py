@@ -34,7 +34,6 @@ class MyTestCase(unittest.TestCase):
                 ],
                 "surplus_fee": ["0", "0"],
                 "amount": [40.70410, 39.00522],
-                "safe_liquidity": [None, None],
             }
         )
 
