@@ -61,7 +61,7 @@ class Cid:
         return None
 
     @classmethod
-    async def fetch_many(
+    async def fetch_many(  # pylint: disable=too-many-locals
         cls, missing_rows: list[dict[str, str]], max_retries: int = 3
     ) -> tuple[list[FoundContent], list[NotFoundContent]]:
         """Async AppData Fetching"""
@@ -100,7 +100,6 @@ class Cid:
                     except aiohttp.ContentTypeError as err:
                         log.warning(f"failed to parse response {response} with {err}")
                         attempts += 1
-
 
                 if not content:
                     total_attempts = previous_attempts + max_retries
