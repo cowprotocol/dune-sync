@@ -14,7 +14,6 @@ class TestModelOrderRewards(unittest.TestCase):
                 "tx_hash": ["0x71", "0x72", "0x73"],
                 "surplus_fee": [12345678910111213, 0, 0],
                 "amount": [40.70410, 39.00522, 0],
-                "safe_liquidity": [None, True, False],
             }
         )
 
@@ -27,7 +26,6 @@ class TestModelOrderRewards(unittest.TestCase):
                     "data": {
                         "surplus_fee": "12345678910111213",
                         "amount": 40.70410,
-                        "safe_liquidity": None,
                     },
                 },
                 {
@@ -37,7 +35,6 @@ class TestModelOrderRewards(unittest.TestCase):
                     "data": {
                         "surplus_fee": "0",
                         "amount": 39.00522,
-                        "safe_liquidity": True,
                     },
                 },
                 {
@@ -47,7 +44,6 @@ class TestModelOrderRewards(unittest.TestCase):
                     "data": {
                         "surplus_fee": "0",
                         "amount": 0.0,
-                        "safe_liquidity": False,
                     },
                 },
             ],

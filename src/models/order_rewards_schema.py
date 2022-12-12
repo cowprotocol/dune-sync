@@ -24,7 +24,6 @@ class OrderRewards:
                 "data": {
                     "surplus_fee": str(row["surplus_fee"]),
                     "amount": float(row["amount"]),
-                    "safe_liquidity": row["safe_liquidity"],
                 },
             }
             for row in rewards_df.to_dict(orient="records")
