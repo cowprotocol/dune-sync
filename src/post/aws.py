@@ -37,7 +37,8 @@ class BucketFileObject:
         Decompose the unique identifier `object_key` into
         more meaningful parts from which it can be reconstructed
         """
-        path, name = object_key.split("/")
+        path_struct = object_key.split("/")
+        path, name = path_struct[0], path_struct[1]
 
         try:
             block = int(name.strip("cow_").strip(".json"))
@@ -76,7 +77,9 @@ class BucketStructure:
         )
         for bucket_obj in bucket_objects:
             object_key = bucket_obj.key
-            path, _ = object_key.split("/")
+            path_struct = object_key.split("/")
+            path = path_struct[0]
+
             grouped_files[path].append(BucketFileObject.from_key(object_key))
             if path not in SyncTable.supported_tables():
                 # Catches any unrecognized filepath.
