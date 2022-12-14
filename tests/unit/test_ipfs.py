@@ -23,6 +23,22 @@ class TestIPFS(unittest.TestCase):
             ),
         )
 
+    def test_specific_app_hash(self):
+        app_hash = "0xf38f906477cc6e6cf7ec1a6f4648e14ef49453b4834db300fbca2014140aa3cb"
+        self.assertEqual(
+            Cid(app_hash).get_content(),
+            {
+                "appCode": "CowSwap",
+                "metadata": {
+                    "referrer": {
+                        "address": "0x8540F80Fab2AFCAe8d8FD6b1557B1Cf943A0999b",
+                        "version": "0.1.0",
+                    }
+                },
+                "version": "0.1.0",
+            },
+        )
+
     def test_cid_constructor(self):
         # works with or without 0x prefix:
         hex_str = "0x3d876de8fcd70969349c92d731eeb0482fe8667ceca075592b8785081d630b9a"
