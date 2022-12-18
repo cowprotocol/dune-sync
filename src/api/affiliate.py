@@ -5,12 +5,12 @@ from typing import Any
 from dotenv import load_dotenv
 from flask import Flask, jsonify
 
-from src.fetch.dune_cached import CachedDuneFetcher
+from src.fetch.affiliate_data import CachingAffiliateFetcher
 from src.logger import set_log
 
 app = Flask(__name__)
 load_dotenv()
-cached_fetcher = CachedDuneFetcher(
+cached_fetcher = CachingAffiliateFetcher(
     api_key=os.environ["DUNE_API_KEY"],
     execution_id=os.environ.get("LAST_EXECUTION_ID"),
     cache_validity=int(os.environ["CACHE_VALIDITY"]),

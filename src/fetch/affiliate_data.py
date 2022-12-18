@@ -58,7 +58,7 @@ class AffiliateMemory:
     last_execution: str
 
 
-class CachedDuneFetcher:
+class CachingAffiliateFetcher:
     """
     Class containing, DuneClient, FileIO and a logger for convenient Dune Fetching.
     """
