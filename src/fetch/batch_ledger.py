@@ -51,11 +51,6 @@ def get_competition_data(tx_hash: str) -> InteractionData:
 
     Orderbook API:
     https://api.cow.fi/mainnet/api/v1/solver_competition/by_tx_hash/{tx_hash}
-
-    simulation_block = d["competitionSimulationBlock"]
-    winning_solution = x["solutions"][-1]
-    uninternalized_call_data = winning_solution["uninternalizedCallData"]
-    call_data = winning_solution["callData"]
     """
     print(f"Fetching competition data for transaction {tx_hash}")
     data = requests.get(

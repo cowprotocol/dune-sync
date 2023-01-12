@@ -29,7 +29,7 @@ class SimulationData:
         transaction = simulation["transaction"]
         return cls(
             logs=[
-                SimulationLog.from_dict(log)
+                SimulationLog.from_dict(log["raw"])
                 for log in transaction["transaction_info"]["logs"]
             ],
             block_number=transaction["block_number"],
