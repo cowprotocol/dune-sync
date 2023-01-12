@@ -3,8 +3,11 @@ import argparse
 import logging
 from pathlib import Path
 
+from web3 import Web3
+
 PROJECT_ROOT = Path(__file__).parent.parent
 QUERY_PATH = PROJECT_ROOT / Path("src/sql")
+ABI_PATH = Path(__file__).parent.parent / Path("src/abis")
 
 
 def parse_log_level() -> str:
@@ -20,3 +23,6 @@ def parse_log_level() -> str:
 
 
 LOG_LEVEL = parse_log_level()
+SETTLEMENT_CONTRACT_ADDRESS = Web3.toChecksumAddress(
+    "0x9008d19f58aabd9ed0d60971565aa8510560ab41"
+)
