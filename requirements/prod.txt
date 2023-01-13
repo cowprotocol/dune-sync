@@ -11,3 +11,6 @@ SQLAlchemy>=1.4.44
 # For Python 3.11 support. Waiting for official release.
 # https://pypi.org/project/web3/#history
 web3==6.0.0b9
+# Python 3.11 seems to need this explicitly delcared for some reason now.
+ipfshttpclient==0.8.0a2
+
