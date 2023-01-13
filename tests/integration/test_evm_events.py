@@ -10,7 +10,7 @@ from src.fetch.evm.events import get_tx_receipt, TransferEvent, TradeEvent, Even
 
 class TestEvmEventFetching(unittest.TestCase):
     def setUp(self) -> None:
-        self.evm_address = Web3.toChecksumAddress("0x" + "1" * 40)
+        self.evm_address = Web3.to_checksum_address("0x" + "1" * 40)
         self.tx_hash = (
             "0x26f01695c0983ea19915053f0eb62af633431d039beef94bd3f5b37ed9521627"
         )

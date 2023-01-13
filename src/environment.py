@@ -23,6 +23,6 @@ def parse_log_level() -> str:
 
 
 LOG_LEVEL = parse_log_level()
-SETTLEMENT_CONTRACT_ADDRESS = Web3.toChecksumAddress(
+SETTLEMENT_CONTRACT_ADDRESS = Web3.to_checksum_address(
     "0x9008d19f58aabd9ed0d60971565aa8510560ab41"
 )

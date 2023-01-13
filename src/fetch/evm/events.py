@@ -4,10 +4,12 @@ Event data classes, and methods for fetching and parsing from EVM.
 from __future__ import annotations
 
 import os
+import warnings
 from dataclasses import dataclass
 from enum import Enum
 
 from dotenv import load_dotenv
+from eth_typing import HexStr
 from web3 import Web3, HTTPProvider
 from web3.types import TxReceipt, EventData
 
@@ -53,11 +55,11 @@ def integer_from_hex_data(hex_data: str) -> int:
     return int(hex_data, 16)
 
 
-def get_tx_receipt(tx_hash: str) -> TxReceipt:
+def get_tx_receipt(tx_hash: HexStr) -> TxReceipt:
     """
     Fetches Transaction Receipt for `tx_hash` from EVM via eth_rpc call.
     """
-    receipt = WEB3.eth.getTransactionReceipt(tx_hash)
+    receipt = WEB3.eth.get_transaction_receipt(tx_hash)
     return receipt
 
 
@@ -76,7 +78,7 @@ class TransferType(Enum):
         cls,
         transfer: TransferEvent,
         users: set[str],
-        ref_account: str = SETTLEMENT_CONTRACT,
+        ref_account: str = SETTLEMENT_CONTRACT_ADDRESS,
     ) -> TransferType:
         """
         Compartmentalizes the logic of transfer type classification.
@@ -133,7 +135,8 @@ class TransferEvent:
         Multiple transfers can occur within a single transaction and this constructor
         parses the receipt logs, returning all the transfers.
         """
-        transfer_events = ERC20_CONTRACT.events.Transfer().processReceipt(receipt)
+        warnings.filterwarnings(action="ignore", category=UserWarning)
+        transfer_events = ERC20_CONTRACT.events.Transfer().process_receipt(receipt)
         return [
             cls(
                 token=event.address,
@@ -197,7 +200,8 @@ class TradeEvent:  # pylint: disable=too-many-instance-attributes
         Multiple Trades can occur within a single transaction.
         This constructor, parses the receipt logs, returning all the transfers.
         """
-        trade_events = SETTLEMENT_CONTRACT.events.Trade().processReceipt(receipt)
+        warnings.filterwarnings(action="ignore", category=UserWarning)
+        trade_events = SETTLEMENT_CONTRACT.events.Trade().process_receipt(receipt)
         return [
             cls(
                 buy_token=event.args.buyToken,
