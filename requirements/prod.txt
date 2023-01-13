@@ -8,3 +8,6 @@ py-multiformats-cid>=0.4.4
 boto3>=1.26.12
 SQLAlchemy>=1.4.44
 web3==5.31.3
+# For Python 3.11 support. Waiting for official release.
+# https://pypi.org/project/web3/#history
+# web3==6.0.0b9
