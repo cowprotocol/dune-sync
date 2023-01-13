@@ -41,16 +41,15 @@ def address_from_topic(topic: str) -> str:
     E.g. 0x0000000000000000000000009008d19f58aabd9ed0d60971565aa8510560ab41
     """
     assert topic[:-40] == "0x000000000000000000000000"
-    return "0x" + topic[1][-40:]
+    return "0x" + topic[-40:]
 
 
 def integer_from_hex_data(hex_data: str) -> int:
     """
     Utility method to strip empty bytes from hex string
     which is known to represent an integer.
-    E.g.
+    E.g. 0x000000000000000000000000000000000000000000000000000000000000000f --> 15
     """
-    print(hex_data)
     hex_data.replace("0x", "")
     return int(hex_data, 16)
 
