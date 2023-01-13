@@ -12,5 +12,6 @@ SQLAlchemy>=1.4.44
 # https://pypi.org/project/web3/#history
 web3==6.0.0b9
 # Python 3.11 seems to need this explicitly delcared for some reason now.
+# Reported in https://github.com/ethereum/web3.py/pull/2699#issuecomment-1381641813
 ipfshttpclient==0.8.0a2
 
