@@ -1,3 +1,6 @@
+"""
+Elementary components and interfaces for performing Tenderly Transaction Simulations
+"""
 import os
 from typing import Optional, Any
 
@@ -16,6 +19,17 @@ SIMULATE_URL = (
 def simulate_transaction(
     contract_address: str, sender: str, call_data: str, block_number: Optional[int]
 ) -> Any:
+    """
+    Makes a Tenderly Transaction Simulation request
+    via their API on `block_number` with transaction data:
+        {
+            "to": contract_address,
+            "from": sender,
+            "data": call_data
+            "value": 0,
+        }
+    Returns "untyped" simulation results.
+    """
     response = requests.post(
         url=SIMULATE_URL,
         json={
@@ -36,5 +50,6 @@ def simulate_transaction(
         headers={
             "X-Access-Key": os.environ["TENDERLY_ACCESS_KEY"],
         },
+        timeout=3,
     )
     return response.json()
