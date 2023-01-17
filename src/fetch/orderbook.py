@@ -45,9 +45,16 @@ class OrderbookFetcher:
         return create_engine(db_string)
 
     @classmethod
+    def _read_query_for_env(
+        cls, query: str, env: OrderbookEnv, data_types: dict[str, str]
+    ) -> DataFrame:
+        return pd.read_sql_query(query, con=cls._pg_engine(env), dtype=data_types)  # type: ignore
+
+    @classmethod
     def _query_both_dbs(cls, query: str) -> tuple[DataFrame, DataFrame]:
-        barn = pd.read_sql(query, con=cls._pg_engine(OrderbookEnv.BARN))
-        prod = pd.read_sql(query, con=cls._pg_engine(OrderbookEnv.PROD))
+        data_types = {"block_number": "int64", "amount": "float64"}
+        barn = cls._read_query_for_env(query, OrderbookEnv.BARN, data_types)
+        prod = cls._read_query_for_env(query, OrderbookEnv.PROD, data_types)
         return barn, prod
 
     @classmethod
