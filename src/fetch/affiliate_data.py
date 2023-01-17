@@ -55,7 +55,7 @@ class AffiliateMemory:
 
     data: dict[str, AffiliateData]
     last_update: datetime
-    last_execution: str
+    last_execution_id: str
 
 
 class CachingAffiliateFetcher:
@@ -64,7 +64,7 @@ class CachingAffiliateFetcher:
     """
 
     def __init__(
-        self, api_key: str, execution_id: Optional[str], cache_validity: int = 30
+        self, dune: DuneClient, execution_id: Optional[str], cache_validity: float = 30
     ) -> None:
         """
         Class constructor.
@@ -73,7 +73,7 @@ class CachingAffiliateFetcher:
         - `execution_id` can be used to avoid initial fetching if known
         """
         log.info("loading affiliate data cache")
-        self.dune = DuneClient(api_key)
+        self.dune = dune
         self.memory: AffiliateMemory = self._fetch_affiliates(execution_id)
         self.cache_validity = timedelta(minutes=cache_validity)
         log.info("affiliate data cache loaded")
@@ -83,12 +83,15 @@ class CachingAffiliateFetcher:
         if execution_id:
             results = self.dune.get_result(execution_id)
         else:
+            # https://dune.com/queries/1757231?d=1
+            # Query executes in ~24 seconds.
             results = self.dune.refresh(Query(AFFILIATE_QUERY_ID), ping_frequency=10)
+            log.info(f"query execution {results.execution_id} succeeded")
 
         last_update = results.times.execution_ended_at or utc_now()
         return AffiliateMemory(
             last_update=last_update,
-            last_execution=results.execution_id,
+            last_execution_id=results.execution_id,
             data={
                 row["trader"]: AffiliateData.from_dict(row, last_update=last_update)
                 for row in results.get_rows()
