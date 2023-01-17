@@ -6,7 +6,7 @@ from src.fetch.orderbook import OrderbookFetcher
 from src.models.block_range import BlockRange
 
 
-class MyTestCase(unittest.TestCase):
+class TestFetchOrderbook(unittest.TestCase):
     def test_latest_block_reasonable(self):
         self.assertGreater(OrderbookFetcher.get_latest_block(), 16020300)
 
