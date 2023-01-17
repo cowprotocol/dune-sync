@@ -50,16 +50,8 @@ class OrderbookFetcher:
         cls, query: str, env: OrderbookEnv, data_types: Optional[dict[str, str]] = None
     ) -> DataFrame:
         # It seems there is a bug in mypy on the dtype field (with error [arg-type]).
-        # They expect types that I believe match what we pass,
-        # but also don't provide a public interface to import their types
-        # Also using numpy types like `np.int64` doesn't work either.
-        # error: Argument "dtype" to "read_sql_query" has incompatible type "Dict[str, str]";
-        # expected "Optional[Union[Union[ExtensionDtype, Union[str, dtype[generic], Type[str],
-        # Type[complex], Type[bool], Type[object]]], Dict[Any, Union[ExtensionDtype,
-        # Union[str, dtype[generic], Type[str], Type[complex], Type[bool], Type[object]]]]]]"
-        # ---
-        # When attempting to import expected type declarations,
-        # like DType, we are faces with private interface pandas._typing
+        # They expect types that should align with what we pass.
+        # More context at: https://github.com/cowprotocol/dune-sync/issues/24
         return pd.read_sql_query(query, con=cls._pg_engine(env), dtype=data_types)  # type: ignore
 
     @classmethod
