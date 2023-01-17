@@ -3,6 +3,7 @@ import os
 from typing import Any
 
 from dotenv import load_dotenv
+from dune_client.client import DuneClient
 from flask import Flask, jsonify
 
 from src.fetch.affiliate_data import CachingAffiliateFetcher
@@ -11,7 +12,7 @@ from src.logger import set_log
 app = Flask(__name__)
 load_dotenv()
 cached_fetcher = CachingAffiliateFetcher(
-    api_key=os.environ["DUNE_API_KEY"],
+    dune=DuneClient(os.environ["DUNE_API_KEY"]),
     execution_id=os.environ.get("LAST_EXECUTION_ID"),
     cache_validity=int(os.environ["CACHE_VALIDITY"]),
 )
