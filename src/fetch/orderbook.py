@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -45,9 +46,20 @@ class OrderbookFetcher:
         return create_engine(db_string)
 
     @classmethod
-    def _query_both_dbs(cls, query: str) -> tuple[DataFrame, DataFrame]:
-        barn = pd.read_sql(query, con=cls._pg_engine(OrderbookEnv.BARN))
-        prod = pd.read_sql(query, con=cls._pg_engine(OrderbookEnv.PROD))
+    def _read_query_for_env(
+        cls, query: str, env: OrderbookEnv, data_types: Optional[dict[str, str]] = None
+    ) -> DataFrame:
+        # It seems there is a bug in mypy on the dtype field (with error [arg-type]).
+        # They expect types that should align with what we pass.
+        # More context at: https://github.com/cowprotocol/dune-sync/issues/24
+        return pd.read_sql_query(query, con=cls._pg_engine(env), dtype=data_types)  # type: ignore
+
+    @classmethod
+    def _query_both_dbs(
+        cls, query: str, data_types: Optional[dict[str, str]] = None
+    ) -> tuple[DataFrame, DataFrame]:
+        barn = cls._read_query_for_env(query, OrderbookEnv.BARN, data_types)
+        prod = cls._read_query_for_env(query, OrderbookEnv.PROD, data_types)
         return barn, prod
 
     @classmethod
@@ -55,7 +67,10 @@ class OrderbookFetcher:
         """
         Fetches the latest mutually synced block from orderbook databases (with REORG protection)
         """
-        barn, prod = cls._query_both_dbs(open_query("orderbook/latest_block.sql"))
+        data_types = {"latest": "int64"}
+        barn, prod = cls._query_both_dbs(
+            open_query("orderbook/latest_block.sql"), data_types
+        )
         assert len(barn) == 1 == len(prod), "Expecting single record"
         return min(int(barn["latest"][0]), int(prod["latest"][0])) - REORG_THRESHOLD
 
@@ -69,7 +84,8 @@ class OrderbookFetcher:
             .replace("{{start_block}}", str(block_range.block_from))
             .replace("{{end_block}}", str(block_range.block_to))
         )
-        barn, prod = cls._query_both_dbs(cow_reward_query)
+        data_types = {"block_number": "int64", "amount": "float64"}
+        barn, prod = cls._query_both_dbs(cow_reward_query, data_types)
 
         # Solvers do not appear in both environments!
         assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
