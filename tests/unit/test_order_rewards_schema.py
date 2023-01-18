@@ -9,6 +9,7 @@ class TestModelOrderRewards(unittest.TestCase):
     def test_order_rewards_transformation(self):
         rewards_df = pd.DataFrame(
             {
+                "block_number": [1, 2, 3],
                 "order_uid": ["0x01", "0x02", "0x03"],
                 "solver": ["0x51", "0x52", "0x53"],
                 "tx_hash": ["0x71", "0x72", "0x73"],
@@ -20,6 +21,7 @@ class TestModelOrderRewards(unittest.TestCase):
         self.assertEqual(
             [
                 {
+                    "block_number": 1,
                     "order_uid": "0x01",
                     "solver": "0x51",
                     "tx_hash": "0x71",
@@ -29,6 +31,7 @@ class TestModelOrderRewards(unittest.TestCase):
                     },
                 },
                 {
+                    "block_number": 2,
                     "order_uid": "0x02",
                     "solver": "0x52",
                     "tx_hash": "0x72",
@@ -38,6 +41,7 @@ class TestModelOrderRewards(unittest.TestCase):
                     },
                 },
                 {
+                    "block_number": 3,
                     "order_uid": "0x03",
                     "solver": "0x53",
                     "tx_hash": "0x73",

@@ -1,4 +1,5 @@
 with trade_hashes as (SELECT solver,
+                             block_number,
                              order_uid,
                              fee_amount,
                              settlement.tx_hash,
@@ -20,7 +21,8 @@ with trade_hashes as (SELECT solver,
                       where block_number > {{start_block}} and block_number <= {{end_block}})
 
 -- Most efficient column order for sorting would be having tx_hash or order_uid first
-select concat('0x', encode(trade_hashes.order_uid, 'hex')) as order_uid,
+select block_number,
+       concat('0x', encode(trade_hashes.order_uid, 'hex')) as order_uid,
        concat('0x', encode(solver, 'hex'))  as solver,
        concat('0x', encode(tx_hash, 'hex')) as tx_hash,
        coalesce(surplus_fee, 0)::text       as surplus_fee,

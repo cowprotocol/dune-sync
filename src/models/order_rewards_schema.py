@@ -18,6 +18,7 @@ class OrderRewards:
         """Converts Pandas DataFrame into the expected stream type for Dune"""
         return [
             {
+                "block_number": int(row["block_number"]),
                 "order_uid": row["order_uid"],
                 "tx_hash": row["tx_hash"],
                 "solver": row["solver"],
