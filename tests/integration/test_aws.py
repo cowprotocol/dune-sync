@@ -66,6 +66,14 @@ class TestAWSConnection(unittest.TestCase):
         # File was downloaded!
         self.assertTrue(exists(self.empty_file))
 
+    def test_download_specific_file(self):
+        success = self.aws_client.download_file(
+            filename="cow_16434617.json",
+            object_key="order_rewards/cow_16434617.json",
+        )
+        self.assertTrue(success)
+        # File was downloaded!
+
     def test_delete_file(self):
         self.create_upload_remove()
         success = self.aws_client.delete_file(object_key=self.key)
