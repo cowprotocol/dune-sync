@@ -7,6 +7,9 @@ from typing import Optional, Any
 import requests
 from dotenv import load_dotenv
 
+from src.environment import SETTLEMENT_CONTRACT_ADDRESS
+from src.models.tenderly import SimulationData
+
 load_dotenv()
 TENDERLY_USER = os.environ["TENDERLY_USER"]
 TENDERLY_PROJECT = os.environ["TENDERLY_PROJECT"]
@@ -53,3 +56,22 @@ def simulate_transaction(
         timeout=3,
     )
     return response.json()
+
+
+def simulate_settlement(
+    sender: str, call_data: str, block_number: Optional[int]
+) -> SimulationData:
+    """
+    Given `call_data`, uses Tenderly API to simulate a settlement call on `block_number`.
+    Returning sufficiently relevant parts of the simulation to build Settlement Transfers
+    """
+    simulation_dict = simulate_transaction(
+        contract_address=SETTLEMENT_CONTRACT_ADDRESS,
+        sender=sender,
+        call_data=call_data,
+        block_number=block_number,
+    )
+    # Test simulation here: http://jsonblob.com/1063126730742710272
+    # print("Simulation Success", json.dumps(simulation_dict))
+
+    return SimulationData.from_dict(simulation_dict)
