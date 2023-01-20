@@ -88,7 +88,13 @@ class CachingAffiliateFetcher:
             results = self.dune.refresh(Query(AFFILIATE_QUERY_ID), ping_frequency=10)
             log.info(f"query execution {results.execution_id} succeeded")
 
-        last_update = results.times.execution_ended_at or utc_now()
+        if not results.times.execution_ended_at:
+            # This should not happen for successful query executions.
+            log.warning(f"Missing execution time on result (using utc_now): {results}")
+            last_update = utc_now()
+        else:
+            last_update = results.times.execution_ended_at
+
         return AffiliateMemory(
             last_update=last_update,
             last_execution_id=results.execution_id,
@@ -117,7 +123,9 @@ class CachingAffiliateFetcher:
         refreshes memory before return.
         """
         if not valid_address(account):
-            log.warning(f"Invalid address received {account}")
+            message = f"Invalid address: {account}"
+            log.warning(message)
+            raise ValueError(message)
 
         if self.cache_expired():
             log.debug("cache expired - refreshing results")
