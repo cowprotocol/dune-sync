@@ -17,7 +17,6 @@ class TestSettlementTransfer(unittest.TestCase):
         )
 
     def test_get_settlement_transfers(self):
-
         settlement_transfers = SettlementTransfer.from_events(
             trades=[
                 TradeEvent(
