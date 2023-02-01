@@ -20,7 +20,11 @@ SIMULATE_URL = (
 
 
 def simulate_transaction(
-    contract_address: str, sender: str, call_data: str, block_number: Optional[int]
+    contract_address: str,
+    sender: str,
+    call_data: str,
+    block_number: Optional[int],
+    save: bool = False,
 ) -> Any:
     """
     Makes a Tenderly Transaction Simulation request
@@ -46,8 +50,8 @@ def simulate_transaction(
             "gas_price": "0",
             "value": 0,
             # // simulation config (tenderly specific)
-            "save_if_fails": False,
-            "save": False,
+            "save_if_fails": save,
+            "save": save,
             "simulation_type": "quick",
         },
         headers={
@@ -59,17 +63,22 @@ def simulate_transaction(
 
 
 def simulate_settlement(
-    sender: str, call_data: str, block_number: Optional[int]
+    sender: str,
+    call_data: str,
+    block_number: Optional[int],
+    save_simulation: bool = False,
 ) -> SimulationData:
     """
     Given `call_data`, uses Tenderly API to simulate a settlement call on `block_number`.
     Returning sufficiently relevant parts of the simulation to build Settlement Transfers
     """
+    # print("Exec Simulation on block", block_number)
     simulation_dict = simulate_transaction(
         contract_address=SETTLEMENT_CONTRACT_ADDRESS,
         sender=sender,
         call_data=call_data,
         block_number=block_number,
+        save=save_simulation,
     )
     # Test simulation here: http://jsonblob.com/1063126730742710272
     # print("Simulation Success", json.dumps(simulation_dict))

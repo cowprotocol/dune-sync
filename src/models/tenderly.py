@@ -50,7 +50,7 @@ class SimulationData:
         return cls(
             logs=[
                 SimulationLog.from_dict(log["raw"])
-                for log in transaction["transaction_info"]["logs"]
+                for log in transaction["transaction_info"]["logs"] or []
             ],
             block_number=transaction["block_number"],
             tx_hash=transaction["hash"],

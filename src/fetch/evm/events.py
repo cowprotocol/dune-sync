@@ -77,7 +77,7 @@ class TransferType(Enum):
         cls,
         transfer: TransferEvent,
         users: set[str],
-        ref_account: str = SETTLEMENT_CONTRACT_ADDRESS,
+        ref_account: str = str(SETTLEMENT_CONTRACT_ADDRESS).lower(),
     ) -> TransferType:
         """
         Compartmentalizes the logic of transfer type classification.
@@ -138,10 +138,10 @@ class TransferEvent:
         transfer_events = ERC20_CONTRACT.events.Transfer().process_receipt(receipt)
         return [
             cls(
-                token=event.address,
+                token=event.address.lower(),
                 wad=event.args.wad,
-                src=event.args.src,
-                dst=event.args.dst,
+                src=event.args.src.lower(),
+                dst=event.args.dst.lower(),
                 meta=EventMeta.from_event(event),
             )
             for event in transfer_events
@@ -175,6 +175,13 @@ class TransferEvent:
                     )
                 )
         return transfers
+
+    def involves_address(self, address: str) -> bool:
+        """
+        Utility for determining if transfer
+        involves a given address as sender or receiver
+        """
+        return address.lower() in {self.src.lower(), self.dst.lower()}
 
 
 @dataclass
