@@ -1,0 +1,235 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "target",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes4",
+        "name": "selector",
+        "type": "bytes4"
+      }
+    ],
+    "name": "Interaction",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "orderUid",
+        "type": "bytes"
+      }
+    ],
+    "name": "OrderInvalidated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "orderUid",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "signed",
+        "type": "bool"
+      }
+    ],
+    "name": "PreSignature",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "solver",
+        "type": "address"
+      }
+    ],
+    "name": "Settlement",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "contract IERC20",
+        "name": "sellToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "contract IERC20",
+        "name": "buyToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "sellAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "buyAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "feeAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "orderUid",
+        "type": "bytes"
+      }
+    ],
+    "name": "Trade",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract IERC20[]",
+        "name": "tokens",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "clearingPrices",
+        "type": "uint256[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "sellTokenIndex",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "buyTokenIndex",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "receiver",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sellAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "buyAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint32",
+            "name": "validTo",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "appData",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "feeAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "flags",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "executedAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "signature",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct GPv2Trade.Data[]",
+        "name": "trades",
+        "type": "tuple[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "callData",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct GPv2Interaction.Data[][3]",
+        "name": "interactions",
+        "type": "tuple[][3]"
+      }
+    ],
+    "name": "settle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

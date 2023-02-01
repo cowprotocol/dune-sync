@@ -33,6 +33,9 @@ check:
 test:
 	python -m pytest tests
 
+test-unit:
+	python -m pytest tests/unit
+
 run:
 	python -m src.main
 
