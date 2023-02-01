@@ -25,13 +25,6 @@ def internal_transfers(
 
     interaction_data = get_competition_data(tx_hash)
 
-    optimized_simulation = simulate_settlement(
-        block_number=interaction_data.simulation_block,
-        call_data=interaction_data.call_data,
-        sender=solver_address,
-        save_simulation=save_simulation,
-    )
-
     full_simulation = simulate_settlement(
         block_number=interaction_data.simulation_block,
         call_data=interaction_data.uninternalized_call_data,
@@ -42,19 +35,37 @@ def internal_transfers(
     full_transfers = SettlementTransfer.from_events(
         trades, transfers=TransferEvent.from_tenderly_simulation(full_simulation)
     )
+
+    # # May not need this AT ALL.
+    # optimized_simulation = simulate_settlement(
+    #     block_number=interaction_data.simulation_block,
+    #     call_data=interaction_data.call_data,
+    #     sender=solver_address,
+    #     save_simulation=save_simulation,
+    # )
+
+    # reduced_transfers = SettlementTransfer.from_events(
+    #     trades, transfers=TransferEvent.from_tenderly_simulation(optimized_simulation)
+    # )
+    # if not reduced_transfers:
+    #     print("Simulation failed using actual transfers")
+    #     reduced_transfers = SettlementTransfer.from_events(
+    #         trades,
+    #         transfers=[
+    #             t
+    #             for t in TransferEvent.from_tx_receipt(tx_receipt)
+    #             if t.involves_address(SETTLEMENT_CONTRACT_ADDRESS)
+    #         ],
+    #     )
     reduced_transfers = SettlementTransfer.from_events(
-        trades, transfers=TransferEvent.from_tenderly_simulation(optimized_simulation)
+        trades,
+        transfers=[
+            t
+            for t in TransferEvent.from_tx_receipt(tx_receipt)
+            if t.involves_address(SETTLEMENT_CONTRACT_ADDRESS)
+        ],
     )
-    if not reduced_transfers:
-        print("Simulation failed using actual transfers")
-        reduced_transfers = SettlementTransfer.from_events(
-            trades,
-            transfers=[
-                t
-                for t in TransferEvent.from_tx_receipt(tx_receipt)
-                if t.involves_address(SETTLEMENT_CONTRACT_ADDRESS)
-            ],
-        )
+
     if not full_transfers:
         raise BrokenPipeError("Can't run program without Full Simulation!")
 

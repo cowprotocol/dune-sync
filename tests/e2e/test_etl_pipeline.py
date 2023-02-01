@@ -21,7 +21,7 @@ class TestFullPipeline(unittest.TestCase):
         results = internal_transfers(tx_hash, self.file_manager)
 
         # Check that internalized imbalance "matches" (negatively)
-        # https://dune.com/queries/663231?TxHash={tx_hash}
+        # https://dune.com/queries/663231?TxHash=0xca0bbc3551a4e44c31a9fbd29f872f921548d33400e28debb07ffdc5c2d82370
         self.assertEqual(
             results,
             [
@@ -33,7 +33,7 @@ class TestFullPipeline(unittest.TestCase):
                     token="0xadb2437e6f65682b85f814fbc12fec0508a7b1d0", amount=0
                 ),
                 TokenImbalance(
-                    token="0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", amount=218470417
+                    token="0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", amount=231318775
                 ),
                 TokenImbalance(
                     token="0x6b175474e89094c44da98b954eedeac495271d0f",
