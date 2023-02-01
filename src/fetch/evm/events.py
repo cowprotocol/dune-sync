@@ -84,12 +84,14 @@ class TransferType(Enum):
         Compartmentalizes the logic of transfer type classification.
         For a given transfer and reference account
         """
-        assert ref_account in {transfer.src, transfer.dst}
-        if ref_account == transfer.src:
+        # Lowering Address all the time needs to be more uniform.
+        src, dst = transfer.src.lower(), transfer.dst.lower()
+        assert ref_account in {src, dst}
+        if ref_account == src:
             # Outgoing from ref_account
-            return cls.USER_OUT if transfer.dst in users else cls.AMM_OUT
+            return cls.USER_OUT if dst in users else cls.AMM_OUT
         # Incoming to ref_account
-        return cls.USER_IN if transfer.src in users else cls.AMM_IN
+        return cls.USER_IN if src in users else cls.AMM_IN
 
 
 @dataclass
