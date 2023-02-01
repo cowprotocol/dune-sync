@@ -22,7 +22,8 @@ SETTLEMENT_CONTRACT = Web3().eth.contract(
     address=SETTLEMENT_CONTRACT_ADDRESS, abi=load_contract_abi("gpv2_settlement")
 )
 NETWORK_STRING = os.environ.get("NETWORK", "mainnet")
-NODE_URL = f"https://{NETWORK_STRING}.infura.io/v3/{os.environ.get('INFURA_KEY', 'invalid_infura_key')}"
+INFURA_KEY = os.environ.get("INFURA_KEY", "invalid_infura_key")
+NODE_URL = f"https://{NETWORK_STRING}.infura.io/v3/{INFURA_KEY}"
 WEB3 = Web3(HTTPProvider(NODE_URL))
 ERC20_CONTRACT = Web3().eth.contract(abi=load_contract_abi("erc20"))
 
