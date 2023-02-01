@@ -6,7 +6,7 @@ pandas>=1.5.0
 ndjson>=0.3.1
 py-multiformats-cid>=0.4.4
 boto3>=1.26.12
-SQLAlchemy>=1.4.44
+SQLAlchemy<2.0
 # web3==5.31.3
 # For Python 3.11 support. Waiting for official release.
 # https://pypi.org/project/web3/#history
