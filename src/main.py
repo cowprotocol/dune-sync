@@ -3,7 +3,6 @@ import argparse
 import asyncio
 import logging.config
 import os
-import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -11,11 +10,11 @@ from dotenv import load_dotenv
 
 from src.fetch.dune import DuneFetcher
 from src.fetch.orderbook import OrderbookFetcher
+from src.models.tables import SyncTable
 from src.post.aws import AWSClient
 from src.sync import sync_app_data
 from src.sync.config import SyncConfig, AppDataSyncConfig
 from src.sync.order_rewards import sync_order_rewards
-from src.models.tables import SyncTable
 
 log = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -44,13 +43,6 @@ class ScriptArgs:
             help="Flag indicating whether script should not post files to AWS or not",
             default=False,
         )
-        parser.add_argument(
-            "--hard-reset",
-            type=bool,
-            help="Flag indicating whether the existing sync table data should "
-            "be deleted from the bucket and rebuilt from scratch",
-            default=False,
-        )
         arguments, _ = parser.parse_known_args()
         self.sync_table: SyncTable = arguments.sync_table
         self.dry_run: bool = arguments.dry_run
@@ -62,11 +54,6 @@ if __name__ == "__main__":
     volume_path = Path(os.environ["VOLUME_PATH"])
     args = ScriptArgs()
     aws = AWSClient.new_from_environment()
-    if args.hard_reset and not args.dry_run:
-        # Drop Data from AWS bucket
-        aws.delete_all(args.sync_table)
-        # drop backup data from volume path
-        shutil.rmtree(volume_path / str(args.sync_table))
 
     if args.sync_table == SyncTable.APP_DATA:
         asyncio.run(

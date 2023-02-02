@@ -237,9 +237,12 @@ class AWSClient:
 
     def delete_all(self, table: SyncTable | str) -> None:
         """Deletes all files within the supported tables directory"""
+        log.info(f"Emptying Bucket {table}")
         try:
             table_files = self.existing_files().get(table)
+            log.info(f"Found {len(table_files)} files to be removed.")
             for file_data in table_files:
+                log.info(f"Deleting file {file_data.object_key}")
                 self.delete_file(file_data.object_key)
         except KeyError as err:
             raise ValueError(
