@@ -66,4 +66,8 @@ class TokenImbalance:
         for transfer in transfers:
             amount = transfer.amount if transfer.incoming else -transfer.amount
             imbalance_dict[transfer.token] += amount
-        return [cls(token=key, amount=value) for key, value in imbalance_dict.items()]
+        return [
+            cls(token=key, amount=value)
+            for key, value in imbalance_dict.items()
+            if value != 0
+        ]

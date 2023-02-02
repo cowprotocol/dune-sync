@@ -27,7 +27,8 @@ def internal_transfers(
 
     full_simulation = simulate_settlement(
         block_number=interaction_data.simulation_block,
-        call_data=interaction_data.uninternalized_call_data,
+        call_data=interaction_data.uninternalized_call_data
+        or interaction_data.call_data,
         sender=solver_address,
         save_simulation=save_simulation,
     )

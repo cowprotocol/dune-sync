@@ -30,9 +30,6 @@ class TestFullPipeline(unittest.TestCase):
                     amount=-1608243187495153737,
                 ),
                 TokenImbalance(
-                    token="0xadb2437e6f65682b85f814fbc12fec0508a7b1d0", amount=0
-                ),
-                TokenImbalance(
                     token="0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", amount=231318775
                 ),
                 TokenImbalance(
@@ -113,12 +110,33 @@ class TestFullPipeline(unittest.TestCase):
                 ),
                 # Expected.
                 TokenImbalance(
-                    token="0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", amount=0
-                ),
-                # Expected.
-                TokenImbalance(
                     token="0x5a98fcbea516cf06857215779fd812ca3bef1b32",
                     amount=2232582627542468223215,
+                ),
+            ],
+        )
+
+    def test_event_pipeline_0x3b2e(self):
+        tx_hash = "0x3b2e9675b6d71a34e9b7f4abb4c9e80922be311076fcbb345d7da9d91a05e048"
+        results = internal_transfers(tx_hash, self.file_manager)
+        self.assertEqual(
+            results,
+            [],
+        )
+
+    def test_event_pipeline_0x7a00(self):
+        tx_hash = "0x7a007eb8ad25f5f1f1f36459998ae758b0e699ca69cc7b4c38354d42092651bf"
+        results = internal_transfers(tx_hash, self.file_manager)
+        self.assertEqual(
+            results,
+            [
+                TokenImbalance(
+                    token="0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    amount=-95100807345736279,
+                ),
+                TokenImbalance(
+                    token="0x64aa3364f17a4d01c6f1751fd97c2bd3d7e7f1d5",
+                    amount=14916332565,
                 ),
             ],
         )

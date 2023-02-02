@@ -5,6 +5,7 @@ to construct batch-wise token transfer Ledger for Solver Slippage
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Optional
 
 import requests
 
@@ -20,11 +21,11 @@ class InteractionData:
     simulation_block: int
     # Solver who submitted the solution
     solver_address: str
-    # Full Call Data provided by the solver
-    call_data: str
     # Reduced Call Data,after internal interactions have been removed.
     # This should be equivalent to what actually appears on chain.
-    uninternalized_call_data: str
+    call_data: str
+    # Full Call Data provided by the solver
+    uninternalized_call_data: Optional[str]
 
 
 def get_competition_data(tx_hash: str) -> InteractionData:
@@ -46,7 +47,7 @@ def get_competition_data(tx_hash: str) -> InteractionData:
     winning_solution = data["solutions"][-1]
     return InteractionData(
         simulation_block=data["competitionSimulationBlock"],
-        uninternalized_call_data=winning_solution["uninternalizedCallData"],
+        uninternalized_call_data=winning_solution.get("uninternalizedCallData", None),
         call_data=winning_solution["callData"],
         solver_address=winning_solution["solver"],
     )
