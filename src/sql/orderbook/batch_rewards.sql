@@ -32,10 +32,8 @@ with hashed_observations as (SELECT block_number,
                        -- participation
                        participants
                      from hashed_observations ho
-                            -- may want to do outer joins
                             join settlement_scores ss
                                  on ho.auction_id = ss.auction_id
-                       -- may want to do outer joins
                             join auction_participants ap
                                  on ho.auction_id = ap.auction_id)
 
