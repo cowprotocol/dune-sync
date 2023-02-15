@@ -17,7 +17,7 @@ class TestFetchOrderbook(unittest.TestCase):
     def test_get_order_rewards(self):
         block_number = 16000000
         block_range = BlockRange(block_number, block_number + 50)
-        rewards_df = OrderbookFetcher.get_orderbook_rewards(block_range)
+        rewards_df = OrderbookFetcher.get_order_rewards(block_range)
         expected = pd.DataFrame(
             {
                 "block_number": [16000018, 16000050],

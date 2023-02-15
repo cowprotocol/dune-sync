@@ -75,7 +75,7 @@ class OrderbookFetcher:
         return min(int(barn["latest"][0]), int(prod["latest"][0])) - REORG_THRESHOLD
 
     @classmethod
-    def get_orderbook_rewards(cls, block_range: BlockRange) -> DataFrame:
+    def get_order_rewards(cls, block_range: BlockRange) -> DataFrame:
         """
         Fetches and validates Orderbook Reward DataFrame as concatenation from Prod and Staging DB
         """
@@ -85,6 +85,23 @@ class OrderbookFetcher:
             .replace("{{end_block}}", str(block_range.block_to))
         )
         data_types = {"block_number": "int64", "amount": "float64"}
+        barn, prod = cls._query_both_dbs(cow_reward_query, data_types)
+
+        # Solvers do not appear in both environments!
+        assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
+        return pd.concat([prod, barn])
+
+    @classmethod
+    def get_batch_rewards(cls, block_range: BlockRange) -> DataFrame:
+        """
+        Fetches and validates Batch Rewards DataFrame as concatenation from Prod and Staging DB
+        """
+        cow_reward_query = (
+            open_query("orderbook/batch_rewards.sql")
+            .replace("{{start_block}}", str(block_range.block_from))
+            .replace("{{end_block}}", str(block_range.block_to))
+        )
+        data_types = {"block_number": "int64"}
         barn, prod = cls._query_both_dbs(cow_reward_query, data_types)
 
         # Solvers do not appear in both environments!
