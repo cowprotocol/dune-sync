@@ -141,6 +141,27 @@ class TestFullPipeline(unittest.TestCase):
             ],
         )
 
+    def test_event_pipeline_0x0e98(self):
+        tx_hash = "0x0e9877bff7c9f9fb8516afc857d5bc986f8116bbf6972899c3eb65af4445901e"
+        results = internal_transfers(tx_hash, self.file_manager)
+        self.assertEqual(
+            results,
+            [
+                TokenImbalance(
+                    token="0x6810e776880c02933d47db1b9fc05908e5386b96",
+                    amount=-1694865144280746549,
+                ),
+                TokenImbalance(
+                    token="0x00a8b738e453ffd858a7edf03bccfe20412f0eb0",
+                    amount=-1945523048541962118749,
+                ),
+                TokenImbalance(
+                    token="0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    amount=99902973634572547,
+                ),
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
