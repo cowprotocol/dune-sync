@@ -14,7 +14,7 @@ from src.models.tables import SyncTable
 from src.post.aws import AWSClient
 from src.sync import sync_app_data
 from src.sync.config import SyncConfig, AppDataSyncConfig
-from src.sync.orderbook import sync_order_rewards, sync_batch_rewards
+from src.sync.order_rewards import sync_order_rewards, sync_batch_rewards
 
 log = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s %(message)s")
