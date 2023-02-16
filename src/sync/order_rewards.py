@@ -98,7 +98,7 @@ def sync_batch_rewards(
         dry_run,
         sync_table,
         data_list=BatchRewards.from_pdf_to_dune_records(
-            fetcher.get_order_rewards(block_range)
+            fetcher.get_batch_rewards(block_range)
         ),
     )
 
