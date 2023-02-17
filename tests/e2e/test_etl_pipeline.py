@@ -162,6 +162,29 @@ class TestFullPipeline(unittest.TestCase):
             ],
         )
 
+    def test_event_pipeline_0x42669(self):
+        # Unusual slippage from prod-Laertes
+        # https://dune.com/queries/1688044?MinAbsoluteSlippageTolerance=100&RelativeSlippageTolerance=1.0&SignificantSlippageValue=2000&TxHash=0x&StartTime=2023-02-15+00%3A00%3A00&EndTime=2023-02-16+00%3A00%3A00
+        tx_hash = "0x426690f4385bf943dffc12c5e2adbfd793acc1d16b3a8f5fddcd9e3f94a5a20b"
+        results = internal_transfers(tx_hash, self.file_manager)
+        self.assertEqual(
+            results,
+            [
+                TokenImbalance(
+                    token="0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    amount=5677312578,
+                ),
+                TokenImbalance(
+                    token="0x0f2d719407fdbeff09d87557abb7232601fd9f29",
+                    amount=-4480160974861274910720,
+                ),
+                TokenImbalance(
+                    token="0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    amount=1054375308649770183,
+                ),
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

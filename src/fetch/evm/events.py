@@ -86,6 +86,7 @@ class TransferType(Enum):
         """
         # Lowering Address all the time needs to be more uniform.
         src, dst = transfer.src.lower(), transfer.dst.lower()
+        ref_account = ref_account.lower()
         assert ref_account in {src, dst}
         if ref_account == src:
             # Outgoing from ref_account

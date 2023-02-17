@@ -33,18 +33,23 @@ class SettlementTransfer:
             - transfers: Events (token, src, dst, wad) are transformed by examination of src, dst
         """
         traders = {t.owner.lower() for t in trades}
-        return [
-            cls(
-                token=transfer.token,
-                amount=transfer.wad,
-                incoming=str(SETTLEMENT_CONTRACT_ADDRESS).lower()
-                == transfer.dst.lower(),
-                transfer_type=TransferType.from_referenced_transfer(
-                    transfer, users=traders
-                ),
-            )
-            for transfer in transfers
-        ]
+        ref_address = str(SETTLEMENT_CONTRACT_ADDRESS).lower()
+        relevant_transfers = []
+        for transfer in transfers:
+            if transfer.involves_address(ref_address):
+                relevant_transfers.append(
+                    cls(
+                        token=transfer.token,
+                        amount=transfer.wad,
+                        incoming=ref_address == transfer.dst.lower(),
+                        transfer_type=TransferType.from_referenced_transfer(
+                            transfer, users=traders, ref_account=ref_address
+                        ),
+                    )
+                )
+            else:
+                print(f"Found irrelevant transfer {transfer}")
+        return relevant_transfers
 
 
 @dataclass
