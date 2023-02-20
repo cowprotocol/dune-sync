@@ -39,7 +39,7 @@ docker run -v ${PWD}/data:/app/data --env-file .env ghcr.io/cowprotocol/dune-syn
 ### Breaking Changes
 
 Whenever the schema changes, we must coordinate with Dune that the data must be dropped and the table rebuilt.
-For this we have implemented a feature flag `--hard-reset True` which can be called to delete all data from their 
+For this we have provided a script `scripts/empty_bucket.py` which can be called to delete all data from their 
 buckets and our backup volume. This should only be run whilst in coordination with their team about the changes. 
 They will "stop the stream", drop the table on their side and restart the stream. 
 In the event that a hard reset is performed without the proper coordination, 
