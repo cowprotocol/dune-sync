@@ -9,8 +9,7 @@ with hashed_observations as (SELECT block_number,
                                SELECT tx_hash, solver, tx_nonce, tx_from
                                FROM settlements s
                                WHERE s.block_number = so.block_number
-                                 AND s.log_index > so.log_index
-                               ORDER BY s.log_index
+                                 AND s.log_index = so.log_index
                                LIMIT 1
                                ) AS settlement ON TRUE
                                     JOIN auction_transaction
