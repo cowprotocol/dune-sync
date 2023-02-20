@@ -34,9 +34,10 @@ reward_data AS (
      -- participation
      participants
 FROM hashed_observations ho
-JOIN settlement_scores ss
+-- outer joins made in order to detect missing data.
+LEFT OUTER JOIN settlement_scores ss
   ON ho.auction_id = ss.auction_id
-JOIN auction_participants ap
+LEFT OUTER JOIN auction_participants ap
   ON ho.auction_id = ap.auction_id
 )
 
