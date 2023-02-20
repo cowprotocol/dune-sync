@@ -26,7 +26,6 @@ class ScriptArgs:
     """Runtime arguments' parser/initializer"""
 
     dry_run: bool
-    hard_reset: bool
     sync_table: SyncTable
 
     def __init__(self) -> None:
@@ -46,7 +45,6 @@ class ScriptArgs:
         arguments, _ = parser.parse_known_args()
         self.sync_table: SyncTable = arguments.sync_table
         self.dry_run: bool = arguments.dry_run
-        self.hard_reset: bool = arguments.hard_reset
 
 
 if __name__ == "__main__":
