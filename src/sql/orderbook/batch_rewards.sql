@@ -27,7 +27,7 @@ reward_data AS (
      execution_cost,
      surplus,
      fee,
-     surplus + fee - reference_score AS reward_eth,
+     surplus + fee - reference_score AS payment,
      -- scores
      winning_score,
      reference_score,
