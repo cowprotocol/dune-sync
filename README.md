@@ -55,7 +55,6 @@ docker run -v ${PWD}/data:/app/data \
     --env-file .env \
     ghcr.io/cowprotocol/dune-sync \
     --sync-table SYNC_TABLE \
-    --hard-reset True
 ```
 
 This will empty the buckets and repopulate with the appropriate changes.
