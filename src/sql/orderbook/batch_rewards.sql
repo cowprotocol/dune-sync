@@ -1,4 +1,4 @@
-WITH hashed_observations AS (
+WITH observed_settlements AS (
 SELECT
     -- settlement
     tx_hash,
@@ -21,24 +21,32 @@ WHERE block_number > {{start_block}} AND block_number <= {{end_block}}
 
 reward_data AS (
   SELECT
-     -- observations
-     block_number,
-     tx_hash,
-     execution_cost,
-     surplus,
-     fee,
-     surplus + fee - reference_score AS payment,
-     -- scores
-     winning_score,
-     reference_score,
-     -- participation
-     participants
-FROM hashed_observations ho
--- outer joins made in order to detect missing data.
-LEFT OUTER JOIN settlement_scores ss
-  ON ho.auction_id = ss.auction_id
-LEFT OUTER JOIN auction_participants ap
-  ON ho.auction_id = ap.auction_id
+    -- observations
+    tx_hash,
+    -- Right-hand terms in coalesces below represent the case when settlement
+    -- observations are unavailable (i.e. no settlement corresponds to reported scores).
+    -- In particular, this means that surplus, fee and execution cost are all zero.
+    -- When there is an absence of settlement block number, we fall back
+    -- on the block_deadline from the settlement_scores table.
+    coalesce(block_number, block_deadline) as block_number,
+    coalesce(execution_cost, 0) as execution_cost,
+    coalesce(surplus, 0) as surplus,
+    coalesce(fee, 0) as fee,
+    surplus + fee - reference_score AS payment,
+    -- scores
+    winning_score,
+    reference_score,
+    -- participation
+    participants  -- TODO: Extract winning solver as well here
+FROM settlement_scores ss
+-- If there are reported scores,
+-- there will always be a record of auction participants
+JOIN auction_participants ap
+  ON os.auction_id = ap.auction_id
+  -- outer joins made in order to capture non-existent settlements.
+LEFT OUTER JOIN observed_settlements os
+  ON os.auction_id = ss.auction_id
+
 )
 
 SELECT * FROM reward_data
