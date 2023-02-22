@@ -46,7 +46,6 @@ JOIN auction_participants ap
   -- outer joins made in order to capture non-existent settlements.
 LEFT OUTER JOIN observed_settlements os
   ON os.auction_id = ss.auction_id
-
 )
 
 SELECT * FROM reward_data
