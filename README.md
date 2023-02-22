@@ -54,7 +54,7 @@ So, the process is:
 docker run -v ${PWD}/data:/app/data \
     --env-file .env \
     ghcr.io/cowprotocol/dune-sync \
-    --sync-table SYNC_TABLE \
+    --sync-table SYNC_TABLE
 ```
 
 This will empty the buckets and repopulate with the appropriate changes.
