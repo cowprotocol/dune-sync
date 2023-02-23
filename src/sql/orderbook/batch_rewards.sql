@@ -2,6 +2,7 @@ WITH observed_settlements AS (
 SELECT
     -- settlement
     tx_hash,
+    solver,
     -- settlement_observations
     block_number,
     effective_gas_price * gas_used AS execution_cost,
@@ -23,6 +24,11 @@ reward_data AS (
   SELECT
     -- observations
     tx_hash,
+    coalesce(
+      solver,
+      -- This is the winning solver (i.e. last entry of participants array)
+      participants[array_length(participants, 1)]
+    ) as solver,
     -- Right-hand terms in coalesces below represent the case when settlement
     -- observations are unavailable (i.e. no settlement corresponds to reported scores).
     -- In particular, this means that surplus, fee and execution cost are all zero.
@@ -37,7 +43,7 @@ reward_data AS (
     winning_score,
     reference_score,
     -- participation
-    participants  -- TODO: Extract winning solver as well here
+    participants
 FROM settlement_scores ss
 -- If there are reported scores,
 -- there will always be a record of auction participants
