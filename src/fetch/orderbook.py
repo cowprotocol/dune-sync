@@ -77,7 +77,7 @@ class OrderbookFetcher:
     @classmethod
     def get_order_rewards(cls, block_range: BlockRange) -> DataFrame:
         """
-        Fetches and validates Orderbook Reward DataFrame as concatenation from Prod and Staging DB
+        Fetches and validates Order Reward DataFrame as concatenation from Prod and Staging DB
         """
         cow_reward_query = (
             open_query("orderbook/order_rewards.sql")

@@ -22,7 +22,7 @@ class BatchRewards:
                 "tx_hash": row["tx_hash"],
                 "solver": row["solver"],
                 "data": {
-                    "reward_eth": float(row["reward_eth"]),
+                    "reward_eth": str(row["reward_eth"]),
                     # All the following values are in WEI.
                     "execution_cost": str(row["execution_cost"]),
                     "surplus": str(row["surplus"]),
@@ -31,7 +31,7 @@ class BatchRewards:
                     "reference_score": str(row["reference_score"]),
                     # TODO - Not sure yet how to parse this bytea[]
                     #  Will need to experiment with this.
-                    "participants": row["participants"],
+                    "participating_solvers": row["participating_solvers"],
                 },
             }
             for row in rewards_df.to_dict(orient="records")
