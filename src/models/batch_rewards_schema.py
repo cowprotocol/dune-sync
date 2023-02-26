@@ -22,8 +22,8 @@ class BatchRewards:
                 "tx_hash": row["tx_hash"],
                 "solver": row["solver"],
                 "data": {
-                    "reward_eth": str(row["reward_eth"]),
                     # All the following values are in WEI.
+                    "reward_eth": str(row["reward_eth"]),
                     "execution_cost": str(row["execution_cost"]),
                     "surplus": str(row["surplus"]),
                     "fee": str(row["fee"]),
