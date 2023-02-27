@@ -54,4 +54,15 @@ LEFT OUTER JOIN observed_settlements os
   ON os.auction_id = ss.auction_id
 )
 
-SELECT * FROM reward_data
+SELECT
+  block_number,
+  concat('0x', encode(tx_hash, 'hex'))  as tx_hash,
+  concat('0x', encode(solver, 'hex'))  as solver,
+  execution_cost,
+  surplus,
+  fee,
+  surplus + fee - reference_score as reward_eth,
+  winning_score,
+  reference_score,
+  participants as participating_solvers
+FROM reward_data

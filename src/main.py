@@ -14,7 +14,7 @@ from src.models.tables import SyncTable
 from src.post.aws import AWSClient
 from src.sync import sync_app_data
 from src.sync.config import SyncConfig, AppDataSyncConfig
-from src.sync.order_rewards import sync_order_rewards
+from src.sync.order_rewards import sync_order_rewards, sync_batch_rewards
 
 log = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -72,8 +72,15 @@ if __name__ == "__main__":
     elif args.sync_table == SyncTable.ORDER_REWARDS:
         sync_order_rewards(
             aws,
-            fetcher=OrderbookFetcher(),
             config=SyncConfig(volume_path),
+            fetcher=OrderbookFetcher(),
+            dry_run=args.dry_run,
+        )
+    elif args.sync_table == SyncTable.BATCH_REWARDS:
+        sync_batch_rewards(
+            aws,
+            config=SyncConfig(volume_path),
+            fetcher=OrderbookFetcher(),
             dry_run=args.dry_run,
         )
     else:
