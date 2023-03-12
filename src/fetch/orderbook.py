@@ -101,7 +101,11 @@ class OrderbookFetcher:
             .replace("{{start_block}}", str(block_range.block_from))
             .replace("{{end_block}}", str(block_range.block_to))
         )
-        data_types = {"block_number": "int64"}
+        data_types = {
+            "block_number": "int64",
+            "block_deadline": "int64",
+            "reference_score": "int",
+        }
         barn, prod = cls._query_both_dbs(cow_reward_query, data_types)
 
         # Solvers do not appear in both environments!

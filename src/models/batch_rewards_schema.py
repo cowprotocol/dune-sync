@@ -21,9 +21,11 @@ class BatchRewards:
                 "block_number": int(row["block_number"]),
                 "tx_hash": row["tx_hash"],
                 "solver": row["solver"],
+                "block_deadline": int(row["block_deadline"]),
                 "data": {
                     # All the following values are in WEI.
-                    "reward_eth": str(row["reward_eth"]),
+                    "uncapped_payment_eth": str(row["uncapped_payment_eth"]),
+                    "capped_payment": str(row["capped_payment"]),
                     "execution_cost": str(row["execution_cost"]),
                     "surplus": str(row["surplus"]),
                     "fee": str(row["fee"]),

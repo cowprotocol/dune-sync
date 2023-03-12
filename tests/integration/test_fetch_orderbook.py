@@ -40,6 +40,52 @@ class TestFetchOrderbook(unittest.TestCase):
 
         self.assertIsNone(pd.testing.assert_frame_equal(expected, rewards_df))
 
+    def test_get_batch_rewards(self):
+        block_number = 16735007
+        block_range = BlockRange(block_number, block_number + 50)
+        rewards_df = OrderbookFetcher.get_batch_rewards(block_range)
+
+        expected = pd.DataFrame(
+            {
+                "block_number": [16734995, 16734998],
+                "block_deadline": [16735008, 16735011],
+                "tx_hash": [
+                    "0x203bac6edde8f4dd2e18e7a5e2d81cb721d8b4f1f021217d0d4b55a799efe3f0",
+                    "0xce494850e80b3308d71a5896b7485de0d777af924ebad064d74be4320d027cba",
+                ],
+                "solver": [
+                    "0xde786877a10dbb7eba25a4da65aecf47654f08ab",
+                    "0xde786877a10dbb7eba25a4da65aecf47654f08ab",
+                ],
+                "execution_cost": [7538092113186786.0, 7116851210101934.0],
+                "surplus": [53999674326241.0, 58558783891722.0],
+                "fee": [
+                    0.0,
+                    0.0,
+                ],
+                "uncapped_payment_eth": [-11707681268602884.0, -11238052424133296.0],
+                "capped_payment": [-10000000000000000.0, -10000000000000000.0],
+                "winning_score": [11761680942929144.0, 11296611208025016.0],
+                "reference_score": [11761680942929126.0, 11296611208025016.0],
+                "participating_solvers": [
+                    [
+                        "0x8a4e90e9afc809a69d2a3bdbe5fff17a12979609",
+                        "0xde786877a10dbb7eba25a4da65aecf47654f08ab",
+                        "0xe33062a24149f7801a48b2675ed5111d3278f0f5",
+                    ],
+                    [
+                        "0x0a308697e1d3a91dcb1e915c51f8944aaec9015f",
+                        "0x109bf9e0287cc95cc623fbe7380dd841d4bdeb03",
+                        "0x8a4e90e9afc809a69d2a3bdbe5fff17a12979609",
+                        "0xdae69affe582d36f330ee1145995a53fab670962",
+                        "0xde786877a10dbb7eba25a4da65aecf47654f08ab",
+                        "0xe33062a24149f7801a48b2675ed5111d3278f0f5",
+                    ],
+                ],
+            }
+        )
+        self.assertIsNone(pd.testing.assert_frame_equal(expected, rewards_df))
+
 
 if __name__ == "__main__":
     unittest.main()
