@@ -104,7 +104,8 @@ class OrderbookFetcher:
         data_types = {
             "block_number": "int64",
             "block_deadline": "int64",
-            "reference_score": "int",
+            # TODO - get this right! somehow
+            # "reference_score": "int",
         }
         barn, prod = cls._query_both_dbs(cow_reward_query, data_types)
 
