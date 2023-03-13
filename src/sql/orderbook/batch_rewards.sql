@@ -75,7 +75,7 @@ WITH observed_settlements AS (SELECT
                                          10000000000000000 + execution_cost) as capped_payment,
                                    winning_score,
                                    reference_score,
-                                   participating_solvers                     as participating_solvers
+                                   participating_solvers
                             FROM reward_data)
 
 
