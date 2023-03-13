@@ -16,6 +16,15 @@ from src.models.block_range import BlockRange
 from src.utils import open_query
 
 REORG_THRESHOLD = 65
+NUMERICAL_COLUMNS = [
+    "execution_cost",
+    "surplus",
+    "fee",
+    "uncapped_payment_eth",
+    "capped_payment",
+    "winning_score",
+    "reference_score",
+]
 
 
 class OrderbookEnv(Enum):
@@ -104,11 +113,14 @@ class OrderbookFetcher:
         data_types = {
             "block_number": "int64",
             "block_deadline": "int64",
-            # TODO - get this right! somehow
-            # "reference_score": "int",
         }
         barn, prod = cls._query_both_dbs(cow_reward_query, data_types)
 
         # Solvers do not appear in both environments!
         assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
-        return pd.concat([prod, barn])
+        # Ensure numerical types.
+        combined_df = pd.concat([prod, barn])
+        for number_col in NUMERICAL_COLUMNS:
+            combined_df[number_col] = pd.to_numeric(combined_df[number_col])
+
+        return combined_df

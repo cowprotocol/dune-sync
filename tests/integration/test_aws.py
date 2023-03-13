@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 from dotenv import load_dotenv
 
-from src.models.tables import SyncTable
 from src.post.aws import AWSClient, BucketFileObject
 
 
@@ -115,10 +114,6 @@ class TestAWSConnection(unittest.TestCase):
         # cleanup
         aws.delete_file(object_key)
         os.remove(Path(block_indexed_filename))
-
-    def test_sync_block(self):
-        aws = self.aws_client
-        print(aws.last_sync_block(SyncTable.ORDER_REWARDS))
 
     def test_delete_all(self):
         table = "test"
