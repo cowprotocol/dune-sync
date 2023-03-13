@@ -29,8 +29,8 @@ class TestModelBatchRewards(unittest.TestCase):
                 ],
                 "uncapped_payment_eth": [0.0, -10 * ONE_ETH],
                 "capped_payment": [-0.001 * ONE_ETH, -0.001 * ONE_ETH],
-                "winning_score": [11761680942929144.0, 11296611208025016.0],
-                "reference_score": [11761680942929126.0, 11296611208025016.0],
+                "winning_score": [123456 * ONE_ETH, 6789 * ONE_ETH],
+                "reference_score": [ONE_ETH, 2 * ONE_ETH],
                 "participating_solvers": [
                     [
                         "0x51",
@@ -61,10 +61,10 @@ class TestModelBatchRewards(unittest.TestCase):
                         "participating_solvers": ["0x51", "0x52", "0x53"],
                         # TODO - We can't have scientific notation here!
                         #  Must force Dataframe to have string type!
-                        "reference_score": "1.1761680942929126e+16",
+                        "reference_score": "1000000000000000000",
                         "surplus": "2000000000000000000",
                         "uncapped_payment_eth": "0.0",
-                        "winning_score": "1.1761680942929144e+16",
+                        "winning_score": "123456000000000000000000",
                     },
                     "solver": "0x51",
                     "tx_hash": "0x71",
@@ -84,10 +84,10 @@ class TestModelBatchRewards(unittest.TestCase):
                             "0x55",
                             "0x56",
                         ],
-                        "reference_score": "1.1296611208025016e+16",
+                        "reference_score": "2000000000000000000",
                         "surplus": "3000000000000000000",
                         "uncapped_payment_eth": "-10000000000000000000",
-                        "winning_score": "1.1296611208025016e+16",
+                        "winning_score": "6789000000000000000000",
                     },
                     "solver": "0x52",
                     "tx_hash": "0x72",
