@@ -28,7 +28,6 @@ class TestModelBatchRewards(unittest.TestCase):
                     0,
                 ],
                 "uncapped_payment_eth": [0, -10 * ONE_ETH],
-                # Should not be working with decimals!
                 "capped_payment": [-1000000000000000, -1000000000000000],
                 "winning_score": [123456 * ONE_ETH, 6789 * ONE_ETH],
                 "reference_score": [ONE_ETH, 2 * ONE_ETH],
