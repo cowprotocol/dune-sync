@@ -24,11 +24,12 @@ class TestModelBatchRewards(unittest.TestCase):
                 "execution_cost": [9999 * ONE_ETH, 1],
                 "surplus": [2 * ONE_ETH, 3 * ONE_ETH],
                 "fee": [
-                    0.01 * ONE_ETH,
-                    0.0,
+                    1000000000000000,
+                    0,
                 ],
-                "uncapped_payment_eth": [0.0, -10 * ONE_ETH],
-                "capped_payment": [-0.001 * ONE_ETH, -0.001 * ONE_ETH],
+                "uncapped_payment_eth": [0, -10 * ONE_ETH],
+                # Should not be working with decimals!
+                "capped_payment": [-1000000000000000, -1000000000000000],
                 "winning_score": [123456 * ONE_ETH, 6789 * ONE_ETH],
                 "reference_score": [ONE_ETH, 2 * ONE_ETH],
                 "participating_solvers": [
@@ -55,15 +56,13 @@ class TestModelBatchRewards(unittest.TestCase):
                     "block_deadline": 789,
                     "block_number": 123,
                     "data": {
-                        "capped_payment": "-1000000000000000.0",
+                        "capped_payment": "-1000000000000000",
                         "execution_cost": "9999000000000000000000",
-                        "fee": "1e+16",
+                        "fee": "1000000000000000",
                         "participating_solvers": ["0x51", "0x52", "0x53"],
-                        # TODO - We can't have scientific notation here!
-                        #  Must force Dataframe to have string type!
                         "reference_score": "1000000000000000000",
                         "surplus": "2000000000000000000",
-                        "uncapped_payment_eth": "0.0",
+                        "uncapped_payment_eth": "0",
                         "winning_score": "123456000000000000000000",
                     },
                     "solver": "0x51",
@@ -73,9 +72,9 @@ class TestModelBatchRewards(unittest.TestCase):
                     "block_deadline": 1011,
                     "block_number": 456,
                     "data": {
-                        "capped_payment": "-1000000000000000.0",
+                        "capped_payment": "-1000000000000000",
                         "execution_cost": "1",
-                        "fee": "0.0",
+                        "fee": "0",
                         "participating_solvers": [
                             "0x51",
                             "0x52",
