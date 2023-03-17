@@ -111,7 +111,9 @@ class OrderbookFetcher:
             .replace("{{end_block}}", str(block_range.block_to))
         )
         data_types = {
-            "block_number": "int64",
+            # According to this: https://stackoverflow.com/a/11548224
+            # capitalized int64 means `Optional<Integer>` and it appears to work.
+            "block_number": "Int64",
             "block_deadline": "int64",
         }
         barn, prod = cls._query_both_dbs(cow_reward_query, data_types)

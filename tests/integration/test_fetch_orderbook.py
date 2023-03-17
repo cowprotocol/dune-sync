@@ -1,5 +1,6 @@
 import unittest
 
+import pandas
 import pandas as pd
 
 from src.fetch.orderbook import OrderbookFetcher
@@ -41,48 +42,90 @@ class TestFetchOrderbook(unittest.TestCase):
         self.assertIsNone(pd.testing.assert_frame_equal(expected, rewards_df))
 
     def test_get_batch_rewards(self):
-        block_number = 16735007
-        block_range = BlockRange(block_number, block_number + 50)
+        block_number = 16846500
+        block_range = BlockRange(block_number, block_number + 25)
         rewards_df = OrderbookFetcher.get_batch_rewards(block_range)
-
         expected = pd.DataFrame(
             {
-                "block_number": [16734995, 16734998],
-                "block_deadline": [16735008, 16735011],
+                "block_number": pd.Series(
+                    [16846495, 16846502, pandas.NA], dtype="Int64"
+                ),
+                # "block_number": [16846495, 16846502, pandas.NA],
+                "block_deadline": [16846509, 16846516, 16846524],
                 "tx_hash": [
-                    "0x203bac6edde8f4dd2e18e7a5e2d81cb721d8b4f1f021217d0d4b55a799efe3f0",
-                    "0xce494850e80b3308d71a5896b7485de0d777af924ebad064d74be4320d027cba",
+                    "0x2189c2994dcffcd40cc92245e216b0fda42e0f30573ce4b131341e8ac776ed75",
+                    "0x8328fa642f47adb61f751363cf718d707dafcdc258898fa953945afd42aa020f",
+                    "0x",
                 ],
                 "solver": [
-                    "0xde786877a10dbb7eba25a4da65aecf47654f08ab",
-                    "0xde786877a10dbb7eba25a4da65aecf47654f08ab",
+                    "0xb20b86c4e6deeb432a22d773a221898bbbd03036",
+                    "0x55a37a2e5e5973510ac9d9c723aec213fa161919",
+                    "0x55a37a2e5e5973510ac9d9c723aec213fa161919",
                 ],
-                "execution_cost": [7538092113186786.0, 7116851210101934.0],
-                "surplus": [53999674326241.0, 58558783891722.0],
+                "execution_cost": [
+                    5417013431615490.0,
+                    14681404168612460.0,
+                    0.0,
+                ],
+                "surplus": [
+                    5867838023808109.0,
+                    104011002982952096.0,
+                    0.0,
+                ],
                 "fee": [
-                    0.0,
+                    7751978767036064.0,
+                    10350680045815652.0,
                     0.0,
                 ],
-                "uncapped_payment_eth": [-11707681268602884.0, -11238052424133296.0],
-                "capped_payment": [-10000000000000000.0, -10000000000000000.0],
-                "winning_score": [11761680942929144.0, 11296611208025016.0],
-                "reference_score": [11761680942929126.0, 11296611208025016.0],
+                "uncapped_payment_eth": [
+                    7232682540629268.0,
+                    82825156151734416.0,
+                    -3527106002507021.0,
+                ],
+                "capped_payment": [
+                    7232682540629268.0,
+                    24681404168612460.0,
+                    -3527106002507021.0,
+                ],
+                "winning_score": [
+                    6537976145828389.0,
+                    95640781782532192.0,
+                    3527282436747751.0,
+                ],
+                "reference_score": [
+                    6387134250214905.0,
+                    31536526877033328.0,
+                    3527106002507021.0,
+                ],
                 "participating_solvers": [
                     [
-                        "0x8a4e90e9afc809a69d2a3bdbe5fff17a12979609",
-                        "0xde786877a10dbb7eba25a4da65aecf47654f08ab",
-                        "0xe33062a24149f7801a48b2675ed5111d3278f0f5",
+                        "0x398890be7c4fac5d766e1aeffde44b2ee99f38ef",
+                        "0xb20b86c4e6deeb432a22d773a221898bbbd03036",
                     ],
                     [
-                        "0x0a308697e1d3a91dcb1e915c51f8944aaec9015f",
-                        "0x109bf9e0287cc95cc623fbe7380dd841d4bdeb03",
-                        "0x8a4e90e9afc809a69d2a3bdbe5fff17a12979609",
-                        "0xdae69affe582d36f330ee1145995a53fab670962",
-                        "0xde786877a10dbb7eba25a4da65aecf47654f08ab",
-                        "0xe33062a24149f7801a48b2675ed5111d3278f0f5",
+                        "0x55a37a2e5e5973510ac9d9c723aec213fa161919",
+                        "0x97ec0a17432d71a3234ef7173c6b48a2c0940896",
+                        "0xa21740833858985e4d801533a808786d3647fb83",
+                        "0xb20b86c4e6deeb432a22d773a221898bbbd03036",
+                        "0xbff9a1b539516f9e20c7b621163e676949959a66",
+                        "0xc9ec550bea1c64d779124b23a26292cc223327b6",
+                        "0xda869be4adea17ad39e1dfece1bc92c02491504f",
+                    ],
+                    [
+                        "0x149d0f9282333681ee41d30589824b2798e9fb47",
+                        "0x3cee8c7d9b5c8f225a8c36e7d3514e1860309651",
+                        "0x55a37a2e5e5973510ac9d9c723aec213fa161919",
+                        "0x7a0a8890d71a4834285efdc1d18bb3828e765c6a",
+                        "0x97ec0a17432d71a3234ef7173c6b48a2c0940896",
+                        "0xa21740833858985e4d801533a808786d3647fb83",
+                        "0xb20b86c4e6deeb432a22d773a221898bbbd03036",
+                        "0xbff9a1b539516f9e20c7b621163e676949959a66",
+                        "0xc9ec550bea1c64d779124b23a26292cc223327b6",
+                        "0xda869be4adea17ad39e1dfece1bc92c02491504f",
+                        "0xe9ae2d792f981c53ea7f6493a17abf5b2a45a86b",
                     ],
                 ],
-            }
+            },
         )
         self.assertIsNone(pd.testing.assert_frame_equal(expected, rewards_df))
 
