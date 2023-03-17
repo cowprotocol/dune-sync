@@ -23,8 +23,8 @@ WITH observed_settlements AS (SELECT
 
      auction_participation as (SELECT ss.auction_id,
                                       array_agg(
-                                        concat('0x', encode(participant, 'hex')) ORDER BY participant
-                                      ) as participating_solvers
+                                              concat('0x', encode(participant, 'hex')) ORDER BY participant
+                                        ) as participating_solvers
                                FROM auction_participants
                                       JOIN settlement_scores ss
                                            ON auction_participants.auction_id = ss.auction_id
@@ -79,10 +79,13 @@ WITH observed_settlements AS (SELECT
                             FROM reward_data)
 
 
-SELECT settlement_block                     as block_number,
+SELECT settlement_block                    as block_number,
        block_deadline,
-       concat('0x', encode(tx_hash, 'hex')) as tx_hash,
-       concat('0x', encode(solver, 'hex'))  as solver,
+       case
+         when tx_hash is NULL then NULL
+         else concat('0x', encode(tx_hash, 'hex'))
+         end                               as tx_hash,
+       concat('0x', encode(solver, 'hex')) as solver,
        execution_cost,
        surplus,
        fee,

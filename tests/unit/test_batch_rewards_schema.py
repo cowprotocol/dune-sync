@@ -1,5 +1,6 @@
 import unittest
 
+import pandas
 import pandas as pd
 
 from src.models.batch_rewards_schema import BatchRewards
@@ -11,11 +12,11 @@ class TestModelBatchRewards(unittest.TestCase):
     def test_order_rewards_transformation(self):
         sample_df = pd.DataFrame(
             {
-                "block_number": [123, 456],
+                "block_number": pd.Series([123, pandas.NA], dtype="Int64"),
                 "block_deadline": [789, 1011],
                 "tx_hash": [
                     "0x71",
-                    "0x72",
+                    None,
                 ],
                 "solver": [
                     "0x51",
@@ -69,7 +70,7 @@ class TestModelBatchRewards(unittest.TestCase):
                 },
                 {
                     "block_deadline": 1011,
-                    "block_number": 456,
+                    "block_number": None,
                     "data": {
                         "capped_payment": "-1000000000000000",
                         "execution_cost": "1",
@@ -88,7 +89,7 @@ class TestModelBatchRewards(unittest.TestCase):
                         "winning_score": "6789000000000000000000",
                     },
                     "solver": "0x52",
-                    "tx_hash": "0x72",
+                    "tx_hash": None,
                 },
             ],
             BatchRewards.from_pdf_to_dune_records(sample_df),

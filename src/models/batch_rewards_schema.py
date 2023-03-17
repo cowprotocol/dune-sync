@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+import pandas
 from pandas import DataFrame
 
 
@@ -18,7 +19,9 @@ class BatchRewards:
         """Converts Pandas DataFrame into the expected stream type for Dune"""
         return [
             {
-                "block_number": int(row["block_number"]),
+                "block_number": int(row["block_number"])
+                if not pandas.isna(row["block_number"])
+                else None,
                 "tx_hash": row["tx_hash"],
                 "solver": row["solver"],
                 "block_deadline": int(row["block_deadline"]),
