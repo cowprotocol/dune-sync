@@ -1,6 +1,5 @@
 import unittest
 
-import pandas
 import pandas as pd
 
 from src.fetch.orderbook import OrderbookFetcher
@@ -48,7 +47,7 @@ class TestFetchOrderbook(unittest.TestCase):
         expected = pd.DataFrame(
             {
                 "block_number": pd.Series(
-                    [16846495, 16846502, pandas.NA], dtype="Int64"
+                    [16846495, 16846502, pd.NA], dtype="Int64"
                 ),
                 "block_deadline": [16846509, 16846516, 16846524],
                 "tx_hash": [
