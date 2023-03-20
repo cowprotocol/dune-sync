@@ -10,6 +10,7 @@ ONE_ETH = 1000000000000000000
 
 class TestModelBatchRewards(unittest.TestCase):
     def test_order_rewards_transformation(self):
+        max_uint = 115792089237316195423570985008687907853269984665640564039457584007913129639936
         sample_df = pd.DataFrame(
             {
                 "block_number": pd.Series([123, pandas.NA], dtype="Int64"),
@@ -26,7 +27,7 @@ class TestModelBatchRewards(unittest.TestCase):
                 "surplus": [2 * ONE_ETH, 3 * ONE_ETH],
                 "fee": [
                     1000000000000000,
-                    0,
+                    max_uint,
                 ],
                 "uncapped_payment_eth": [0, -10 * ONE_ETH],
                 "capped_payment": [-1000000000000000, -1000000000000000],
@@ -74,7 +75,7 @@ class TestModelBatchRewards(unittest.TestCase):
                     "data": {
                         "capped_payment": -1000000000000000,
                         "execution_cost": 1,
-                        "fee": 0,
+                        "fee": max_uint,
                         "participating_solvers": [
                             "0x51",
                             "0x52",
