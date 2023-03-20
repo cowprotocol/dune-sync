@@ -30,6 +30,9 @@ check:
 	make lint
 	make types
 
+test-unit:
+	python -m pytest tests/unit
+
 test:
 	python -m pytest tests
 
