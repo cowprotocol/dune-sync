@@ -27,13 +27,13 @@ class BatchRewards:
                 "block_deadline": int(row["block_deadline"]),
                 "data": {
                     # All the following values are in WEI.
-                    "uncapped_payment_eth": str(row["uncapped_payment_eth"]),
-                    "capped_payment": str(row["capped_payment"]),
-                    "execution_cost": str(row["execution_cost"]),
-                    "surplus": str(row["surplus"]),
-                    "fee": str(row["fee"]),
-                    "winning_score": str(row["winning_score"]),
-                    "reference_score": str(row["reference_score"]),
+                    "uncapped_payment_eth": int(row["uncapped_payment_eth"]),
+                    "capped_payment": int(row["capped_payment"]),
+                    "execution_cost": int(row["execution_cost"]),
+                    "surplus": int(row["surplus"]),
+                    "fee": int(row["fee"]),
+                    "winning_score": int(row["winning_score"]),
+                    "reference_score": int(row["reference_score"]),
                     "participating_solvers": row["participating_solvers"],
                 },
             }
