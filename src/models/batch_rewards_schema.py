@@ -34,8 +34,6 @@ class BatchRewards:
                     "fee": str(row["fee"]),
                     "winning_score": str(row["winning_score"]),
                     "reference_score": str(row["reference_score"]),
-                    # TODO - Not sure yet how to parse this bytea[]
-                    #  Will need to experiment with this.
                     "participating_solvers": row["participating_solvers"],
                 },
             }

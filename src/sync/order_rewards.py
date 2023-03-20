@@ -87,8 +87,7 @@ def sync_batch_rewards(
         block_from=last_sync_block(
             aws,
             table=sync_table,
-            genesis_block=16691686,  # First Recorded Batch Reward block
-            # TODO - use correct genesis block here. (note this is not actually determined yet)
+            genesis_block=16862919,  # First Recorded Batch Reward block
         ),
         block_to=fetcher.get_latest_block(),
     )

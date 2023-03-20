@@ -46,9 +46,7 @@ class TestFetchOrderbook(unittest.TestCase):
         rewards_df = OrderbookFetcher.get_batch_rewards(block_range)
         expected = pd.DataFrame(
             {
-                "block_number": pd.Series(
-                    [16846495, 16846502, pd.NA], dtype="Int64"
-                ),
+                "block_number": pd.Series([16846495, 16846502, pd.NA], dtype="Int64"),
                 "block_deadline": [16846509, 16846516, 16846524],
                 "tx_hash": [
                     "0x2189c2994dcffcd40cc92245e216b0fda42e0f30573ce4b131341e8ac776ed75",
