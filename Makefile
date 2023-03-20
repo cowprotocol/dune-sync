@@ -33,6 +33,9 @@ check:
 test-unit:
 	python -m pytest tests/unit
 
+test-integration:
+	python -m pytest tests/integration
+
 test:
 	python -m pytest tests
 
