@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+import pandas
 from pandas import DataFrame
 
 
@@ -18,19 +19,21 @@ class BatchRewards:
         """Converts Pandas DataFrame into the expected stream type for Dune"""
         return [
             {
-                "block_number": int(row["block_number"]),
+                "block_number": int(row["block_number"])
+                if not pandas.isna(row["block_number"])
+                else None,
                 "tx_hash": row["tx_hash"],
                 "solver": row["solver"],
+                "block_deadline": int(row["block_deadline"]),
                 "data": {
                     # All the following values are in WEI.
-                    "reward_eth": str(row["reward_eth"]),
+                    "uncapped_payment_eth": str(row["uncapped_payment_eth"]),
+                    "capped_payment": str(row["capped_payment"]),
                     "execution_cost": str(row["execution_cost"]),
                     "surplus": str(row["surplus"]),
                     "fee": str(row["fee"]),
                     "winning_score": str(row["winning_score"]),
                     "reference_score": str(row["reference_score"]),
-                    # TODO - Not sure yet how to parse this bytea[]
-                    #  Will need to experiment with this.
                     "participating_solvers": row["participating_solvers"],
                 },
             }

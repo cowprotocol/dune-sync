@@ -16,6 +16,15 @@ from src.models.block_range import BlockRange
 from src.utils import open_query
 
 REORG_THRESHOLD = 65
+NUMERICAL_COLUMNS = [
+    "execution_cost",
+    "surplus",
+    "fee",
+    "uncapped_payment_eth",
+    "capped_payment",
+    "winning_score",
+    "reference_score",
+]
 
 
 class OrderbookEnv(Enum):
@@ -101,9 +110,19 @@ class OrderbookFetcher:
             .replace("{{start_block}}", str(block_range.block_from))
             .replace("{{end_block}}", str(block_range.block_to))
         )
-        data_types = {"block_number": "int64"}
+        data_types = {
+            # According to this: https://stackoverflow.com/a/11548224
+            # capitalized int64 means `Optional<Integer>` and it appears to work.
+            "block_number": "Int64",
+            "block_deadline": "int64",
+        }
         barn, prod = cls._query_both_dbs(cow_reward_query, data_types)
 
         # Solvers do not appear in both environments!
         assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
-        return pd.concat([prod, barn])
+        # Ensure numerical types.
+        combined_df = pd.concat([prod, barn])
+        for number_col in NUMERICAL_COLUMNS:
+            combined_df[number_col] = pd.to_numeric(combined_df[number_col])
+
+        return combined_df
