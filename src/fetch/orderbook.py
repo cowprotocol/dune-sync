@@ -111,7 +111,4 @@ class OrderbookFetcher:
 
         # Solvers do not appear in both environments!
         assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
-        # Ensure numerical types.
-        combined_df = pd.concat([prod, barn])
-
-        return combined_df
+        return pd.concat([prod, barn])
