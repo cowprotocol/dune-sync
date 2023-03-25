@@ -16,15 +16,6 @@ from src.models.block_range import BlockRange
 from src.utils import open_query
 
 REORG_THRESHOLD = 65
-NUMERICAL_COLUMNS = [
-    "execution_cost",
-    "surplus",
-    "fee",
-    "uncapped_payment_eth",
-    "capped_payment",
-    "winning_score",
-    "reference_score",
-]
 
 
 class OrderbookEnv(Enum):
@@ -120,9 +111,4 @@ class OrderbookFetcher:
 
         # Solvers do not appear in both environments!
         assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
-        # Ensure numerical types.
-        combined_df = pd.concat([prod, barn])
-        for number_col in NUMERICAL_COLUMNS:
-            combined_df[number_col] = pd.to_numeric(combined_df[number_col])
-
-        return combined_df
+        return pd.concat([prod, barn])
