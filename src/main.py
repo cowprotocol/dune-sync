@@ -1,7 +1,6 @@
 """Main Entry point for app_hash sync"""
 import argparse
 import asyncio
-import logging.config
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,15 +9,14 @@ from dotenv import load_dotenv
 
 from src.fetch.dune import DuneFetcher
 from src.fetch.orderbook import OrderbookFetcher
+from src.logger import set_log
 from src.models.tables import SyncTable
 from src.post.aws import AWSClient
 from src.sync import sync_app_data
 from src.sync.config import SyncConfig, AppDataSyncConfig
 from src.sync.order_rewards import sync_order_rewards, sync_batch_rewards
 
-log = logging.getLogger(__name__)
-logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s %(message)s")
-log.setLevel(logging.DEBUG)
+log = set_log(__name__)
 
 
 @dataclass
