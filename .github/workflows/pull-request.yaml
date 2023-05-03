@@ -42,6 +42,8 @@ jobs:
         run: pip install -r requirements/dev.txt
       - name: Unit Tests
         run: python -m pytest tests/unit
+        env:
+          IPFS_ACCESS_KEY: ${{ secrets.IPFS_ACCESS_KEY }}
       - name: Integration Tests
         run: python -m pytest tests/integration
         env:

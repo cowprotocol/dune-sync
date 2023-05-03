@@ -41,9 +41,9 @@ class Cid:
 
     def url(self) -> str:
         """IPFS URL where content can be recovered"""
-        return f"https://gnosis.mypinata.cloud/ipfs/{self}"
+        return f"https://ipfs.cow.fi/ipfs/{self}"
 
-    def get_content(self, max_retries: int = 3) -> Optional[Any]:
+    def get_content(self, access_token: str, max_retries: int = 3) -> Optional[Any]:
         """
         Attempts to fetch content at cid with a timeout of 1 second.
         Trys `max_retries` times and otherwise returns None`
@@ -51,7 +51,11 @@ class Cid:
         attempts = 0
         while attempts < max_retries:
             try:
-                response = requests.get(self.url(), timeout=1)
+                response = requests.get(
+                    self.url(),
+                    timeout=1,
+                    headers={"x-pinata-gateway-token": access_token},
+                )
                 return response.json()
             except requests.exceptions.ReadTimeout:
                 attempts += 1
@@ -62,11 +66,13 @@ class Cid:
 
     @classmethod
     async def fetch_many(  # pylint: disable=too-many-locals
-        cls, missing_rows: list[dict[str, str]], max_retries: int = 3
+        cls, missing_rows: list[dict[str, str]], access_token: str, max_retries: int = 3
     ) -> tuple[list[FoundContent], list[NotFoundContent]]:
         """Async AppData Fetching"""
         found, not_found = [], []
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(
+            headers={"x-pinata-gateway-token": access_token}
+        ) as session:
             while missing_rows:
                 row = missing_rows.pop()
                 app_hash = row["app_hash"]

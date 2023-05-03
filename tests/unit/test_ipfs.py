@@ -1,7 +1,13 @@
+import os
 import unittest
 from unittest import IsolatedAsyncioTestCase
 
+from dotenv import load_dotenv
+
 from src.fetch.ipfs import Cid
+
+load_dotenv()
+ACCESS_KEY = os.environ["IPFS_ACCESS_KEY"]
 
 
 class TestIPFS(unittest.TestCase):
@@ -34,7 +40,7 @@ class TestIPFS(unittest.TestCase):
             "0000000000000000000000000000000000000000000000000000000000000000"
         )
 
-        self.assertEqual(None, null_cid.get_content(max_retries=10))
+        self.assertEqual(None, null_cid.get_content(ACCESS_KEY, max_retries=10))
 
     def test_get_content(self):
         self.assertEqual(
@@ -50,7 +56,7 @@ class TestIPFS(unittest.TestCase):
             },
             Cid(
                 "3d876de8fcd70969349c92d731eeb0482fe8667ceca075592b8785081d630b9a"
-            ).get_content(max_retries=10),
+            ).get_content(ACCESS_KEY, max_retries=10),
         )
 
         self.assertEqual(
@@ -67,7 +73,7 @@ class TestIPFS(unittest.TestCase):
             },
             Cid(
                 "1FE7C5555B3F9C14FF7C60D90F15F1A5B11A0DA5B1E8AA043582A1B2E1058D0C"
-            ).get_content(),
+            ).get_content(ACCESS_KEY),
         )
 
 
@@ -191,7 +197,7 @@ class TestAsyncIPFS(IsolatedAsyncioTestCase):
                 "first_seen_block": 13971658,
             },
         ]
-        results = await Cid.fetch_many(x)
+        results = await Cid.fetch_many(x, ACCESS_KEY)
         print(results)
 
 

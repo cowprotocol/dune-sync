@@ -33,10 +33,12 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
         new_rows: list[DuneRecord],
         block_range: BlockRange,
         config: SyncConfig,
+        ipfs_access_key: str,
         missing_file_name: str,
     ):
         super().__init__(block_range, SYNC_TABLE, config)
         self.file_manager = file_manager
+        self.ipfs_access_key = ipfs_access_key
 
         self._found: list[FoundContent] = []
         self._not_found: list[NotFoundContent] = []
@@ -57,12 +59,16 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
 
     async def _handle_new_records(self, max_retries: int) -> None:
         # Drain the dune_results into "found" and "not found" categories
-        self._found, self._not_found = await Cid.fetch_many(self.new_rows, max_retries)
+        self._found, self._not_found = await Cid.fetch_many(
+            self.new_rows, self.ipfs_access_key, max_retries
+        )
 
     async def _handle_missing_records(
         self, max_retries: int, give_up_threshold: int
     ) -> None:
-        found, not_found = await Cid.fetch_many(self.missing_values, max_retries)
+        found, not_found = await Cid.fetch_many(
+            self.missing_values, self.ipfs_access_key, max_retries
+        )
         while found:
             self._found.append(found.pop())
         while not_found:
@@ -120,6 +126,7 @@ async def sync_app_data(
     aws: AWSClient,
     dune: DuneFetcher,
     config: AppDataSyncConfig,
+    ipfs_access_key: str,
     dry_run: bool,
 ) -> None:
     """App Data Sync Logic"""
@@ -137,6 +144,7 @@ async def sync_app_data(
         new_rows=await dune.get_app_hashes(block_range),
         block_range=block_range,
         config=config,
+        ipfs_access_key=ipfs_access_key,
         missing_file_name=config.missing_files_name,
     )
     await data_handler.fetch_content_and_filter(
