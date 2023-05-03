@@ -64,6 +64,7 @@ if __name__ == "__main__":
                         os.environ.get("APP_DATA_GIVE_UP_THRESHOLD", 100)
                     ),
                 ),
+                ipfs_access_key=os.environ["IPFS_ACCESS_KEY"],
                 dry_run=args.dry_run,
             )
         )
