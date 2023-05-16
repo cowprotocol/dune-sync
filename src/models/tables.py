@@ -8,6 +8,7 @@ class SyncTable(Enum):
     APP_DATA = "app_data"
     ORDER_REWARDS = "order_rewards"
     BATCH_REWARDS = "batch_rewards"
+    INTERNAL_IMBALANCE = "internal_imbalance"
 
     def __str__(self) -> str:
         return str(self.value)

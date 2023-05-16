@@ -9,12 +9,14 @@ from dotenv import load_dotenv
 
 from src.fetch.dune import DuneFetcher
 from src.fetch.orderbook import OrderbookFetcher
+from src.fetch.postgres import PostgresFetcher
 from src.logger import set_log
 from src.models.tables import SyncTable
 from src.post.aws import AWSClient
 from src.sync import sync_app_data
 from src.sync.config import SyncConfig, AppDataSyncConfig
 from src.sync.order_rewards import sync_order_rewards, sync_batch_rewards
+from src.sync.token_imbalance import sync_internal_imbalance
 
 log = set_log(__name__)
 
@@ -80,6 +82,13 @@ if __name__ == "__main__":
             aws,
             config=SyncConfig(volume_path),
             fetcher=OrderbookFetcher(),
+            dry_run=args.dry_run,
+        )
+    elif args.sync_table == SyncTable.INTERNAL_IMBALANCE:
+        sync_internal_imbalance(
+            aws,
+            config=SyncConfig(volume_path),
+            fetcher=PostgresFetcher(os.environ["WAREHOUSE_URL"]),
             dry_run=args.dry_run,
         )
     else:
