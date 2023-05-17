@@ -24,8 +24,10 @@ def sync_internal_imbalance(
         block_from=last_sync_block(
             aws,
             table=sync_table,
-            # TODO - determine and set the correct genesis block!
-            genesis_block=17236982,
+            # The first block for which solver competitions
+            # are available in production orderbook:
+            # select * from solver_competitions where id = 1;
+            genesis_block=15173540,
         ),
         block_to=fetcher.get_latest_block(),
     )
