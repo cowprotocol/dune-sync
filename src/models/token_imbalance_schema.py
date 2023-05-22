@@ -21,7 +21,7 @@ class TokenImbalance:
                 "block_number": int(row["block_number"]),
                 "tx_hash": row["tx_hash"],
                 "token": row["token"],
-                "amount": int(row["amount"]),
+                "amount": str(row["amount"]),
             }
             for row in frame.to_dict(orient="records")
         ]

@@ -19,20 +19,20 @@ class TestModelTokenImbalance(unittest.TestCase):
                     "0xa0",
                     "0xa1",
                 ],
-                "amount": [9999, max_uint],
+                "amount": [-9999, max_uint],
             }
         )
 
         self.assertEqual(
             [
                 {
-                    "amount": 9999,
+                    "amount": "-9999",
                     "block_number": 123,
                     "token": "0xa0",
                     "tx_hash": "0x71",
                 },
                 {
-                    "amount": 115792089237316195423570985008687907853269984665640564039457584007913129639936,
+                    "amount": "115792089237316195423570985008687907853269984665640564039457584007913129639936",
                     "block_number": 456,
                     "token": "0xa1",
                     "tx_hash": "0x72",
