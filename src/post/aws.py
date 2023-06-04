@@ -82,7 +82,7 @@ class BucketStructure:
                 # Catches any unrecognized filepath.
                 log.warning(f"Found unexpected file {object_key}")
 
-        log.debug(f"loaded bucket filesystem: {grouped_files}")
+        log.debug(f"loaded bucket filesystem: {grouped_files.keys()}")
 
         return cls(files=grouped_files)
 
