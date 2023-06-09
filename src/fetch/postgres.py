@@ -28,7 +28,7 @@ class PostgresFetcher:
     def _read_query(
         self, query: str, data_types: Optional[dict[str, str]] = None
     ) -> DataFrame:
-        return pd.read_sql_query(query, con=self.engine, dtype=data_types)  # type: ignore
+        return pd.read_sql_query(query, con=self.engine, dtype=data_types)
 
     def get_latest_block(self) -> int:
         """
