@@ -52,7 +52,7 @@ class OrderbookFetcher:
         # It seems there is a bug in mypy on the dtype field (with error [arg-type]).
         # They expect types that should align with what we pass.
         # More context at: https://github.com/cowprotocol/dune-sync/issues/24
-        return pd.read_sql_query(query, con=cls._pg_engine(env), dtype=data_types)  # type: ignore
+        return pd.read_sql_query(query, con=cls._pg_engine(env), dtype=data_types)
 
     @classmethod
     def _query_both_dbs(
