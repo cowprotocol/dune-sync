@@ -14,16 +14,24 @@ from src.models.app_data_content import FoundContent, NotFoundContent
 
 log = set_log(__name__)
 
+OLD_PREFIX = bytearray([1, 112, 18, 32])
+# https://github.com/cowprotocol/services/blob/2db800aa38824e32fb542c9e2387d77ca6349676/crates/app-data-hash/src/lib.rs#L41-L44
+NEW_PREFIX = bytearray([1, 0x55, 0x1B, 32])
+
 
 class Cid:
     """Holds logic for constructing and converting various representations of a Delegation ID"""
 
-    def __init__(self, hex_str: str) -> None:
+    def __init__(self, hex_str: str, prefix: bytearray = NEW_PREFIX) -> None:
         """Builds Object (bytes as base representation) from hex string."""
         stripped_hex = hex_str.replace("0x", "")
         # Anatomy of a CID: https://proto.school/anatomy-of-a-cid/04
-        prefix = bytearray([1, 112, 18, 32])
         self.bytes = bytes(prefix + bytes.fromhex(stripped_hex))
+
+    @classmethod
+    def old_schema(cls, hex_str: str) -> Cid:
+        """Constructor of old CID format (with different prefix)"""
+        return cls(hex_str, OLD_PREFIX)
 
     @property
     def hex(self) -> str:
@@ -85,6 +93,12 @@ class Cid:
                 result = await cid.fetch_content(
                     max_retries, previous_attempts, session, first_seen_block
                 )
+                if isinstance(result, NotFoundContent):
+                    # Try Fetching the old format
+                    result = await cls.old_schema(app_hash).fetch_content(
+                        max_retries, previous_attempts, session, first_seen_block
+                    )
+
                 if isinstance(result, FoundContent):
                     found.append(result)
                 else:

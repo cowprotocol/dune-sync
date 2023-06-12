@@ -15,7 +15,7 @@ class TestIPFS(unittest.TestCase):
         self.assertEqual(
             "bafybeib5q5w6r7gxbfutjhes24y65mcif7ugm7hmub2vsk4hqueb2yylti",
             str(
-                Cid(
+                Cid.old_schema(
                     "0x3d876de8fcd70969349c92d731eeb0482fe8667ceca075592b8785081d630b9a"
                 )
             ),
@@ -23,8 +23,18 @@ class TestIPFS(unittest.TestCase):
         self.assertEqual(
             "bafybeia747cvkwz7tqkp67da3ehrl4nfwena3jnr5cvainmcugzocbmnbq",
             str(
-                Cid(
+                Cid.old_schema(
                     "0x1FE7C5555B3F9C14FF7C60D90F15F1A5B11A0DA5B1E8AA043582A1B2E1058D0C"
+                )
+            ),
+        )
+
+    def test_new_hash_to_cid(self):
+        self.assertEqual(
+            "bafkrwiek6tumtfzvo6yivqq5c7jtdkw6q3ar5pgfcjdujvrbzkbwl3eueq",
+            str(
+                Cid(
+                    "0x8af4e8c9973577b08ac21d17d331aade86c11ebcc5124744d621ca8365ec9424"
                 )
             ),
         )
@@ -54,7 +64,7 @@ class TestIPFS(unittest.TestCase):
                     }
                 },
             },
-            Cid(
+            Cid.old_schema(
                 "3d876de8fcd70969349c92d731eeb0482fe8667ceca075592b8785081d630b9a"
             ).get_content(ACCESS_KEY, max_retries=10),
         )
@@ -71,7 +81,7 @@ class TestIPFS(unittest.TestCase):
                     }
                 },
             },
-            Cid(
+            Cid.old_schema(
                 "1FE7C5555B3F9C14FF7C60D90F15F1A5B11A0DA5B1E8AA043582A1B2E1058D0C"
             ).get_content(ACCESS_KEY),
         )
