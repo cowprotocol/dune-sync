@@ -6,6 +6,7 @@ from typing import Any, Optional
 
 import aiohttp
 import requests
+from aiohttp import ClientSession
 from multiformats_cid.cid import from_bytes
 
 from src.logger import set_log
@@ -76,50 +77,64 @@ class Cid:
             while missing_rows:
                 row = missing_rows.pop()
                 app_hash = row["app_hash"]
-                cid = cls(app_hash)
-                attempts = 0
+
                 previous_attempts = int(row.get("attempts", 0))
-                content = None
-                while attempts < max_retries:
-                    try:
-                        async with session.get(cid.url(), timeout=1) as response:
-                            content = await response.json()
-                            if previous_attempts:
-                                log.debug(
-                                    f"Found previously missing content hash {app_hash} at CID {cid}"
-                                )
-                            else:
-                                log.debug(
-                                    f"Found content for {app_hash} at "
-                                    f"CID {cid} ({attempts + 1} trys)"
-                                )
-                            found.append(
-                                FoundContent(
-                                    app_hash=app_hash,
-                                    first_seen_block=int(row["first_seen_block"]),
-                                    content=content,
-                                )
-                            )
-                            break
-                    except asyncio.TimeoutError:
-                        attempts += 1
-                    except aiohttp.ContentTypeError as err:
-                        log.warning(f"failed to parse response {response} with {err}")
-                        attempts += 1
+                cid = cls(app_hash)
 
-                if not content:
-                    total_attempts = previous_attempts + max_retries
-                    base_message = f"no content found for {app_hash} at CID {cid} after"
-                    if previous_attempts:
-                        log.debug(f"still {base_message} {total_attempts} attempts")
-                    else:
-                        log.debug(f"{base_message} {max_retries} retries")
+                first_seen_block = int(row["first_seen_block"])
+                result = await cid.fetch_content(
+                    max_retries, previous_attempts, session, first_seen_block
+                )
+                if isinstance(result, FoundContent):
+                    found.append(result)
+                else:
+                    assert isinstance(result, NotFoundContent)
+                    not_found.append(result)
 
-                    not_found.append(
-                        NotFoundContent(
-                            app_hash=app_hash,
-                            first_seen_block=int(row["first_seen_block"]),
-                            attempts=total_attempts,
-                        )
-                    )
             return found, not_found
+
+    async def fetch_content(
+        self,
+        max_retries: int,
+        previous_attempts: int,
+        session: ClientSession,
+        first_seen_block: int,
+    ) -> FoundContent | NotFoundContent:
+        """Asynchronous content fetching"""
+        attempts = 0
+        while attempts < max_retries:
+            try:
+                async with session.get(self.url(), timeout=1) as response:
+                    content = await response.json()
+                    if previous_attempts:
+                        log.debug(
+                            f"Found previously missing content hash {self.hex} at CID {self}"
+                        )
+                    else:
+                        log.debug(
+                            f"Found content for {self.hex} at CID {self} ({attempts + 1} trys)"
+                        )
+                    return FoundContent(
+                        app_hash=self.hex,
+                        first_seen_block=first_seen_block,
+                        content=content,
+                    )
+            except asyncio.TimeoutError:
+                attempts += 1
+            except aiohttp.ContentTypeError as err:
+                log.warning(f"failed to parse response {response} with {err}")
+                attempts += 1
+
+        #  Content Not Found.
+        total_attempts = previous_attempts + max_retries
+        base_message = f"no content found for {self.hex} at CID {self} after"
+        if previous_attempts:
+            log.debug(f"still {base_message} {total_attempts} attempts")
+        else:
+            log.debug(f"{base_message} {max_retries} retries")
+
+        return NotFoundContent(
+            app_hash=self.hex,
+            first_seen_block=first_seen_block,
+            attempts=total_attempts,
+        )
