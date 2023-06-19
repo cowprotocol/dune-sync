@@ -125,17 +125,21 @@ class AWSClient:
         https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-api.html
         """
         sts_client = boto3.client("sts")
-
+        
+        # TODO - assume that the internal role is already assumed. and use get session_token
+        # sts_client.get_session_token()
         internal_assumed_role_object = sts_client.assume_role(
             RoleArn=self.internal_role,
             RoleSessionName="InternalSession",
         )
         credentials = internal_assumed_role_object["Credentials"]
+        # sts_client.get_session_token()
+
         sts_client = boto3.client(
             "sts",
-            aws_access_key_id=credentials["AccessKeyId"],
-            aws_secret_access_key=credentials["SecretAccessKey"],
-            aws_session_token=credentials["SessionToken"],
+            aws_access_key_id=credentials["AccessKeyId"],          # AWS_ACCESS_KEY_ID
+            aws_secret_access_key=credentials["SecretAccessKey"],  # AWS_SECRET_ACCESS_KEY
+            aws_session_token=credentials["SessionToken"],         # AWS_SESSION_TOKEN
         )
 
         external_assumed_role_object = sts_client.assume_role(
@@ -179,6 +183,7 @@ class AWSClient:
                            be f"{table_name}/cow_{latest_block_number}.json"
         :return: True if file was uploaded, else raises
         """
+        # TODO - try this: https://github.com/flashbots/mev-inspect-py/blob/main/mev_inspect/s3_export.py#L91
         s3_client = self._get_s3_client(self._assume_role())
         S3Transfer(s3_client).upload_file(
             filename=filename,
