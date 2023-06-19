@@ -5,8 +5,7 @@ import sys
 from s3transfer import S3UploadFailedError
 
 from src.logger import set_log
-from src.models.tables import SyncTable
-from src.post.aws import AWSClient
+from src.aws import AWSClient
 from src.sync.record_handler import RecordHandler
 
 log = set_log(__name__)
@@ -21,7 +20,7 @@ class UploadHandler:  # pylint: disable=too-few-public-methods
     in the appropriate order.
     """
 
-    def __init__(self, aws: AWSClient, record_handler: RecordHandler, table: SyncTable):
+    def __init__(self, aws: AWSClient, record_handler: RecordHandler, table: str):
         self.aws = aws
         self.record_handler = record_handler
         self.table = str(table)
@@ -55,15 +54,12 @@ class UploadHandler:  # pylint: disable=too-few-public-methods
             record_handler.name,
         )
 
-        record_handler.write_found_content()
         if num_records > 0:
             log.info(
                 f"attempting to post {num_records} new {name} records for block range {block_range}"
             )
             if dry_run:
-                log.info(
-                    "DRY-RUN-ENABLED: New records written to volume, but not posted to AWS."
-                )
+                log.info("DRY-RUN-ENABLED: new records not posted to AWS.")
             else:
                 self._aws_login_and_upload()
                 log.info(
@@ -73,4 +69,3 @@ class UploadHandler:  # pylint: disable=too-few-public-methods
         else:
             log.info(f"No new {name} for block range {block_range}: no sync necessary")
 
-        record_handler.write_sync_data()

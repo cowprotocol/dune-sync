@@ -1,13 +1,12 @@
 """Shared methods between both sync scripts."""
 
 from src.logger import set_log
-from src.models.tables import SyncTable
-from src.post.aws import AWSClient
+from src.aws import AWSClient
 
 log = set_log(__name__)
 
 
-def last_sync_block(aws: AWSClient, table: SyncTable, genesis_block: int = 0) -> int:
+def last_sync_block(aws: AWSClient, table: str, genesis_block: int = 0) -> int:
     """Attempts to get last sync block from AWS Bucket files, otherwise uses genesis"""
     try:
         block_from = aws.last_sync_block(table)

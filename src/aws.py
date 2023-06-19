@@ -13,7 +13,6 @@ from botocore.client import BaseClient
 from dotenv import load_dotenv
 
 from src.logger import set_log
-from src.models.tables import SyncTable
 
 log = set_log(__name__)
 
@@ -78,21 +77,17 @@ class BucketStructure:
             object_key = bucket_obj.key
             path, _ = object_key.split("/")
             grouped_files[path].append(BucketFileObject.from_key(object_key))
-            if path not in SyncTable.supported_tables():
-                # Catches any unrecognized filepath.
-                log.warning(f"Found unexpected file {object_key}")
 
         log.debug(f"loaded bucket filesystem: {grouped_files.keys()}")
 
         return cls(files=grouped_files)
 
-    def get(self, table: SyncTable | str) -> list[BucketFileObject]:
+    def get(self, table: str) -> list[BucketFileObject]:
         """
         Returns the list of files under `table`
             - returns empty list if none available.
         """
-        table_str = str(table) if isinstance(table, SyncTable) else table
-        return self.files.get(table_str, [])
+        return self.files.get(table, [])
 
 
 class AWSClient:
@@ -175,6 +170,24 @@ class AWSClient:
         )
         log.debug(f"uploaded {filename} to {self.bucket}")
         return True
+    
+    def put_object(self, filename: str, object_key: str) -> bool:
+        """Upload a file to an S3 bucket
+
+        :param filename: File to upload. Should be a full path to file.
+        :param object_key: S3 object key. For our purposes, this would
+                           be f"{table_name}/cow_{latest_block_number}.json"
+        :return: True if file was uploaded, else raises
+        """
+        s3_client = self._get_s3_client(self._assume_role())
+        S3Transfer(s3_client).upload_file(
+            filename=filename,
+            bucket=self.bucket,
+            key=object_key,
+            extra_args={"ACL": "bucket-owner-full-control"},
+        )
+        log.debug(f"uploaded {filename} to {self.bucket}")
+        return True
 
     def delete_file(self, object_key: str) -> bool:
         """Delete a file from an S3 bucket
@@ -183,7 +196,6 @@ class AWSClient:
                            be f"{table_name}/cow_{latest_block_number}.json"
         :return: True if file was deleted, else raises
         """
-        # TODO - types! error: "BaseClient" has no attribute "delete_object"
         s3_client = self._get_s3_client(self._assume_role())
         s3_client.delete_object(  # type: ignore
             Bucket=self.bucket,
@@ -220,14 +232,13 @@ class AWSClient:
         bucket_objects = bucket.objects.all()
         return BucketStructure.from_bucket_collection(bucket_objects)
 
-    def last_sync_block(self, table: SyncTable | str) -> int:
+    def last_sync_block(self, table: str) -> int:
         """
         Based on the existing bucket files,
         the last sync block is uniquely determined from the file names.
         """
-        table_str = str(table) if isinstance(table, SyncTable) else table
         try:
-            table_files = self.existing_files().get(table_str)
+            table_files = self.existing_files().get(table)
             return max(file_obj.block for file_obj in table_files if file_obj.block)
         except ValueError as err:
             # Raised when table_files = []
@@ -235,7 +246,7 @@ class AWSClient:
                 f"Could not determine last sync block for {table} files. No files."
             ) from err
 
-    def delete_all(self, table: SyncTable | str) -> None:
+    def delete_all(self, table: str) -> None:
         """Deletes all files within the supported tables directory"""
         log.info(f"Emptying Bucket {table}")
         try:
@@ -245,6 +256,4 @@ class AWSClient:
                 log.info(f"Deleting file {file_data.object_key}")
                 self.delete_file(file_data.object_key)
         except KeyError as err:
-            raise ValueError(
-                f"Invalid table_name {table}, please chose from {SyncTable.supported_tables()}"
-            ) from err
+            raise ValueError(f"invalid table name {table}") from err
