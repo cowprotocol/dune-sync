@@ -193,6 +193,7 @@ class AWSClient:
         )
 
         s3_client = self._get_s3_client(self._assume_role())
+
         s3_client.upload_fileobj(
             file_object,
             bucket=self.bucket,
