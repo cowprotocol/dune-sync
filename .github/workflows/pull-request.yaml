@@ -24,3 +24,29 @@ jobs:
         run: black --check ./
       - name: Type Check (mypy)
         run: mypy src --strict
+
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Requirements
+        run: pip install -r requirements/dev.txt
+      - name: Unit Tests
+        run: python -m pytest tests/unit
+        env:
+          IPFS_ACCESS_KEY: ${{ secrets.IPFS_ACCESS_KEY }}
+      - name: Integration Tests
+        run: python -m pytest tests/integration
+        env:
+          PROD_DB_URL: ${{ secrets.PROD_DB_URL }}
+          BARN_DB_URL: ${{ secrets.BARN_DB_URL }}
+          WAREHOUSE_URL: ${{ secrets.WAREHOUSE_URL }}

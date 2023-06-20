@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from dotenv import load_dotenv
 
-from src.aws import AWSClient, BucketFileObject
+from src.post.aws import AWSClient, BucketFileObject
 
 
 class TestAWSConnection(unittest.TestCase):
