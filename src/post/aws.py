@@ -10,7 +10,6 @@ import boto3
 from boto3.resources.base import ServiceResource
 from boto3.s3.transfer import S3Transfer
 from botocore.client import BaseClient
-from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 
 from src.logger import set_log
