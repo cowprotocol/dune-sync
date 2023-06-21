@@ -132,14 +132,14 @@ class AWSClient:
         """
         sts_client = boto3.client("sts")
 
-        try:
+        if "AWS_SECRET_ACCESS_KEY" in os.environ:
             # When credentials are supplied directly in the environment (local testing)
             internal_assumed_role_object = sts_client.assume_role(
                 RoleArn=self.internal_role,
                 RoleSessionName="InternalSession",
             )
             credentials = internal_assumed_role_object["Credentials"]
-        except ClientError:
+        else:
             # When deployed to AWS and
             credentials = sts_client.get_session_token()["Credentials"]
 
