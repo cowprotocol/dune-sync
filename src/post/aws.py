@@ -138,16 +138,13 @@ class AWSClient:
                 RoleSessionName="InternalSession",
             )
             credentials = internal_assumed_role_object["Credentials"]
-        else:
-            # When deployed to AWS and
-            credentials = sts_client.get_session_token()["Credentials"]
 
-        sts_client = boto3.client(
-            "sts",
-            aws_access_key_id=credentials["AccessKeyId"],
-            aws_secret_access_key=credentials["SecretAccessKey"],
-            aws_session_token=credentials["SessionToken"],
-        )
+            sts_client = boto3.client(
+                "sts",
+                aws_access_key_id=credentials["AccessKeyId"],
+                aws_secret_access_key=credentials["SecretAccessKey"],
+                aws_session_token=credentials["SessionToken"],
+            )
 
         external_assumed_role_object = sts_client.assume_role(
             RoleArn=self.external_role,
