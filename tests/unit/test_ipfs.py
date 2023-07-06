@@ -5,6 +5,7 @@ from unittest import IsolatedAsyncioTestCase
 from dotenv import load_dotenv
 
 from src.fetch.ipfs import Cid
+from src.models.app_data_content import FoundContent
 
 load_dotenv()
 ACCESS_KEY = os.environ["IPFS_ACCESS_KEY"]
@@ -84,6 +85,69 @@ class TestIPFS(unittest.TestCase):
             Cid.old_schema(
                 "1FE7C5555B3F9C14FF7C60D90F15F1A5B11A0DA5B1E8AA043582A1B2E1058D0C"
             ).get_content(ACCESS_KEY),
+        )
+
+    def test_get_content_from_backend(self):
+        # only exists on prod
+        self.assertEqual(
+            FoundContent(
+                app_hash="008f7a676ab1284ba638d777c3ec36a1aadd4d5b794604a79bda78d5509f134d",
+                first_seen_block=0,
+                content={
+                    "appCode": "CoW Swap-SafeApp",
+                    "environment": "production",
+                    "metadata": {
+                        "quote": {"slippageBips": "30", "version": "0.2.0"},
+                        "orderClass": {"orderClass": "market", "version": "0.1.0"},
+                    },
+                    "version": "0.6.0",
+                },
+            ),
+            Cid.fetch_from_backend(
+                "008f7a676ab1284ba638d777c3ec36a1aadd4d5b794604a79bda78d5509f134d", 0, 0
+            ),
+        )
+
+        # only exists on barn
+        self.assertEqual(
+            FoundContent(
+                app_hash="080469552d19a60b9aef6418c564176ec099bd049c78bffa5cda51d5b0f539f8",
+                first_seen_block=0,
+                content={
+                    "appCode": "CoW Swap",
+                    "environment": "barn",
+                    "metadata": {
+                        "quote": {"slippageBips": "100", "version": "0.2.0"},
+                        "orderClass": {"orderClass": "market", "version": "0.1.0"},
+                    },
+                    "version": "0.5.0",
+                },
+            ),
+            Cid.fetch_from_backend(
+                "080469552d19a60b9aef6418c564176ec099bd049c78bffa5cda51d5b0f539f8", 0, 0
+            ),
+        )
+
+        # also works with 0x prefixed string
+        self.assertEqual(
+            FoundContent(
+                app_hash="0x080469552d19a60b9aef6418c564176ec099bd049c78bffa5cda51d5b0f539f8",
+                first_seen_block=0,
+                content={
+                    "appCode": "CoW Swap",
+                    "environment": "barn",
+                    "metadata": {
+                        "quote": {"slippageBips": "100", "version": "0.2.0"},
+                        "orderClass": {"orderClass": "market", "version": "0.1.0"},
+                    },
+                    "version": "0.5.0",
+                },
+            ),
+            Cid.fetch_from_backend(
+                "0x080469552d19a60b9aef6418c564176ec099bd049c78bffa5cda51d5b0f539f8",
+                0,
+                0,
+            ),
         )
 
 
