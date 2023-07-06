@@ -39,21 +39,14 @@ class Cid:
     ) -> FoundContent | NotFoundContent:
         """Fetches the given app data hash from the cow protocol backend (prod and staging)"""
 
-        # first try prod
-        url = f"https://api.cow.fi/mainnet/api/v1/app_data/{hex_str}"
-        response = cls.fetch_from_backend_inner(
-            url, hex_str, first_seen_block, attempts
-        )
-        if response:
-            return response
-
-        # then try barn
-        url = f"https://barn.api.cow.fi/mainnet/api/v1/app_data/{hex_str}"
-        response = cls.fetch_from_backend_inner(
-            url, hex_str, first_seen_block, attempts
-        )
-        if response:
-            return response
+        envs = ["api", "barn.api"]
+        for env in envs:
+            url = f"https://{env}.cow.fi/mainnet/api/v1/app_data/{hex_str}"
+            response = cls.fetch_from_backend_inner(
+                url, hex_str, first_seen_block, attempts
+            )
+            if response:
+                return response
 
         return NotFoundContent(hex_str, first_seen_block, attempts + 1)
 
