@@ -33,6 +33,40 @@ class Cid:
         """Constructor of old CID format (with different prefix)"""
         return cls(hex_str, OLD_PREFIX)
 
+    @classmethod
+    def fetch_from_backend(
+        cls, hex_str: str, first_seen_block: int, attempts: int
+    ) -> FoundContent | NotFoundContent:
+        """Fetches the given app data hash from the cow protocol backend (prod and staging)"""
+
+        envs = ["api", "barn.api"]
+        for env in envs:
+            url = f"https://{env}.cow.fi/mainnet/api/v1/app_data/{hex_str}"
+            response = cls.fetch_from_backend_inner(
+                url, hex_str, first_seen_block, attempts
+            )
+            if response:
+                return response
+
+        return NotFoundContent(hex_str, first_seen_block, attempts + 1)
+
+    @classmethod
+    def fetch_from_backend_inner(
+        cls, url: str, hex_str: str, first_seen_block: int, attempts: int
+    ) -> Optional[FoundContent]:
+        """Fetches the given app data hash from the specified backend url"""
+        response = requests.get(url, timeout=1)
+        if response.status_code != 200:
+            return None
+
+        if attempts:
+            log.debug(f"Found previously missing content hash {hex_str} in the backend")
+        else:
+            log.debug(
+                f"Found content for {hex_str} in the backend ({attempts + 1} trys)"
+            )
+        return FoundContent(hex_str, first_seen_block, response.json())
+
     @property
     def hex(self) -> str:
         """Returns hex representation"""
@@ -90,13 +124,21 @@ class Cid:
                 cid = cls(app_hash)
 
                 first_seen_block = int(row["first_seen_block"])
+                # try fetching new format from IPFS
                 result = await cid.fetch_content(
                     max_retries, previous_attempts, session, first_seen_block
                 )
+
                 if isinstance(result, NotFoundContent):
-                    # Try Fetching the old format
+                    # try fetching the old format from IPFS
                     result = await cls.old_schema(app_hash).fetch_content(
                         max_retries, previous_attempts, session, first_seen_block
+                    )
+
+                if isinstance(result, NotFoundContent):
+                    # try fetching any format from backend (prod and staging)
+                    result = cls.fetch_from_backend(
+                        app_hash, first_seen_block, previous_attempts
                     )
 
                 if isinstance(result, FoundContent):
