@@ -64,6 +64,7 @@ class TestSyncAppData(IsolatedAsyncioTestCase):
             block_range=block_range_2,
             config=self.config,
             missing_file_name=missing_files,
+            ipfs_access_key=os.environ["IPFS_ACCESS_KEY"],
         )
         print(
             f"Beginning Second Run Content Fetching on {len(data_handler.new_rows)} records"

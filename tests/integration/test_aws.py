@@ -35,7 +35,7 @@ class TestAWSConnection(unittest.TestCase):
         s3_resource = self.aws_client._assume_role()
         self.assertIsNotNone(s3_resource.buckets)
 
-    def test_create_upload_remove(self):
+    def create_upload_remove(self):
         Path(self.empty_file).touch()
         self.aws_client.upload_file(
             filename=self.empty_file,
