@@ -13,6 +13,7 @@ class TestModelOrderRewards(unittest.TestCase):
                 "order_uid": ["0x01", "0x02", "0x03"],
                 "solver": ["0x51", "0x52", "0x53"],
                 "tx_hash": ["0x71", "0x72", "0x73"],
+                "quote_solver": ["0x21", None, "0x22"],
                 "surplus_fee": [12345678910111213, 0, 0],
                 "amount": [40.70410, 39.00522, 0],
             }
@@ -28,6 +29,7 @@ class TestModelOrderRewards(unittest.TestCase):
                     "data": {
                         "surplus_fee": "12345678910111213",
                         "amount": 40.70410,
+                        "quote_solver": "0x21",
                     },
                 },
                 {
@@ -38,6 +40,7 @@ class TestModelOrderRewards(unittest.TestCase):
                     "data": {
                         "surplus_fee": "0",
                         "amount": 39.00522,
+                        "quote_solver": None,
                     },
                 },
                 {
@@ -48,6 +51,7 @@ class TestModelOrderRewards(unittest.TestCase):
                     "data": {
                         "surplus_fee": "0",
                         "amount": 0.0,
+                        "quote_solver": "0x22",
                     },
                 },
             ],
