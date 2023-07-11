@@ -29,6 +29,7 @@ class TestFetchOrderbook(unittest.TestCase):
                     "0x3cee8c7d9b5c8f225a8c36e7d3514e1860309651",
                     "0xc9ec550bea1c64d779124b23a26292cc223327b6",
                 ],
+                "quote_solver": [None, None],
                 "tx_hash": [
                     "0xb6f7df8a1114129f7b61f2863b3f81b3620e95f73e5b769a62bb7a87ab6983f4",
                     "0x2ce77009e78c291cdf39eb6f8ddf7e2c3401b4f962ef1240bdac47e632f8eb7f",
