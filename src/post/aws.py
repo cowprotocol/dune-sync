@@ -251,3 +251,20 @@ class AWSClient:
             raise ValueError(
                 f"Invalid table_name {table}, please chose from {SyncTable.supported_tables()}"
             ) from err
+
+    def delete_from(self, table: SyncTable | str, block_number: int) -> None:
+        """Deletes all files above and including `block_numer`"""
+        log.info(f"Deleting all files in {table} from {block_number}")
+        try:
+            table_files = self.existing_files().get(table)
+            filtered_files = [
+                fd for fd in table_files if fd.block is None or fd.block >= block_number
+            ]
+            log.info(f"Found {len(filtered_files)} files to be removed.")
+            for file_data in filtered_files:
+                log.info(f"Deleting file {file_data.object_key}")
+                self.delete_file(file_data.object_key)
+        except KeyError as err:
+            raise ValueError(
+                f"Invalid table_name {table}, please chose from {SyncTable.supported_tables()}"
+            ) from err
