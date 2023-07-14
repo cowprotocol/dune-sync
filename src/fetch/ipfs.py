@@ -55,7 +55,7 @@ class Cid:
         cls, url: str, hex_str: str, first_seen_block: int, attempts: int
     ) -> Optional[FoundContent]:
         """Fetches the given app data hash from the specified backend url"""
-        response = requests.get(url, timeout=1)
+        response = requests.get(url, timeout=5)
         if response.status_code != 200:
             return None
 
@@ -124,21 +124,22 @@ class Cid:
                 cid = cls(app_hash)
 
                 first_seen_block = int(row["first_seen_block"])
-                # try fetching new format from IPFS
-                result = await cid.fetch_content(
-                    max_retries, previous_attempts, session, first_seen_block
+
+                # try fetching any format from backend (prod and staging)
+                result = cls.fetch_from_backend(
+                    app_hash, first_seen_block, previous_attempts
                 )
+
+                if isinstance(result, NotFoundContent):
+                    # try fetching new format from IPFS
+                    await cid.fetch_content(
+                        max_retries, previous_attempts, session, first_seen_block
+                    )
 
                 if isinstance(result, NotFoundContent):
                     # try fetching the old format from IPFS
                     result = await cls.old_schema(app_hash).fetch_content(
                         max_retries, previous_attempts, session, first_seen_block
-                    )
-
-                if isinstance(result, NotFoundContent):
-                    # try fetching any format from backend (prod and staging)
-                    result = cls.fetch_from_backend(
-                        app_hash, first_seen_block, previous_attempts
                     )
 
                 if isinstance(result, FoundContent):
