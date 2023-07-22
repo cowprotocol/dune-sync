@@ -3,6 +3,7 @@ from typing import Any
 
 from dune_client.file.interface import FileIO
 
+from src.fetch.ipfs import Cid
 from src.fetch.orderbook import OrderbookFetcher
 from src.logger import set_log
 from src.models.batch_rewards_schema import BatchRewards
@@ -11,7 +12,7 @@ from src.models.order_rewards_schema import OrderRewards
 from src.models.tables import SyncTable
 from src.post.aws import AWSClient
 from src.sync.common import last_sync_block
-from src.sync.config import SyncConfig
+from src.sync.config import SyncConfig, AppDataSyncConfig
 from src.sync.record_handler import RecordHandler
 from src.sync.upload_handler import UploadHandler
 
@@ -51,6 +52,45 @@ class OrderbookDataHandler(
             data=[{self.config.sync_column: str(self.block_range.block_to)}],
             name=self.config.sync_file,
         )
+
+
+async def sync_app_data(
+    aws: AWSClient,
+    fetcher: OrderbookFetcher,
+    config: AppDataSyncConfig,
+    ipfs_access_key: str,
+    dry_run: bool,
+) -> None:
+    """Order Rewards Data Sync Logic"""
+    sync_table = SyncTable.APP_DATA
+    block_range = BlockRange(
+        block_from=last_sync_block(
+            aws,
+            table=sync_table,
+            genesis_block=12153262,  # First App Hash Block
+        ),
+        block_to=fetcher.get_latest_block(),
+    )
+    app_hash_df = fetcher.get_app_hashes(block_range)
+    app_hash_list = app_hash_df.to_dict("records")
+    log.info(f"detected {len(app_hash_list)} new app_hashes for fetching")
+    for rec in app_hash_list:
+        rec["app_hash"] = "0x" + rec["app_hash"].hex()
+
+    found, not_found = await Cid.fetch_many(
+        app_hash_list, ipfs_access_key, config.max_retries
+    )
+    sync_orderbook_data(
+        aws,
+        block_range,
+        config,
+        dry_run,
+        sync_table=sync_table,
+        data_list=[rec.as_dune_record() for rec in found],
+    )
+    if not_found:
+        # TODO - figure out how to handle missing records.
+        log.error(f"missing app data for hashes {not_found}")
 
 
 def sync_order_rewards(

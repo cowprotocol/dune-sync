@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any, Optional
+from typing import Any, Optional, Hashable
 
 import aiohttp
 import requests
@@ -109,7 +109,10 @@ class Cid:
 
     @classmethod
     async def fetch_many(  # pylint: disable=too-many-locals
-        cls, missing_rows: list[dict[str, str]], access_token: str, max_retries: int = 3
+        cls,
+        missing_rows: list[dict[Hashable, Any]],
+        access_token: str,
+        max_retries: int = 3,
     ) -> tuple[list[FoundContent], list[NotFoundContent]]:
         """Async AppData Fetching"""
         found, not_found = [], []
