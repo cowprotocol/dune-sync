@@ -109,3 +109,23 @@ class OrderbookFetcher:
         # Solvers do not appear in both environments!
         assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
         return pd.concat([prod, barn])
+
+    @classmethod
+    def get_app_hashes(cls, block_range: BlockRange) -> DataFrame:
+        """
+        Fetches and validates Batch Rewards DataFrame as concatenation from Prod and Staging DB
+        """
+        cow_reward_query = (
+            open_query("orderbook/app_hashes.sql")
+            .replace("{{start_block}}", str(block_range.block_from))
+            .replace("{{end_block}}", str(block_range.block_to))
+        )
+        data_types = {
+            # According to this: https://stackoverflow.com/a/11548224
+            # capitalized int64 means `Optional<Integer>` and it appears to work.
+            "first_seen_block": "int64",
+        }
+        barn, prod = cls._query_both_dbs(cow_reward_query, data_types)
+
+        # Solvers do not appear in both environments!
+        return pd.concat([prod, barn])

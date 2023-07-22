@@ -9,7 +9,7 @@ from src.models.token_imbalance_schema import TokenImbalance
 from src.post.aws import AWSClient
 from src.sync.common import last_sync_block
 from src.sync.config import SyncConfig
-from src.sync.order_rewards import OrderbookDataHandler
+from src.sync.orderbook_data import OrderbookDataHandler
 from src.sync.upload_handler import UploadHandler
 
 log = set_log(__name__)
