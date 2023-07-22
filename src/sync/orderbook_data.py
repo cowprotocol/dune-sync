@@ -73,9 +73,6 @@ async def sync_app_data(
     )
     app_hash_df = fetcher.get_app_hashes(block_range)
     app_hash_list = app_hash_df.to_dict("records")
-    log.info(f"detected {len(app_hash_list)} new app_hashes for fetching")
-    for rec in app_hash_list:
-        rec["app_hash"] = "0x" + rec["app_hash"].hex()
 
     found, not_found = await Cid.fetch_many(
         app_hash_list, ipfs_access_key, config.max_retries
