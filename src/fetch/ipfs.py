@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Optional
 
+import json
 import aiohttp
 import requests
 from aiohttp import ClientSession
@@ -65,7 +66,8 @@ class Cid:
             log.debug(
                 f"Found content for {hex_str} in the backend ({attempts + 1} trys)"
             )
-        return FoundContent(hex_str, first_seen_block, response.json()["fullAppData"])
+        app_data_string = response.json()["fullAppData"]
+        return FoundContent(hex_str, first_seen_block, json.loads(app_data_string))
 
     @property
     def hex(self) -> str:
