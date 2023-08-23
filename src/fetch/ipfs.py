@@ -65,7 +65,7 @@ class Cid:
             log.debug(
                 f"Found content for {hex_str} in the backend ({attempts + 1} trys)"
             )
-        return FoundContent(hex_str, first_seen_block, response.json())
+        return FoundContent(hex_str, first_seen_block, response.json()["fullAppData"])
 
     @property
     def hex(self) -> str:
