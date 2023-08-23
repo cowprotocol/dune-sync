@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Optional
 
+import json
 import aiohttp
 import requests
 from aiohttp import ClientSession
@@ -65,7 +66,8 @@ class Cid:
             log.debug(
                 f"Found content for {hex_str} in the backend ({attempts + 1} trys)"
             )
-        return FoundContent(hex_str, first_seen_block, response.json())
+        app_data_string = response.json()["fullAppData"]
+        return FoundContent(hex_str, first_seen_block, json.loads(app_data_string))
 
     @property
     def hex(self) -> str:
@@ -124,21 +126,21 @@ class Cid:
                 cid = cls(app_hash)
 
                 first_seen_block = int(row["first_seen_block"])
-                # try fetching new format from IPFS
-                result = await cid.fetch_content(
-                    max_retries, previous_attempts, session, first_seen_block
+                # try fetching any format from backend (prod and staging)
+                result = cls.fetch_from_backend(
+                    app_hash, first_seen_block, previous_attempts
                 )
+
+                if isinstance(result, NotFoundContent):
+                    # try fetching new format from IPFS
+                    result = await cid.fetch_content(
+                        max_retries, previous_attempts, session, first_seen_block
+                    )
 
                 if isinstance(result, NotFoundContent):
                     # try fetching the old format from IPFS
                     result = await cls.old_schema(app_hash).fetch_content(
                         max_retries, previous_attempts, session, first_seen_block
-                    )
-
-                if isinstance(result, NotFoundContent):
-                    # try fetching any format from backend (prod and staging)
-                    result = cls.fetch_from_backend(
-                        app_hash, first_seen_block, previous_attempts
                     )
 
                 if isinstance(result, FoundContent):
