@@ -129,7 +129,6 @@ class Cid:
                     app_hash, first_seen_block, previous_attempts
                 )
 
-
                 if isinstance(result, NotFoundContent):
                     # try fetching new format from IPFS
                     result = await cid.fetch_content(
