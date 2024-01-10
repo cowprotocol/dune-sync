@@ -45,4 +45,4 @@ from trade_hashes
                        on trade_hashes.order_uid = o.order_uid
                          and trade_hashes.auction_id = o.auction_id
       left outer join winning_quotes wq
-            on o.order_uid = wq.order_uid;
+            on trade_hashes.order_uid = wq.order_uid;
