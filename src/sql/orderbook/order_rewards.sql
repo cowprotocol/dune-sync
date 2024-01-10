@@ -25,7 +25,10 @@ with trade_hashes as (SELECT settlement.solver,
                         FROM trades t
                                INNER JOIN orders o ON order_uid = uid
                                JOIN order_quotes oq ON t.order_uid = oq.order_uid
-                        WHERE block_number > {{start_block}}
+                        WHERE ((o.kind = 'sell' AND o.buy_amount <= oq.buy_amount)
+                            OR (o.kind='buy' AND o.sell_amount >= oq.sell_amount))
+                          AND o.partially_fillable='f'
+                          AND block_number > {{start_block}}
                           AND block_number <= {{end_block}}
                           AND oq.solver != '\x0000000000000000000000000000000000000000')
 
