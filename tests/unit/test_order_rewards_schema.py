@@ -27,8 +27,8 @@ class TestModelOrderRewards(unittest.TestCase):
                 {
                     "block_number": 1,
                     "order_uid": "0x01",
-                    "solver": "0x51",
                     "tx_hash": "0x71",
+                    "solver": "0x51",
                     "data": {
                         "surplus_fee": "12345678910111213",
                         "amount": 40.70410,
@@ -41,8 +41,8 @@ class TestModelOrderRewards(unittest.TestCase):
                 {
                     "block_number": 2,
                     "order_uid": "0x02",
-                    "solver": "0x52",
                     "tx_hash": "0x72",
+                    "solver": "0x52",
                     "data": {
                         "surplus_fee": "0",
                         "amount": 39.00522,
@@ -55,8 +55,8 @@ class TestModelOrderRewards(unittest.TestCase):
                 {
                     "block_number": 3,
                     "order_uid": "0x03",
-                    "solver": "0x53",
                     "tx_hash": "0x73",
+                    "solver": "0x53",
                     "data": {
                         "surplus_fee": "0",
                         "amount": 0.0,
