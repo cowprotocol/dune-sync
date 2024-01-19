@@ -140,7 +140,9 @@ select block_number,
        coalesce(surplus_fee, 0)::text                      as surplus_fee,
        coalesce(reward, 0.0)                               as amount,
        coalesce(cast(protocol_fee as numeric(78, 0)), 0)::text as protocol_fee,
-       concat('0x', encode(protocol_fee_token, 'hex'))         as protocol_fee_token,
+       CASE WHEN protocol_fee_token is not NULL
+        THEN concat('0x', encode(protocol_fee_token, 'hex'))
+       END                                                     as protocol_fee_token,
        coalesce(protocol_fee_native_price, 0.0)                as protocol_fee_native_price
 from trade_hashes
        left outer join order_execution o
