@@ -38,7 +38,7 @@ class TestFetchOrderbook(unittest.TestCase):
                 "amount": [40.70410, 39.00522],
                 "protocol_fee": ["0", "0"],
                 "protocol_fee_token": [None, None],
-                "protocol_fee_native_price": ["0.0", "0.0"],
+                "protocol_fee_native_price": [0.0, 0.0],
             }
         )
 
@@ -78,6 +78,7 @@ class TestFetchOrderbook(unittest.TestCase):
                     "0",
                 ],
                 "protocol_fee": [
+                    "0",
                     "0",
                     "0",
                 ],
