@@ -32,6 +32,7 @@ class BatchRewards:
                     "execution_cost": int(row["execution_cost"]),
                     "surplus": int(row["surplus"]),
                     "fee": int(row["fee"]),
+                    "protocol_fee": int(row["protocol_fee"]),
                     "winning_score": int(row["winning_score"]),
                     "reference_score": int(row["reference_score"]),
                     "participating_solvers": row["participating_solvers"],

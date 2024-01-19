@@ -97,6 +97,7 @@ class OrderbookFetcher:
             open_query("orderbook/batch_rewards.sql")
             .replace("{{start_block}}", str(block_range.block_from))
             .replace("{{end_block}}", str(block_range.block_to))
+            .replace("{{EPSILON}}", "10000000000000000")
         )
         data_types = {
             # According to this: https://stackoverflow.com/a/11548224

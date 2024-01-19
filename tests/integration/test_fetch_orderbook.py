@@ -36,6 +36,9 @@ class TestFetchOrderbook(unittest.TestCase):
                 ],
                 "surplus_fee": ["0", "0"],
                 "amount": [40.70410, 39.00522],
+                "protocol_fee": ["0", "0"],
+                "protocol_fee_token": [None, None],
+                "protocol_fee_native_price": ["0.0", "0.0"],
             }
         )
 
@@ -72,6 +75,10 @@ class TestFetchOrderbook(unittest.TestCase):
                 "fee": [
                     "7751978767036064",
                     "10350680045815651",
+                    "0",
+                ],
+                "protocol_fee": [
+                    "0",
                     "0",
                 ],
                 "uncapped_payment_eth": [
