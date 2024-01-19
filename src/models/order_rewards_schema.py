@@ -28,7 +28,9 @@ class OrderRewards:
                     "quote_solver": row["quote_solver"],
                     "protocol_fee": str(row["protocol_fee"]),
                     "protocol_fee_token": row["protocol_fee_token"],
-                    "protocol_fee_native_price": float(row["protocol_fee_native_price"]),
+                    "protocol_fee_native_price": float(
+                        row["protocol_fee_native_price"]
+                    ),
                 },
             }
             for row in rewards_df.to_dict(orient="records")
