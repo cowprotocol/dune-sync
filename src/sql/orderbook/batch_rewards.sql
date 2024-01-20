@@ -67,7 +67,7 @@ order_surplus AS (
         ON t.order_uid = o.uid
     JOIN order_execution oe -- contains surplus fee
         ON t.order_uid = oe.order_uid AND at.auction_id = oe.auction_id
-    WHERE ss.block_deadline >= {{start_block}}
+    WHERE ss.block_deadline > {{start_block}}
         AND ss.block_deadline <= {{end_block}}
 )
 ,order_observations AS (
