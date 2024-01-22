@@ -55,7 +55,7 @@ order_surplus AS (
     WHERE s.block_number > {{start_block}}
         AND s.block_number <= {{end_block}}
 )
-,order_observations AS (
+,order_protocol_fee AS (
     SELECT
         os.auction_id,
         os.order_uid,
@@ -109,16 +109,16 @@ order_surplus AS (
     JOIN fee_policies fp -- contains protocol fee policy
         ON os.auction_id = fp.auction_id AND os.order_uid = fp.order_uid
 )
-,order_observations_prices AS (
+,order_protocol_fee_prices AS (
     SELECT
-        oo.order_uid,
-        oo.auction_id,
-        oo.protocol_fee,
-        oo.protocol_fee_token,
+        opf.order_uid,
+        opf.auction_id,
+        opf.protocol_fee,
+        opf.protocol_fee_token,
         ap.price / pow(10, 18) as protocol_fee_native_price
-    FROM order_observations oo
+    FROM order_protocol_fee opf
     JOIN auction_prices ap-- contains price: protocol fee token
-        ON oo.auction_id = ap.auction_id AND oo.protocol_fee_token = ap.token
+        ON opf.auction_id = ap.auction_id AND opf.protocol_fee_token = ap.token
 ),
      winning_quotes as (SELECT concat('0x', encode(oq.solver, 'hex')) as quote_solver,
                                oq.order_uid
@@ -150,6 +150,6 @@ from trade_hashes
                          and trade_hashes.auction_id = o.auction_id
        left outer join winning_quotes wq
                        on trade_hashes.order_uid = wq.order_uid
-       left outer join order_observations_prices oop
-                       on trade_hashes.order_uid = oop.order_uid
-                         and trade_hashes.auction_id = oop.auction_id;
+       left outer join order_protocol_fee_prices opfp
+                       on trade_hashes.order_uid = opfp.order_uid
+                         and trade_hashes.auction_id = opfp.auction_id;
