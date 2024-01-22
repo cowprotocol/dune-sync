@@ -25,11 +25,11 @@ class TestModelBatchRewards(unittest.TestCase):
                 ],
                 "execution_cost": [9999 * ONE_ETH, 1],
                 "surplus": [2 * ONE_ETH, 3 * ONE_ETH],
-                "fee": [
+                "protocol_fee": [2000000000000000, 0],
+                "network_fee": [
                     1000000000000000,
                     max_uint,
                 ],
-                "protocol_fee": [2000000000000000, 0],
                 "uncapped_payment_eth": [0, -10 * ONE_ETH],
                 "capped_payment": [-1000000000000000, -1000000000000000],
                 "winning_score": [123456 * ONE_ETH, 6789 * ONE_ETH],

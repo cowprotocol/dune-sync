@@ -201,8 +201,8 @@ batch_protocol_fees AS (
                                    solver,
                                    execution_cost,
                                    surplus,
-                                   protocol_fee + fee - network_fee_correction as fee,-- total fee for ranking
                                    protocol_fee, -- the protocol fee
+                                   fee - network_fee_correction as network_fee,-- the network fee
                                    surplus + protocol_fee + fee - network_fee_correction - reference_score as uncapped_payment_eth,
                                    -- Uncapped Reward = CLAMP_[-E, E + exec_cost](uncapped_reward_eth)
                                    LEAST(GREATEST(-{{EPSILON}}, surplus + protocol_fee + fee - network_fee_correction - reference_score),
@@ -220,8 +220,8 @@ SELECT settlement_block                    as block_number,
        concat('0x', encode(solver, 'hex')) as solver,
        execution_cost::text as execution_cost,
        surplus::text as surplus,
-       fee::text as fee,
        protocol_fee::text as protocol_fee,
+       network_fee::text as network_fee,
        uncapped_payment_eth::text as uncapped_payment_eth,
        capped_payment::text as capped_payment,
        winning_score::text as winning_score,
