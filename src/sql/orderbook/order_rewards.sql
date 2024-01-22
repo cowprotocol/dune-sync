@@ -128,8 +128,8 @@ order_surplus AS (
                         WHERE ((o.kind = 'sell' AND o.buy_amount <= oq.buy_amount)
                             OR (o.kind='buy' AND o.sell_amount >= oq.sell_amount))
                           AND o.partially_fillable='f'
-                          AND block_number > 19000000
-                          AND block_number <= 19500000
+                          AND block_number > {{start_block}}
+                          AND block_number <= {{end_block}}
                           AND oq.solver != '\x0000000000000000000000000000000000000000')
 -- Most efficient column order for sorting would be having tx_hash or order_uid first
 select block_number,
