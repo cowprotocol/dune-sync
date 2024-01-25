@@ -80,7 +80,7 @@ order_surplus AS (
                                         THEN fp.surplus_factor / (1 - fp.surplus_factor) * surplus
                                     ELSE
                                         LEAST(
-                                            fp.max_volume_factor / (1 - fp.max_volume_factor) * os.buy_amount, -- at most charge a fraction of volume
+                                            fp.max_volume_factor * os.sell_amount * os.buy_amount / (os.sell_amount - os.observed_fee), -- at most charge a fraction of volume
                                             fp.surplus_factor / (1 - fp.surplus_factor) * surplus -- charge a fraction of surplus
                                         )
                                 END
