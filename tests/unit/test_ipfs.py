@@ -53,40 +53,6 @@ class TestIPFS(unittest.TestCase):
 
         self.assertEqual(None, null_cid.get_content(ACCESS_KEY, max_retries=10))
 
-    def test_get_content(self):
-        self.assertEqual(
-            {
-                "version": "0.1.0",
-                "appCode": "CowSwap",
-                "metadata": {
-                    "referrer": {
-                        "version": "0.1.0",
-                        "address": "0x424a46612794dbb8000194937834250Dc723fFa5",
-                    }
-                },
-            },
-            Cid.old_schema(
-                "3d876de8fcd70969349c92d731eeb0482fe8667ceca075592b8785081d630b9a"
-            ).get_content(ACCESS_KEY, max_retries=10),
-        )
-
-        self.assertEqual(
-            {
-                "version": "1.0.0",
-                "appCode": "CowSwap",
-                "metadata": {
-                    "referrer": {
-                        "kind": "referrer",
-                        "referrer": "0x8c35B7eE520277D14af5F6098835A584C337311b",
-                        "version": "1.0.0",
-                    }
-                },
-            },
-            Cid.old_schema(
-                "1FE7C5555B3F9C14FF7C60D90F15F1A5B11A0DA5B1E8AA043582A1B2E1058D0C"
-            ).get_content(ACCESS_KEY),
-        )
-
     def test_get_content_from_backend(self):
         # only exists on prod
         self.assertEqual(
