@@ -1,3 +1,2 @@
-select min(block_number) latest
-from settlements
-where tx_from is null;
+select max(block_number) latest
+from settlement_observations;
