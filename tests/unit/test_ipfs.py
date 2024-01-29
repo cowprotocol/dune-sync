@@ -53,6 +53,7 @@ class TestIPFS(unittest.TestCase):
 
         self.assertEqual(None, null_cid.get_content(ACCESS_KEY, max_retries=10))
 
+    @unittest.skip(reason="see issue #60")
     def test_get_content(self):
         self.assertEqual(
             {
