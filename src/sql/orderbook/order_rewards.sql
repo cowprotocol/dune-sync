@@ -6,22 +6,19 @@ with trade_hashes as (SELECT settlement.solver,
                              auction_id
                       FROM trades t
                              LEFT OUTER JOIN LATERAL (
-                        SELECT tx_hash, solver, tx_nonce, tx_from
+                        SELECT tx_hash, solver, tx_nonce, tx_from, auction_id, block_number, log_index
                         FROM settlements s
                         WHERE s.block_number = t.block_number
                           AND s.log_index > t.log_index
                         ORDER BY s.log_index ASC
                         LIMIT 1
                         ) AS settlement ON true
-                             join auction_transaction
-                        -- This join also eliminates overlapping
-                        -- trades & settlements between barn and prod DB
-                                  on settlement.tx_from = auction_transaction.tx_from
-                                    and settlement.tx_nonce = auction_transaction.tx_nonce
+                             join settlement_observations so on
+                                settlement.block_number = so.block_number and settlement.log_index = so.log_index
                       where block_number > {{start_block}} and block_number <= {{end_block}}),
 order_surplus AS (
     SELECT
-        at.auction_id,
+        s.auction_id,
         t.order_uid,
         o.sell_token,
         o.buy_token,
@@ -42,8 +39,6 @@ order_surplus AS (
                 THEN o.sell_token
         END AS surplus_token
     FROM settlements s -- links block_number and log_index to tx_from and tx_nonce
-    JOIN auction_transaction at -- links auction_id to tx_from and tx_nonce
-        ON s.tx_from = at.tx_from AND s.tx_nonce = at.tx_nonce
     JOIN settlement_scores ss -- contains block_deadline
         ON at.auction_id = ss.auction_id
     JOIN trades t -- contains traded amounts
