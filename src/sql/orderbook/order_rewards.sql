@@ -1,5 +1,5 @@
 with trade_hashes as (SELECT settlement.solver,
-                             block_number,
+                             t.block_number,
                              order_uid,
                              fee_amount,
                              settlement.tx_hash,
