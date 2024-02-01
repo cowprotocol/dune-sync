@@ -1,21 +1,23 @@
-with trade_hashes as (SELECT settlement.solver,
-                             t.block_number as block_number,
-                             order_uid,
-                             fee_amount,
-                             settlement.tx_hash,
-                             auction_id
-                      FROM trades t
-                             LEFT OUTER JOIN LATERAL (
-                        SELECT tx_hash, solver, tx_nonce, tx_from, auction_id, block_number, log_index
-                        FROM settlements s
-                        WHERE s.block_number = t.block_number
-                          AND s.log_index > t.log_index
-                        ORDER BY s.log_index ASC
-                        LIMIT 1
-                        ) AS settlement ON true
-                             join settlement_observations so on
-                                settlement.block_number = so.block_number and settlement.log_index = so.log_index
-                      where t.block_number > {{start_block}} and t.block_number <= {{end_block}}),
+with trade_hashes as (
+    SELECT settlement.solver,
+            t.block_number as block_number,
+            order_uid,
+            fee_amount,
+            settlement.tx_hash,
+            auction_id
+    FROM trades t
+    LEFT OUTER JOIN LATERAL (
+        SELECT tx_hash, solver, tx_nonce, tx_from, auction_id, block_number, log_index
+        FROM settlements s
+        WHERE s.block_number = t.block_number
+            AND s.log_index > t.log_index
+        ORDER BY s.log_index ASC
+        LIMIT 1
+    ) AS settlement ON true
+        join settlement_observations so on
+            settlement.block_number = so.block_number and settlement.log_index = so.log_index
+        where settlement.block_number > {{start_block}} and settlement.block_number <= {{end_block}}
+    ),
 order_surplus AS (
     SELECT
         s.auction_id,
@@ -119,7 +121,7 @@ winning_quotes as (
         AND t.block_number <= {{end_block}}
         AND oq.solver != '\x0000000000000000000000000000000000000000')
 -- Most efficient column order for sorting would be having tx_hash or order_uid first
-select trade_hashes.block_number as block_number,
+select block_number,
        concat('0x', encode(trade_hashes.order_uid, 'hex')) as order_uid,
        concat('0x', encode(solver, 'hex'))                 as solver,
        quote_solver,
