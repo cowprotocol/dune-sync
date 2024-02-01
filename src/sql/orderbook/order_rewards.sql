@@ -15,7 +15,7 @@ with trade_hashes as (SELECT settlement.solver,
                         ) AS settlement ON true
                              join settlement_observations so on
                                 settlement.block_number = so.block_number and settlement.log_index = so.log_index
-                      where block_number > {{start_block}} and block_number <= {{end_block}}),
+                      where t.block_number > {{start_block}} and t.block_number <= {{end_block}}),
 order_surplus AS (
     SELECT
         s.auction_id,
