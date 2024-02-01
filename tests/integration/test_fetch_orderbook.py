@@ -26,8 +26,8 @@ class TestFetchOrderbook(unittest.TestCase):
                     "0x49f9cf94a59301548bbfaa75c06b1126cb3194d0b18a9e516ebeffabfb7e2d659cf8986e78d6215d1491c66d64409a54cf6268e4648dd550",
                 ],
                 "solver": [
-                    "0x31A9Ec3A6E29039C74723E387DE42b79E6856FD8",
-                    "0x31A9Ec3A6E29039C74723E387DE42b79E6856FD8",
+                    "0x31a9ec3a6e29039c74723e387de42b79e6856fd8",
+                    "0x31a9ec3a6e29039c74723e387de42b79e6856fd8",
                 ],
                 "quote_solver": [None, None],
                 "tx_hash": [
