@@ -52,15 +52,15 @@ order_surplus AS (
             WHEN o.kind = 'buy'
                 THEN o.sell_token
         END AS surplus_token
-    FROM settlements s -- links block_number and log_index to tx_from and tx_nonce
+    FROM settlements s
     JOIN settlement_scores ss -- contains block_deadline
-        ON at.auction_id = ss.auction_id
+        ON s.auction_id = ss.auction_id
     JOIN trades t -- contains traded amounts
         ON s.block_number = t.block_number -- log_index cannot be checked, does not work correctly with multiple auctions on the same block
     JOIN orders o -- contains tokens and limit amounts
         ON t.order_uid = o.uid
     JOIN order_execution oe -- contains surplus fee
-        ON t.order_uid = oe.order_uid AND at.auction_id = oe.auction_id
+        ON t.order_uid = oe.order_uid AND s.auction_id = oe.auction_id
     WHERE ss.block_deadline > {{start_block}}
         AND ss.block_deadline <= {{end_block}}
 )
