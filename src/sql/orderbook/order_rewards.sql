@@ -121,7 +121,7 @@ winning_quotes as (
         AND t.block_number <= {{end_block}}
         AND oq.solver != '\x0000000000000000000000000000000000000000')
 -- Most efficient column order for sorting would be having tx_hash or order_uid first
-select block_number,
+select trade_hashes.block_number as block_number,
        concat('0x', encode(trade_hashes.order_uid, 'hex')) as order_uid,
        concat('0x', encode(solver, 'hex'))                 as solver,
        quote_solver,
