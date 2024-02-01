@@ -1,27 +1,26 @@
-with trade_hashes as (SELECT settlement.solver,
-                             block_number,
-                             order_uid,
-                             fee_amount,
-                             settlement.tx_hash,
-                             auction_id
-                      FROM trades t
-                             LEFT OUTER JOIN LATERAL (
-                        SELECT tx_hash, solver, tx_nonce, tx_from
-                        FROM settlements s
-                        WHERE s.block_number = t.block_number
-                          AND s.log_index > t.log_index
-                        ORDER BY s.log_index ASC
-                        LIMIT 1
-                        ) AS settlement ON true
-                             join auction_transaction
-                        -- This join also eliminates overlapping
-                        -- trades & settlements between barn and prod DB
-                                  on settlement.tx_from = auction_transaction.tx_from
-                                    and settlement.tx_nonce = auction_transaction.tx_nonce
-                      where block_number > {{start_block}} and block_number <= {{end_block}}),
+with trade_hashes as (
+    SELECT settlement.solver,
+            t.block_number as block_number,
+            order_uid,
+            fee_amount,
+            settlement.tx_hash,
+            auction_id
+    FROM trades t
+    LEFT OUTER JOIN LATERAL (
+        SELECT tx_hash, solver, tx_nonce, tx_from, auction_id, block_number, log_index
+        FROM settlements s
+        WHERE s.block_number = t.block_number
+            AND s.log_index > t.log_index
+        ORDER BY s.log_index ASC
+        LIMIT 1
+    ) AS settlement ON true
+        join settlement_observations so on
+            settlement.block_number = so.block_number and settlement.log_index = so.log_index
+        where settlement.block_number > {{start_block}} and settlement.block_number <= {{end_block}}
+    ),
 order_surplus AS (
     SELECT
-        at.auction_id,
+        s.auction_id,
         t.order_uid,
         o.sell_token,
         o.buy_token,
@@ -42,16 +41,14 @@ order_surplus AS (
                 THEN o.sell_token
         END AS surplus_token
     FROM settlements s -- links block_number and log_index to tx_from and tx_nonce
-    JOIN auction_transaction at -- links auction_id to tx_from and tx_nonce
-        ON s.tx_from = at.tx_from AND s.tx_nonce = at.tx_nonce
     JOIN settlement_scores ss -- contains block_deadline
-        ON at.auction_id = ss.auction_id
+        ON s.auction_id = ss.auction_id
     JOIN trades t -- contains traded amounts
         ON s.block_number = t.block_number -- log_index cannot be checked, does not work correctly with multiple auctions on the same block
     JOIN orders o -- contains tokens and limit amounts
         ON t.order_uid = o.uid
     JOIN order_execution oe -- contains surplus fee
-        ON t.order_uid = oe.order_uid AND at.auction_id = oe.auction_id
+        ON t.order_uid = oe.order_uid AND s.auction_id = oe.auction_id
     WHERE s.block_number > {{start_block}}
         AND s.block_number <= {{end_block}}
 )
@@ -110,20 +107,21 @@ order_surplus AS (
     JOIN auction_prices ap-- contains price: protocol fee token
         ON opf.auction_id = ap.auction_id AND opf.protocol_fee_token = ap.token
 ),
-     winning_quotes as (SELECT concat('0x', encode(oq.solver, 'hex')) as quote_solver,
-                               oq.order_uid
-                        FROM trades t
-                               INNER JOIN orders o ON order_uid = uid
-                               JOIN order_quotes oq ON t.order_uid = oq.order_uid
-                        WHERE (o.class = 'market'
-                            OR (o.kind = 'sell' AND (oq.sell_amount - oq.gas_amount * oq.gas_price / oq.sell_token_price) * oq.buy_amount >= o.buy_amount *  oq.sell_amount)
-                            OR (o.kind='buy' AND o.sell_amount >= oq.sell_amount + oq.gas_amount * oq.gas_price / oq.sell_token_price))
-                          AND o.partially_fillable='f' -- the code above might fail for partially fillable orders
-                          AND block_number > {{start_block}}
-                          AND block_number <= {{end_block}}
-                          AND oq.solver != '\x0000000000000000000000000000000000000000')
+winning_quotes as (
+    SELECT concat('0x', encode(oq.solver, 'hex')) as quote_solver,
+            oq.order_uid
+    FROM trades t
+            INNER JOIN orders o ON order_uid = uid
+            JOIN order_quotes oq ON t.order_uid = oq.order_uid
+    WHERE (o.class = 'market'
+        OR (o.kind = 'sell' AND (oq.sell_amount - oq.gas_amount * oq.gas_price / oq.sell_token_price) * oq.buy_amount >= o.buy_amount *  oq.sell_amount)
+        OR (o.kind='buy' AND o.sell_amount >= oq.sell_amount + oq.gas_amount * oq.gas_price / oq.sell_token_price))
+        AND o.partially_fillable='f' -- the code above might fail for partially fillable orders
+        AND t.block_number > {{start_block}}
+        AND t.block_number <= {{end_block}}
+        AND oq.solver != '\x0000000000000000000000000000000000000000')
 -- Most efficient column order for sorting would be having tx_hash or order_uid first
-select block_number,
+select trade_hashes.block_number as block_number,
        concat('0x', encode(trade_hashes.order_uid, 'hex')) as order_uid,
        concat('0x', encode(solver, 'hex'))                 as solver,
        quote_solver,
