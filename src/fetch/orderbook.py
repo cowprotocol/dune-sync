@@ -69,7 +69,9 @@ class OrderbookFetcher:
             open_query("orderbook/latest_block.sql"), data_types
         )
         assert len(barn) == 1 == len(prod), "Expecting single record"
-        return max(int(barn["latest"][0]), int(prod["latest"][0])) - MAX_PROCESSING_DELAY
+        return (
+            max(int(barn["latest"][0]), int(prod["latest"][0])) - MAX_PROCESSING_DELAY
+        )
 
     @classmethod
     def get_order_rewards(cls, block_range: BlockRange) -> DataFrame:

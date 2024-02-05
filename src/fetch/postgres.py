@@ -12,6 +12,7 @@ from src.utils import open_query
 
 REORG_THRESHOLD = 65
 
+
 @dataclass
 class PostgresFetcher:
     """
