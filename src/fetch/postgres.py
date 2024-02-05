@@ -7,10 +7,10 @@ from pandas import DataFrame
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 
-from src.fetch.orderbook import REORG_THRESHOLD
 from src.models.block_range import BlockRange
 from src.utils import open_query
 
+REORG_THRESHOLD = 65
 
 @dataclass
 class PostgresFetcher:
