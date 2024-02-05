@@ -15,7 +15,7 @@ from sqlalchemy.engine import Engine
 from src.models.block_range import BlockRange
 from src.utils import open_query
 
-REORG_THRESHOLD = 65
+MAX_PROCESSING_DELAY = 10
 
 
 class OrderbookEnv(Enum):
@@ -69,7 +69,9 @@ class OrderbookFetcher:
             open_query("orderbook/latest_block.sql"), data_types
         )
         assert len(barn) == 1 == len(prod), "Expecting single record"
-        return min(int(barn["latest"][0]), int(prod["latest"][0])) - REORG_THRESHOLD
+        return (
+            max(int(barn["latest"][0]), int(prod["latest"][0])) - MAX_PROCESSING_DELAY
+        )
 
     @classmethod
     def get_order_rewards(cls, block_range: BlockRange) -> DataFrame:
