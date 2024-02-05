@@ -15,7 +15,7 @@ from sqlalchemy.engine import Engine
 from src.models.block_range import BlockRange
 from src.utils import open_query
 
-MAX_PROCESSING_DELAY = 1
+MAX_PROCESSING_DELAY = 10
 
 
 class OrderbookEnv(Enum):
