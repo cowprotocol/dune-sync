@@ -1,4 +1,4 @@
-with trade_hashes as (
+with trade_hashes as MATERIALIZED (
     SELECT settlement.solver,
             t.block_number as block_number,
             order_uid,
@@ -96,7 +96,7 @@ order_surplus AS (
     JOIN fee_policies fp -- contains protocol fee policy
         ON os.auction_id = fp.auction_id AND os.order_uid = fp.order_uid
 )
-,order_protocol_fee_prices AS (
+,order_protocol_fee_prices AS MATERIALIZED (
     SELECT
         opf.order_uid,
         opf.auction_id,
@@ -107,7 +107,7 @@ order_surplus AS (
     JOIN auction_prices ap-- contains price: protocol fee token
         ON opf.auction_id = ap.auction_id AND opf.protocol_fee_token = ap.token
 ),
-winning_quotes as (
+winning_quotes as MATERIALIZED (
     SELECT concat('0x', encode(oq.solver, 'hex')) as quote_solver,
             oq.order_uid
     FROM trades t
