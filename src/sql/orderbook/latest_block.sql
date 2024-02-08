@@ -1,4 +1,4 @@
 select
     max(block_number) latest
 from
-    settlement_observations
+    settlement_observations;
