@@ -30,8 +30,8 @@ with trade_hashes as (
         join settlement_observations so on settlement.block_number = so.block_number
         and settlement.log_index = so.log_index
     where
-        settlement.block_number > { { start_block } }
-        and settlement.block_number <= { { end_block } }
+        settlement.block_number > {{start_block}}
+        and settlement.block_number <= {{end_block}}
 ),
 order_surplus AS (
     SELECT
