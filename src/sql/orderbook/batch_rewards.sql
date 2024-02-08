@@ -189,8 +189,8 @@ batch_protocol_fees AS (
                                    fee - network_fee_correction as network_fee,-- the network fee
                                    surplus + protocol_fee + fee - network_fee_correction - reference_score as uncapped_payment_eth,
                                    -- Uncapped Reward = CLAMP_[-E, E + exec_cost](uncapped_reward_eth)
-                                   LEAST(GREATEST(-{{EPSILON}}, surplus + protocol_fee + fee - network_fee_correction - reference_score),
-                                     {{EPSILON}} + execution_cost) as capped_payment,
+                                   LEAST(GREATEST(-{{EPSILON_LOWER}}, surplus + protocol_fee + fee - network_fee_correction - reference_score),
+                                     {{EPSILON_UPPER}} + execution_cost) as capped_payment,
                                    winning_score,
                                    reference_score,
                                    participating_solvers           as participating_solvers
