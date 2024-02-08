@@ -99,8 +99,12 @@ class OrderbookFetcher:
             open_query("orderbook/batch_rewards.sql")
             .replace("{{start_block}}", str(block_range.block_from))
             .replace("{{end_block}}", str(block_range.block_to))
-            .replace("{{EPSILON_LOWER}}", "10000000000000000")  # lower ETH cap for payment (in WEI)
-            .replace("{{EPSILON_UPPER}}", "12000000000000000")  # upper ETH cap for payment (in WEI)
+            .replace(
+                "{{EPSILON_LOWER}}", "10000000000000000"
+            )  # lower ETH cap for payment (in WEI)
+            .replace(
+                "{{EPSILON_UPPER}}", "12000000000000000"
+            )  # upper ETH cap for payment (in WEI)
         )
         data_types = {
             # According to this: https://stackoverflow.com/a/11548224
