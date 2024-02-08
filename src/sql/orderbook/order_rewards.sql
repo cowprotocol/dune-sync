@@ -140,8 +140,8 @@ winning_quotes as (
             )
         )
         AND o.partially_fillable = 'f' -- the code above might fail for partially fillable orders
-        AND t.block_number > { { start_block } }
-        AND t.block_number <= { { end_block } }
+        AND t.block_number > {{start_block}}
+        AND t.block_number <= {{end_block}}
         AND oq.solver != '\x0000000000000000000000000000000000000000'
 ) -- Most efficient column order for sorting would be having tx_hash or order_uid first
 select
