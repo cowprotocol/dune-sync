@@ -1,2 +1,4 @@
-select max(block_number) as latest
-from settlements;
+select
+    max(block_number) as latest
+from
+    settlements;
