@@ -31,6 +31,10 @@ class OrderRewards:
                     "protocol_fee_native_price": float(
                         row["protocol_fee_native_price"]
                     ),
+                    "quote_sell_amount": str(row["quote_sell_amount"]),
+                    "quote_buy_amount": str(row["quote_buy_amount"]),
+                    "quote_gas_cost": float(row["quote_gas_cost"]),
+                    "quote_sell_token_price": float(row["quote_sell_token_price"]),
                 },
             }
             for row in rewards_df.to_dict(orient="records")

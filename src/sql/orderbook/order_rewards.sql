@@ -156,11 +156,16 @@ select
     CASE
         WHEN protocol_fee_token is not NULL THEN concat('0x', encode(protocol_fee_token, 'hex'))
     END as protocol_fee_token,
-    coalesce(protocol_fee_native_price, 0.0) as protocol_fee_native_price
+    coalesce(protocol_fee_native_price, 0.0) as protocol_fee_native_price,
+    oq.sell_amount as quote_sell_amount,
+    oq.buy_amount as quote_buy_amount,
+    oq.gas_amount * oq_gas_price as quote_gas_cost,
+    oq.sell_token_price as quote_sell_token_price
 from
     trade_hashes
     left outer join order_execution o on trade_hashes.order_uid = o.order_uid
     and trade_hashes.auction_id = o.auction_id
     left outer join winning_quotes wq on trade_hashes.order_uid = wq.order_uid
     left outer join order_protocol_fee_prices opfp on trade_hashes.order_uid = opfp.order_uid
-    and trade_hashes.auction_id = opfp.auction_id;
+    and trade_hashes.auction_id = opfp.auction_id
+    left outer join order_quotes oq on trade_hashes.order_uid = oq.order_uid
