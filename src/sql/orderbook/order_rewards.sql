@@ -147,7 +147,7 @@ winning_quotes as (
 select
     trade_hashes.block_number as block_number,
     concat('0x', encode(trade_hashes.order_uid, 'hex')) as order_uid,
-    concat('0x', encode(solver, 'hex')) as solver,
+    concat('0x', encode(trade_hashes.solver, 'hex')) as solver,
     quote_solver,
     concat('0x', encode(tx_hash, 'hex')) as tx_hash,
     coalesce(surplus_fee, 0) :: text as surplus_fee,
