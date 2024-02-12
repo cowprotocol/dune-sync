@@ -80,7 +80,7 @@ class TestModelOrderRewards(unittest.TestCase):
                         "protocol_fee": "0",
                         "protocol_fee_token": None,
                         "protocol_fee_native_price": 0.0,
-                        "quote_sell_amount": "12000000000000000.123",
+                        "quote_sell_amount": "35000",
                         "quote_buy_amount": "10",
                         "quote_gas_cost": 12000000000000000.123,
                         "quote_sell_token_price": 100000000000000.0,
