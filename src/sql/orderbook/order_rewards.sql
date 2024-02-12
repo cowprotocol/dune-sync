@@ -159,7 +159,7 @@ select
     coalesce(protocol_fee_native_price, 0.0) as protocol_fee_native_price,
     oq.sell_amount as quote_sell_amount,
     oq.buy_amount as quote_buy_amount,
-    oq.gas_amount * oq_gas_price as quote_gas_cost,
+    oq.gas_amount * oq.gas_price as quote_gas_cost,
     oq.sell_token_price as quote_sell_token_price
 from
     trade_hashes
