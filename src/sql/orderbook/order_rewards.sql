@@ -158,7 +158,7 @@ select
     END as protocol_fee_token,
     coalesce(protocol_fee_native_price, 0.0) as protocol_fee_native_price,
     cast(oq.sell_amount as numeric(78, 0))  as quote_sell_amount,
-    cast(oq.buy_amount numeric(78, 0)) as quote_buy_amount,
+    cast(oq.buy_amount as numeric(78, 0)) as quote_buy_amount,
     cast(oq.gas_amount * oq.gas_price as numeric(78, 0)) as quote_gas_cost,
     oq.sell_token_price as quote_sell_token_price
 from
