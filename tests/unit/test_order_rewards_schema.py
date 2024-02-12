@@ -19,6 +19,14 @@ class TestModelOrderRewards(unittest.TestCase):
                 "protocol_fee": [1000000000000000, 123123123123123, 0],
                 "protocol_fee_token": ["0x91", "0x92", None],
                 "protocol_fee_native_price": [1.0, 0.1, 0.0],
+                "quote_sell_amount": [10000000000000000, 2000000000000000, 35000],
+                "quote_buy_amount": [1000, 2000, 10],
+                "quote_gas_cost": [
+                    5000000000000000.15,
+                    6000000000000000,
+                    12000000000000000,
+                ],
+                "quote_sell_token_price": [1.0, 250000000, 100000000000000.0],
             }
         )
 
@@ -36,6 +44,10 @@ class TestModelOrderRewards(unittest.TestCase):
                         "protocol_fee": "1000000000000000",
                         "protocol_fee_token": "0x91",
                         "protocol_fee_native_price": 1.0,
+                        "quote_sell_amount": "10000000000000000",
+                        "quote_buy_amount": "1000",
+                        "quote_gas_cost": 5000000000000000.15,
+                        "quote_sell_token_price": 1.0,
                     },
                 },
                 {
@@ -50,6 +62,10 @@ class TestModelOrderRewards(unittest.TestCase):
                         "protocol_fee": "123123123123123",
                         "protocol_fee_token": "0x92",
                         "protocol_fee_native_price": 0.1,
+                        "quote_sell_amount": "2000000000000000",
+                        "quote_buy_amount": "2000",
+                        "quote_gas_cost": 6000000000000000,
+                        "quote_sell_token_price": 250000000,
                     },
                 },
                 {
@@ -64,6 +80,10 @@ class TestModelOrderRewards(unittest.TestCase):
                         "protocol_fee": "0",
                         "protocol_fee_token": None,
                         "protocol_fee_native_price": 0.0,
+                        "quote_sell_amount": "35000",
+                        "quote_buy_amount": "10",
+                        "quote_gas_cost": 12000000000000000,
+                        "quote_sell_token_price": 100000000000000.0,
                     },
                 },
             ],
