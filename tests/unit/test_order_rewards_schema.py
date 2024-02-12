@@ -21,7 +21,11 @@ class TestModelOrderRewards(unittest.TestCase):
                 "protocol_fee_native_price": [1.0, 0.1, 0.0],
                 "quote_sell_amount": [10000000000000000, 2000000000000000, 35000],
                 "quote_buy_amount": [1000, 2000, 10],
-                "quote_gas_cost": [5000000000000000, 6000000000000000.52, 12000000000000000.123]
+                "quote_gas_cost": [
+                    5000000000000000,
+                    6000000000000000.52,
+                    12000000000000000.123,
+                ],
                 "quote_sell_token_price": [1.0, 250000000, 100000000000000.0],
             }
         )
@@ -61,7 +65,7 @@ class TestModelOrderRewards(unittest.TestCase):
                         "quote_sell_amount": "2000000000000000",
                         "quote_buy_amount": "2000",
                         "quote_gas_cost": 6000000000000000.52,
-                        "quote_sell_token_price": 250000000,                    
+                        "quote_sell_token_price": 250000000,
                     },
                 },
                 {
