@@ -157,9 +157,9 @@ select
         WHEN protocol_fee_token is not NULL THEN concat('0x', encode(protocol_fee_token, 'hex'))
     END as protocol_fee_token,
     coalesce(protocol_fee_native_price, 0.0) as protocol_fee_native_price,
-    oq.sell_amount as quote_sell_amount,
-    oq.buy_amount as quote_buy_amount,
-    oq.gas_amount * oq.gas_price as quote_gas_cost,
+    cast(oq.sell_amount as numeric(78, 0))  as quote_sell_amount,
+    cast(oq.buy_amount numeric(78, 0)) as quote_buy_amount,
+    cast(oq.gas_amount * oq.gas_price as numeric(78, 0)) as quote_gas_cost,
     oq.sell_token_price as quote_sell_token_price
 from
     trade_hashes
