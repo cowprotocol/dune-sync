@@ -90,9 +90,9 @@ class OrderbookFetcher:
         assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
         if not prod.empty and not barn.empty:
             return pd.concat([prod, barn])
-        elif not prod.empty:
+        if not prod.empty:
             return prod.copy()
-        elif not barn.empty:
+        if not barn.empty:
             return barn.copy()
         return pd.DataFrame()
 
@@ -124,8 +124,8 @@ class OrderbookFetcher:
         assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
         if not prod.empty and not barn.empty:
             return pd.concat([prod, barn])
-        elif not prod.empty:
+        if not prod.empty:
             return prod.copy()
-        elif not barn.empty:
+        if not barn.empty:
             return barn.copy()
         return pd.DataFrame()
