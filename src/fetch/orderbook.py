@@ -88,7 +88,13 @@ class OrderbookFetcher:
 
         # Solvers do not appear in both environments!
         assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
-        return pd.concat([prod, barn])
+        if not prod.empty and not barn.empty:
+            return pd.concat([prod, barn])
+        if not prod.empty:
+            return prod.copy()
+        if not barn.empty:
+            return barn.copy()
+        return pd.DataFrame()
 
     @classmethod
     def get_batch_rewards(cls, block_range: BlockRange) -> DataFrame:
@@ -116,4 +122,10 @@ class OrderbookFetcher:
 
         # Solvers do not appear in both environments!
         assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
-        return pd.concat([prod, barn])
+        if not prod.empty and not barn.empty:
+            return pd.concat([prod, barn])
+        if not prod.empty:
+            return prod.copy()
+        if not barn.empty:
+            return barn.copy()
+        return pd.DataFrame()
