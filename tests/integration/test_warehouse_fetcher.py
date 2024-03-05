@@ -8,11 +8,12 @@ from src.fetch.postgres import PostgresFetcher
 from src.models.block_range import BlockRange
 
 
+@unittest.skip("skipping")
 class TestPostgresWarehouseFetching(unittest.TestCase):
     def setUp(self) -> None:
         load_dotenv()
         # TODO - deploy test DB and populate with some records...
-        self.fetcher = PostgresFetcher(db_url=os.environ["WAREHOUSE_URL"])
+        # self.fetcher = PostgresFetcher(db_url=os.environ["WAREHOUSE_URL"])
 
     def test_latest_block_reasonable(self):
         self.assertGreater(self.fetcher.get_latest_block(), 17273090)

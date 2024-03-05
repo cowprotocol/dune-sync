@@ -84,12 +84,13 @@ if __name__ == "__main__":
             fetcher=OrderbookFetcher(),
             dry_run=args.dry_run,
         )
-    elif args.sync_table == SyncTable.INTERNAL_IMBALANCE:
-        sync_internal_imbalance(
-            aws,
-            config=SyncConfig(volume_path),
-            fetcher=PostgresFetcher(os.environ["WAREHOUSE_URL"]),
-            dry_run=args.dry_run,
-        )
+    # Internal imbalances job is officially paused
+    # elif args.sync_table == SyncTable.INTERNAL_IMBALANCE:
+    #    sync_internal_imbalance(
+    #        aws,
+    #        config=SyncConfig(volume_path),
+    #        #fetcher=PostgresFetcher(os.environ["WAREHOUSE_URL"]),
+    #        dry_run=args.dry_run,
+    #    )
     else:
         log.error(f"unsupported sync_table '{args.sync_table}'")
