@@ -94,8 +94,7 @@ class OrderbookFetcher:
             return prod.copy()
         elif not barn.empty:
             return barn.copy()
-        else:
-            return pd.DataFrame()
+        return pd.DataFrame()
 
     @classmethod
     def get_batch_rewards(cls, block_range: BlockRange) -> DataFrame:
@@ -129,5 +128,4 @@ class OrderbookFetcher:
             return prod.copy()
         elif not barn.empty:
             return barn.copy()
-        else:
-            return pd.DataFrame()
+        return pd.DataFrame()
