@@ -131,7 +131,7 @@ class OrderbookFetcher:
             )  # upper ETH cap for payment (in WEI)
         )
         cow_reward_query_barn = (
-            open_query("orderbook/batch_rewards.sql")
+            open_query("orderbook/barn_batch_rewards.sql")
             .replace("{{start_block}}", str(block_range.block_from))
             .replace("{{end_block}}", str(block_range.block_to))
             .replace(
