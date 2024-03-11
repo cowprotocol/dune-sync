@@ -60,6 +60,17 @@ class OrderbookFetcher:
         return barn, prod
 
     @classmethod
+    def _query_both_dbs_edit(
+        cls,
+        query_prod: str,
+        query_barn: str,
+        data_types: Optional[dict[str, str]] = None,
+    ) -> tuple[DataFrame, DataFrame]:
+        barn = cls._read_query_for_env(query_barn, OrderbookEnv.BARN, data_types)
+        prod = cls._read_query_for_env(query_prod, OrderbookEnv.PROD, data_types)
+        return barn, prod
+
+    @classmethod
     def get_latest_block(cls) -> int:
         """
         Fetches the latest mutually synced block from orderbook databases (with REORG protection)
@@ -78,13 +89,20 @@ class OrderbookFetcher:
         """
         Fetches and validates Order Reward DataFrame as concatenation from Prod and Staging DB
         """
-        cow_reward_query = (
+        cow_reward_query_prod = (
             open_query("orderbook/order_rewards.sql")
             .replace("{{start_block}}", str(block_range.block_from))
             .replace("{{end_block}}", str(block_range.block_to))
         )
+        cow_reward_query_barn = (
+            open_query("orderbook/barn_order_rewards.sql")
+            .replace("{{start_block}}", str(block_range.block_from))
+            .replace("{{end_block}}", str(block_range.block_to))
+        )
         data_types = {"block_number": "int64", "amount": "float64"}
-        barn, prod = cls._query_both_dbs(cow_reward_query, data_types)
+        barn, prod = cls._query_both_dbs_edit(
+            cow_reward_query_prod, cow_reward_query_barn, data_types
+        )
 
         # Solvers do not appear in both environments!
         assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
@@ -101,8 +119,19 @@ class OrderbookFetcher:
         """
         Fetches and validates Batch Rewards DataFrame as concatenation from Prod and Staging DB
         """
-        cow_reward_query = (
+        cow_reward_query_prod = (
             open_query("orderbook/batch_rewards.sql")
+            .replace("{{start_block}}", str(block_range.block_from))
+            .replace("{{end_block}}", str(block_range.block_to))
+            .replace(
+                "{{EPSILON_LOWER}}", "10000000000000000"
+            )  # lower ETH cap for payment (in WEI)
+            .replace(
+                "{{EPSILON_UPPER}}", "12000000000000000"
+            )  # upper ETH cap for payment (in WEI)
+        )
+        cow_reward_query_barn = (
+            open_query("orderbook/barn_batch_rewards.sql")
             .replace("{{start_block}}", str(block_range.block_from))
             .replace("{{end_block}}", str(block_range.block_to))
             .replace(
@@ -118,7 +147,9 @@ class OrderbookFetcher:
             "block_number": "Int64",
             "block_deadline": "int64",
         }
-        barn, prod = cls._query_both_dbs(cow_reward_query, data_types)
+        barn, prod = cls._query_both_dbs_edit(
+            cow_reward_query_prod, cow_reward_query_barn, data_types
+        )
 
         # Solvers do not appear in both environments!
         assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
