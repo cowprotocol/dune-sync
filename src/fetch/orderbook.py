@@ -91,7 +91,7 @@ class OrderbookFetcher:
             .replace("{{end_block}}", str(block_range.block_to))
         )
         data_types = {"block_number": "int64", "amount": "float64"}
-        barn, prod = cls._query_both_dbs_edit(
+        barn, prod = cls._query_both_dbs(
             cow_reward_query_prod, cow_reward_query_barn, data_types
         )
 
@@ -138,7 +138,7 @@ class OrderbookFetcher:
             "block_number": "Int64",
             "block_deadline": "int64",
         }
-        barn, prod = cls._query_both_dbs_edit(
+        barn, prod = cls._query_both_dbs(
             cow_reward_query_prod, cow_reward_query_barn, data_types
         )
 
