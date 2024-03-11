@@ -69,8 +69,7 @@ class OrderbookFetcher:
         """
         data_types = {"latest": "int64"}
         query_barn_prod = open_query("orderbook/latest_block.sql")
-        barn, prod = cls._query_both_dbs(query_barn_prod,query_barn_prod,data_types
-        )
+        barn, prod = cls._query_both_dbs(query_barn_prod, query_barn_prod, data_types)
         assert len(barn) == 1 == len(prod), "Expecting single record"
         return (
             max(int(barn["latest"][0]), int(prod["latest"][0])) - MAX_PROCESSING_DELAY
