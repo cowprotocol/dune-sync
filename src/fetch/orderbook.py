@@ -53,14 +53,6 @@ class OrderbookFetcher:
 
     @classmethod
     def _query_both_dbs(
-        cls, query: str, data_types: Optional[dict[str, str]] = None
-    ) -> tuple[DataFrame, DataFrame]:
-        barn = cls._read_query_for_env(query, OrderbookEnv.BARN, data_types)
-        prod = cls._read_query_for_env(query, OrderbookEnv.PROD, data_types)
-        return barn, prod
-
-    @classmethod
-    def _query_both_dbs_edit(
         cls,
         query_prod: str,
         query_barn: str,
@@ -76,9 +68,8 @@ class OrderbookFetcher:
         Fetches the latest mutually synced block from orderbook databases (with REORG protection)
         """
         data_types = {"latest": "int64"}
-        barn, prod = cls._query_both_dbs(
-            open_query("orderbook/latest_block.sql"), data_types
-        )
+        query_barn_prod = open_query("orderbook/latest_block.sql")
+        barn, prod = cls._query_both_dbs(query_barn_prod, query_barn_prod, data_types)
         assert len(barn) == 1 == len(prod), "Expecting single record"
         return (
             max(int(barn["latest"][0]), int(prod["latest"][0])) - MAX_PROCESSING_DELAY
@@ -90,7 +81,7 @@ class OrderbookFetcher:
         Fetches and validates Order Reward DataFrame as concatenation from Prod and Staging DB
         """
         cow_reward_query_prod = (
-            open_query("orderbook/order_rewards.sql")
+            open_query("orderbook/prod_order_rewards.sql")
             .replace("{{start_block}}", str(block_range.block_from))
             .replace("{{end_block}}", str(block_range.block_to))
         )
@@ -100,7 +91,7 @@ class OrderbookFetcher:
             .replace("{{end_block}}", str(block_range.block_to))
         )
         data_types = {"block_number": "int64", "amount": "float64"}
-        barn, prod = cls._query_both_dbs_edit(
+        barn, prod = cls._query_both_dbs(
             cow_reward_query_prod, cow_reward_query_barn, data_types
         )
 
@@ -120,7 +111,7 @@ class OrderbookFetcher:
         Fetches and validates Batch Rewards DataFrame as concatenation from Prod and Staging DB
         """
         cow_reward_query_prod = (
-            open_query("orderbook/batch_rewards.sql")
+            open_query("orderbook/prod_batch_rewards.sql")
             .replace("{{start_block}}", str(block_range.block_from))
             .replace("{{end_block}}", str(block_range.block_to))
             .replace(
@@ -147,7 +138,7 @@ class OrderbookFetcher:
             "block_number": "Int64",
             "block_deadline": "int64",
         }
-        barn, prod = cls._query_both_dbs_edit(
+        barn, prod = cls._query_both_dbs(
             cow_reward_query_prod, cow_reward_query_barn, data_types
         )
 
