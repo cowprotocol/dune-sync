@@ -90,11 +90,13 @@ order_protocol_fee AS (
                 -- impossible anyways. This query will return a division by
                 -- zero error in that case.
                 LEAST(
-                    fp.surplus_max_volume_factor / (1 - fp.surplus_max_volume_factor) * os.buy_amount, -- at most charge a fraction of volume
+                    fp.surplus_max_volume_factor / (1 - fp.surplus_max_volume_factor) * os.buy_amount,
+                    -- at most charge a fraction of volume
                     fp.surplus_factor / (1 - fp.surplus_factor) * surplus -- charge a fraction of surplus
                 )
                 WHEN os.kind = 'buy' THEN LEAST(
-                    fp.surplus_max_volume_factor / (1 + fp.surplus_max_volume_factor) * os.sell_amount, -- at most charge a fraction of volume
+                    fp.surplus_max_volume_factor / (1 + fp.surplus_max_volume_factor) * os.sell_amount,
+                    -- at most charge a fraction of volume
                     fp.surplus_factor / (1 - fp.surplus_factor) * surplus -- charge a fraction of surplus
                 )
             END
@@ -105,7 +107,7 @@ order_protocol_fee AS (
                     fp.volume_factor / (1 + fp.volume_factor) * os.sell_amount
             END
         END AS protocol_fee,
-        os.surplus_token as protocol_fee_token
+        os.surplus_token AS protocol_fee_token
     FROM
         order_surplus os
         JOIN fee_policies fp -- contains protocol fee policy
@@ -164,17 +166,17 @@ reward_data AS (
         case
             when block_number is not null
             and block_number > block_deadline then 0
-            else coalesce(execution_cost, 0)
+            else coalesce(execution_cost, 0) -- if block_number is null, execution cost is 0
         end as execution_cost,
         case
             when block_number is not null
             and block_number > block_deadline then 0
-            else coalesce(surplus, 0)
+            else coalesce(surplus, 0) -- if block_number is null, surplus is 0
         end as surplus,
         case
             when block_number is not null
             and block_number > block_deadline then 0
-            else coalesce(fee, 0)
+            else coalesce(fee, 0) -- if block_number is null, fee is 0
         end as fee,
         -- scores
         winning_score,
@@ -188,7 +190,7 @@ reward_data AS (
             0
         ) as network_fee_correction
     FROM
-        settlement_scores ss 
+        settlement_scores ss
         -- If there are reported scores,
         -- there will always be a record of auction participants
         JOIN auction_participation ap ON ss.auction_id = ap.auction_id
@@ -207,14 +209,14 @@ reward_per_auction as (
         surplus,
         protocol_fee, -- the protocol fee
         fee - network_fee_correction as network_fee, -- the network fee
-        surplus + protocol_fee + fee - network_fee_correction - reference_score as uncapped_payment_eth,
+        surplus + protocol_fee - reference_score as uncapped_payment,
         -- Capped Reward = CLAMP_[-E, E + exec_cost](uncapped_reward_eth)
         LEAST(
             GREATEST(
                 - {{EPSILON_LOWER}},
-                surplus + protocol_fee + fee - network_fee_correction - reference_score
+                surplus + protocol_fee - reference_score
             ),
-            {{EPSILON_UPPER}} + execution_cost
+            {{EPSILON_UPPER}}
         ) as capped_payment,
         winning_score,
         reference_score,
@@ -234,7 +236,7 @@ SELECT
     surplus :: text as surplus,
     protocol_fee :: text as protocol_fee,
     network_fee :: text as network_fee,
-    uncapped_payment_eth :: text as uncapped_payment_eth,
+    uncapped_payment :: text as uncapped_payment_eth,
     capped_payment :: text as capped_payment,
     winning_score :: text as winning_score,
     reference_score :: text as reference_score,
