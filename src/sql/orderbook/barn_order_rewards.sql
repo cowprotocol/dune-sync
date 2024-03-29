@@ -35,7 +35,9 @@ with trade_hashes as (
 ),
 order_surplus AS (
     SELECT
+        ss.winner as solver,
         s.auction_id,
+        s.tx_hash,
         t.order_uid,
         o.sell_token,
         o.buy_token,
@@ -69,12 +71,14 @@ order_surplus AS (
         LEFT OUTER JOIN order_quotes oq -- contains quote amounts
         ON o.uid = oq.order_uid
     WHERE
-        s.block_number > {{start_block}}
-        AND s.block_number <= {{end_block}}
+        ss.block_deadline >= {{start_block}}
+        AND ss.block_deadline <= {{end_block}}
 ),
 order_protocol_fee AS (
     SELECT
         os.auction_id,
+        os.solver,
+        os.tx_hash,
         os.order_uid,
         os.sell_amount,
         os.buy_amount,
@@ -138,8 +142,11 @@ order_protocol_fee AS (
 ),
 order_protocol_fee_prices AS (
     SELECT
-        opf.order_uid,
         opf.auction_id,
+        opf.solver,
+        opf.tx_hash,
+        opf.order_uid,
+        opf.surplus,
         opf.protocol_fee,
         opf.protocol_fee_token,
         CASE
@@ -147,9 +154,9 @@ order_protocol_fee_prices AS (
             ELSE opf.protocol_fee
         END AS network_fee_correction,
         opf.sell_token as network_fee_token,
-        ap_surplus.price / pow(10, 18) as surplus_token_price,
-        ap_protocol.price / pow(10, 18) as protocol_fee_token_price,
-        ap_sell.price / pow(10, 18) as network_fee_token_price
+        ap_surplus.price / pow(10, 18) as surplus_token_native_price,
+        ap_protocol.price / pow(10, 18) as protocol_fee_token_native_price,
+        ap_sell.price / pow(10, 18) as network_fee_token_native_price
     FROM
         order_protocol_fee opf
         JOIN auction_prices ap_sell -- contains price: sell token
