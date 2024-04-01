@@ -35,7 +35,9 @@ with trade_hashes as (
 ),
 order_surplus AS (
     SELECT
+        ss.winner as solver,
         s.auction_id,
+        s.tx_hash,
         t.order_uid,
         o.sell_token,
         o.buy_token,
@@ -48,11 +50,15 @@ order_surplus AS (
             WHEN o.kind = 'buy' THEN t.buy_amount * (o.sell_amount + o.fee_amount) / o.buy_amount - t.sell_amount
         END AS surplus,
         CASE
+            WHEN o.kind = 'sell' THEN t.buy_amount - t.sell_amount * (oq.buy_amount - oq.buy_amount / oq.sell_amount * oq.gas_amount * oq.gas_price / oq.sell_token_price) / oq.sell_amount
+            WHEN o.kind = 'buy' THEN t.buy_amount * (oq.sell_amount + oq.gas_amount * oq.gas_price / oq.sell_token_price) / oq.buy_amount - t.sell_amount
+        END AS price_improvement,
+        CASE
             WHEN o.kind = 'sell' THEN o.buy_token
             WHEN o.kind = 'buy' THEN o.sell_token
         END AS surplus_token
     FROM
-        settlements s -- links block_number and log_index to tx_from and tx_nonce
+        settlements s
         JOIN settlement_scores ss -- contains block_deadline
         ON s.auction_id = ss.auction_id
         JOIN trades t -- contains traded amounts
@@ -62,13 +68,17 @@ order_surplus AS (
         JOIN order_execution oe -- contains surplus fee
         ON t.order_uid = oe.order_uid
         AND s.auction_id = oe.auction_id
+        LEFT OUTER JOIN order_quotes oq -- contains quote amounts
+        ON o.uid = oq.order_uid
     WHERE
-        s.block_number > {{start_block}}
-        AND s.block_number <= {{end_block}}
+        ss.block_deadline >= {{start_block}}
+        AND ss.block_deadline <= {{end_block}}
 ),
 order_protocol_fee AS (
     SELECT
         os.auction_id,
+        os.solver,
+        os.tx_hash,
         os.order_uid,
         os.sell_amount,
         os.buy_amount,
@@ -84,20 +94,46 @@ order_protocol_fee AS (
                 -- impossible anyways. This query will return a division by
                 -- zero error in that case.
                 LEAST(
-                    fp.surplus_max_volume_factor * os.sell_amount * os.buy_amount / (os.sell_amount - os.observed_fee), -- at most charge a fraction of volume
+                    fp.surplus_max_volume_factor / (1 - fp.surplus_max_volume_factor) * os.buy_amount,
+                    -- at most charge a fraction of volume
                     fp.surplus_factor / (1 - fp.surplus_factor) * surplus -- charge a fraction of surplus
                 )
                 WHEN os.kind = 'buy' THEN LEAST(
-                    fp.surplus_max_volume_factor / (1 + fp.surplus_max_volume_factor) * os.sell_amount, -- at most charge a fraction of volume
+                    fp.surplus_max_volume_factor / (1 + fp.surplus_max_volume_factor) * os.sell_amount,
+                    -- at most charge a fraction of volume
                     fp.surplus_factor / (1 - fp.surplus_factor) * surplus -- charge a fraction of surplus
                 )
             END
-            WHEN fp.kind = 'volume' THEN fp.volume_factor / (1 - fp.volume_factor) * os.sell_amount
+            WHEN fp.kind = 'priceimprovement' THEN CASE
+                WHEN os.kind = 'sell' THEN
+                LEAST(
+                    -- at most charge a fraction of volume
+                    fp.price_improvement_max_volume_factor / (1 - fp.price_improvement_max_volume_factor) * os.buy_amount,
+                    -- charge a fraction of price improvement, at most 0
+                    GREATEST(
+                        fp.price_improvement_factor / (1 - fp.price_improvement_factor) * price_improvement
+                        ,
+                        0
+                    )
+                )
+                WHEN os.kind = 'buy' THEN LEAST(
+                    -- at most charge a fraction of volume
+                    fp.price_improvement_max_volume_factor / (1 + fp.price_improvement_max_volume_factor) * os.sell_amount,
+                    -- charge a fraction of price improvement
+                    GREATEST(
+                        fp.price_improvement_factor / (1 - fp.price_improvement_factor) * price_improvement,
+                        0
+                    )
+                )
+            END
+            WHEN fp.kind = 'volume' THEN CASE
+                WHEN os.kind = 'sell' THEN
+                    fp.volume_factor / (1 - fp.volume_factor) * os.buy_amount
+                WHEN os.kind = 'buy' THEN
+                    fp.volume_factor / (1 + fp.volume_factor) * os.sell_amount
+            END
         END AS protocol_fee,
-        CASE
-            WHEN fp.kind = 'surplus' THEN os.surplus_token
-            WHEN fp.kind = 'volume' THEN os.sell_token
-        END AS protocol_fee_token
+        os.surplus_token AS protocol_fee_token
     FROM
         order_surplus os
         JOIN fee_policies fp -- contains protocol fee policy
@@ -106,16 +142,32 @@ order_protocol_fee AS (
 ),
 order_protocol_fee_prices AS (
     SELECT
-        opf.order_uid,
         opf.auction_id,
+        opf.solver,
+        opf.tx_hash,
+        opf.order_uid,
+        opf.surplus,
         opf.protocol_fee,
         opf.protocol_fee_token,
-        ap.price / pow(10, 18) as protocol_fee_native_price
+        CASE
+            WHEN opf.sell_token != opf.protocol_fee_token THEN (opf.sell_amount - opf.observed_fee) / opf.buy_amount * opf.protocol_fee
+            ELSE opf.protocol_fee
+        END AS network_fee_correction,
+        opf.sell_token as network_fee_token,
+        ap_surplus.price / pow(10, 18) as surplus_token_native_price,
+        ap_protocol.price / pow(10, 18) as protocol_fee_token_native_price,
+        ap_sell.price / pow(10, 18) as network_fee_token_native_price
     FROM
         order_protocol_fee opf
-        JOIN auction_prices ap -- contains price: protocol fee token
-        ON opf.auction_id = ap.auction_id
-        AND opf.protocol_fee_token = ap.token
+        JOIN auction_prices ap_sell -- contains price: sell token
+        ON opf.auction_id = ap_sell.auction_id
+        AND opf.sell_token = ap_sell.token
+        JOIN auction_prices ap_surplus -- contains price: surplus token
+        ON opf.auction_id = ap_surplus.auction_id
+        AND opf.surplus_token = ap_surplus.token
+        JOIN auction_prices ap_protocol -- contains price: protocol fee token
+        ON opf.auction_id = ap_protocol.auction_id
+        AND opf.protocol_fee_token = ap_protocol.token
 ),
 winning_quotes as (
     SELECT
@@ -156,7 +208,7 @@ select
     CASE
         WHEN protocol_fee_token is not NULL THEN concat('0x', encode(protocol_fee_token, 'hex'))
     END as protocol_fee_token,
-    coalesce(protocol_fee_native_price, 0.0) as protocol_fee_native_price,
+    coalesce(protocol_fee_token_price, 0.0) as protocol_fee_native_price,
     cast(oq.sell_amount as numeric(78, 0)) :: text  as quote_sell_amount,
     cast(oq.buy_amount as numeric(78, 0)) :: text as quote_buy_amount,
     oq.gas_amount * oq.gas_price as quote_gas_cost,

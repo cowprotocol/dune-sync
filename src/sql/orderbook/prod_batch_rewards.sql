@@ -53,6 +53,10 @@ order_surplus AS (
             WHEN o.kind = 'buy' THEN t.buy_amount * (o.sell_amount + o.fee_amount) / o.buy_amount - t.sell_amount
         END AS surplus,
         CASE
+            WHEN o.kind = 'sell' THEN t.buy_amount - t.sell_amount * (oq.buy_amount - oq.buy_amount / oq.sell_amount * oq.gas_amount * oq.gas_price / oq.sell_token_price) / oq.sell_amount
+            WHEN o.kind = 'buy' THEN t.buy_amount * (oq.sell_amount + oq.gas_amount * oq.gas_price / oq.sell_token_price) / oq.buy_amount - t.sell_amount
+        END AS price_improvement,
+        CASE
             WHEN o.kind = 'sell' THEN o.buy_token
             WHEN o.kind = 'buy' THEN o.sell_token
         END AS surplus_token
@@ -67,6 +71,8 @@ order_surplus AS (
         JOIN order_execution oe -- contains surplus fee
         ON t.order_uid = oe.order_uid
         AND s.auction_id = oe.auction_id
+        LEFT OUTER JOIN order_quotes oq -- contains quote amounts
+        ON o.uid = oq.order_uid
     WHERE
         ss.block_deadline > {{start_block}}
         AND ss.block_deadline <= {{end_block}}
@@ -76,6 +82,7 @@ order_protocol_fee AS (
         os.auction_id,
         os.solver,
         os.tx_hash,
+        os.order_uid,
         os.sell_amount,
         os.buy_amount,
         os.sell_token,
@@ -100,6 +107,28 @@ order_protocol_fee AS (
                     fp.surplus_factor / (1 - fp.surplus_factor) * surplus -- charge a fraction of surplus
                 )
             END
+            WHEN fp.kind = 'priceimprovement' THEN CASE
+                WHEN os.kind = 'sell' THEN
+                LEAST(
+                    -- at most charge a fraction of volume
+                    fp.price_improvement_max_volume_factor / (1 - fp.price_improvement_max_volume_factor) * os.buy_amount,
+                    -- charge a fraction of price improvement, at most 0
+                    GREATEST(
+                        fp.price_improvement_factor / (1 - fp.price_improvement_factor) * price_improvement
+                        ,
+                        0
+                    )
+                )
+                WHEN os.kind = 'buy' THEN LEAST(
+                    -- at most charge a fraction of volume
+                    fp.price_improvement_max_volume_factor / (1 + fp.price_improvement_max_volume_factor) * os.sell_amount,
+                    -- charge a fraction of price improvement
+                    GREATEST(
+                        fp.price_improvement_factor / (1 - fp.price_improvement_factor) * price_improvement,
+                        0
+                    )
+                )
+            END
             WHEN fp.kind = 'volume' THEN CASE
                 WHEN os.kind = 'sell' THEN
                     fp.volume_factor / (1 - fp.volume_factor) * os.buy_amount
@@ -116,18 +145,21 @@ order_protocol_fee AS (
 ),
 order_protocol_fee_prices AS (
     SELECT
+        opf.auction_id,
         opf.solver,
         opf.tx_hash,
+        opf.order_uid,
         opf.surplus,
         opf.protocol_fee,
+        opf.protocol_fee_token,
         CASE
             WHEN opf.sell_token != opf.protocol_fee_token THEN (opf.sell_amount - opf.observed_fee) / opf.buy_amount * opf.protocol_fee
             ELSE opf.protocol_fee
         END AS network_fee_correction,
         opf.sell_token as network_fee_token,
-        ap_surplus.price / pow(10, 18) as surplus_token_price,
-        ap_protocol.price / pow(10, 18) as protocol_fee_token_price,
-        ap_sell.price / pow(10, 18) as network_fee_token_price
+        ap_surplus.price / pow(10, 18) as surplus_token_native_price,
+        ap_protocol.price / pow(10, 18) as protocol_fee_token_native_price,
+        ap_sell.price / pow(10, 18) as network_fee_token_native_price
     FROM
         order_protocol_fee opf
         JOIN auction_prices ap_sell -- contains price: sell token
@@ -145,8 +177,8 @@ batch_protocol_fees AS (
         solver,
         tx_hash,
         -- sum(surplus * surplus_token_price) as surplus,
-        sum(protocol_fee * protocol_fee_token_price) as protocol_fee,
-        sum(network_fee_correction * network_fee_token_price) as network_fee_correction
+        sum(protocol_fee * protocol_fee_token_native_price) as protocol_fee,
+        sum(network_fee_correction * network_fee_token_native_price) as network_fee_correction
     FROM
         order_protocol_fee_prices
     group by
