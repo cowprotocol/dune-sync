@@ -201,14 +201,14 @@ select
     concat('0x', encode(trade_hashes.order_uid, 'hex')) as order_uid,
     concat('0x', encode(trade_hashes.solver, 'hex')) as solver,
     quote_solver,
-    concat('0x', encode(tx_hash, 'hex')) as tx_hash,
+    concat('0x', encode(trade_hashes.tx_hash, 'hex')) as tx_hash,
     coalesce(surplus_fee, 0) :: text as surplus_fee,
     coalesce(reward, 0.0) as amount,
     coalesce(cast(protocol_fee as numeric(78, 0)), 0) :: text as protocol_fee,
     CASE
         WHEN protocol_fee_token is not NULL THEN concat('0x', encode(protocol_fee_token, 'hex'))
     END as protocol_fee_token,
-    coalesce(protocol_fee_token_price, 0.0) as protocol_fee_native_price,
+    coalesce(protocol_fee_token_native_price, 0.0) as protocol_fee_native_price,
     cast(oq.sell_amount as numeric(78, 0)) :: text  as quote_sell_amount,
     cast(oq.buy_amount as numeric(78, 0)) :: text as quote_buy_amount,
     oq.gas_amount * oq.gas_price as quote_gas_cost,
