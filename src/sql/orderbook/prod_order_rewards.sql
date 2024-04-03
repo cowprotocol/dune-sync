@@ -56,7 +56,8 @@ order_surplus AS (
         CASE
             WHEN o.kind = 'sell' THEN o.buy_token
             WHEN o.kind = 'buy' THEN o.sell_token
-        END AS surplus_token
+        END AS surplus_token,
+        ad.full_app_data as app_data
     FROM
         settlements s
         JOIN settlement_scores ss -- contains block_deadline
@@ -70,6 +71,8 @@ order_surplus AS (
         AND s.auction_id = oe.auction_id
         LEFT OUTER JOIN order_quotes oq -- contains quote amounts
         ON o.uid = oq.order_uid
+        LEFT OUTER JOIN app_data ad
+        on o.app_data = ad.contract_app_data -- contains full app data
     WHERE
         ss.block_deadline >= {{start_block}}
         AND ss.block_deadline <= {{end_block}}
@@ -86,6 +89,7 @@ order_protocol_fee AS (
         os.observed_fee,
         os.surplus,
         os.surplus_token,
+        convert_from(os.full_app_data, 'UTF8')::JSONB->'metadata'->'partnerFee'->>'recipient' as protocol_fee_recipient,
         CASE
             WHEN fp.kind = 'surplus' THEN CASE
                 WHEN os.kind = 'sell' THEN
@@ -149,6 +153,7 @@ order_protocol_fee_prices AS (
         opf.surplus,
         opf.protocol_fee,
         opf.protocol_fee_token,
+        opf.protocol_fee_recipient,
         CASE
             WHEN opf.sell_token != opf.protocol_fee_token THEN (opf.sell_amount - opf.observed_fee) / opf.buy_amount * opf.protocol_fee
             ELSE opf.protocol_fee
@@ -212,7 +217,8 @@ select
     cast(oq.sell_amount as numeric(78, 0)) :: text  as quote_sell_amount,
     cast(oq.buy_amount as numeric(78, 0)) :: text as quote_buy_amount,
     oq.gas_amount * oq.gas_price as quote_gas_cost,
-    oq.sell_token_price as quote_sell_token_price
+    oq.sell_token_price as quote_sell_token_price,
+    opfp.protocol_fee_recipient as protocol_fee_recipient
 from
     trade_hashes
     left outer join order_execution o on trade_hashes.order_uid = o.order_uid
