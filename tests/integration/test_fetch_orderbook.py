@@ -323,6 +323,78 @@ class TestFetchOrderbook(unittest.TestCase):
         )
         self.assertIsNone(pd.testing.assert_frame_equal(expected, rewards_df))
 
+    def test_get_order_rewards_with_integrator_fee(self):
+        block_number = 19581573
+        block_range = BlockRange(block_number, block_number + 1)
+        rewards_df = OrderbookFetcher.get_order_rewards(block_range)
+        expected = pd.DataFrame(
+            {
+                "block_number": [
+                    19581573,
+                ],
+                "order_uid": [
+                    "0x0f6c83ff144aabed918417f61a92672165bba9b1c90f078fedfc10c2c16d03d09fa3c00a92ec5f96b1ad2527ab41b3932efeda58660e7959",
+                    "0xac38b37c7821b1c0f0fd631912d7b19581c305c4bdca84dcb6d862da6cf8591cf9d7adfb5bc41283d67db9d71add65162e242f62660e7c82",
+                ],
+                "solver": [
+                    "0x4339889FD9dFCa20a423fbA011e9dfF1C856CAEb",
+                    "0x4339889FD9dFCa20a423fbA011e9dfF1C856CAEb",
+                ],
+                "quote_solver": [
+                    "0x16c473448e770ff647c69cbe19e28528877fba1b",
+                    "0x16c473448e770ff647c69cbe19e28528877fba1b",
+                ],
+                "tx_hash": [
+                    "0x13315e833ed3204db3320e3e8d213c84ab21e55e715847514d78198af4f68861",
+                    "0x13315e833ed3204db3320e3e8d213c84ab21e55e715847514d78198af4f68861",
+                ],
+                "surplus_fee": [
+                    "958869097252287",
+                    "29812970679943659325",
+                ],
+                "amount": [
+                    0.0,
+                    0.0,
+                ],
+                "protocol_fee": [
+                    "346011",
+                    "0",
+                ],
+                "protocol_fee_token": [
+                    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                ],
+                "protocol_fee_native_price": [
+                    299379646751955503881912320,
+                    299379646751955503881912320,
+                ],
+                "quote_sell_amount": [
+                    "11177061073424246",
+                    "30000000000000000000000",
+                ],
+                "quote_buy_amount": [
+                    "37147277",
+                    "22954359609",
+                ],
+                "quote_gas_cost": [
+                    3605211063076992.0,
+                    1982659477433822.0,
+                ],
+                "quote_sell_token_price": [
+                    1.0,
+                    0.000234609143374563,
+                ],
+                "protocol_fee_recipient": [
+                    "0x9FA3c00a92Ec5f96B1Ad2527ab41B3932EFEDa58",
+                    None,
+                ],
+            }
+        )
+
+        self.assertIsNone(pd.testing.assert_frame_equal(expected, rewards_df))
+    
+
+
 
 if __name__ == "__main__":
     unittest.main()
