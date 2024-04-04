@@ -89,7 +89,7 @@ order_protocol_fee AS (
         os.observed_fee,
         os.surplus,
         os.surplus_token,
-        convert_from(os.full_app_data, 'UTF8')::JSONB->'metadata'->'partnerFee'->>'recipient' as protocol_fee_recipient,
+        convert_from(os.app_data, 'UTF8')::JSONB->'metadata'->'partnerFee'->>'recipient' as protocol_fee_recipient,
         CASE
             WHEN fp.kind = 'surplus' THEN CASE
                 WHEN os.kind = 'sell' THEN
