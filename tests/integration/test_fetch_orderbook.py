@@ -154,7 +154,7 @@ class TestFetchOrderbook(unittest.TestCase):
                     None,
                     None,
                     None,
-                ]
+                ],
             }
         )
 
