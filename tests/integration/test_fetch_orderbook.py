@@ -363,7 +363,7 @@ class TestFetchOrderbook(unittest.TestCase):
                 "protocol_fee_token": [
                     "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    None,
                 ],
                 "protocol_fee_native_price": [
                     299379646751955503881912320,
