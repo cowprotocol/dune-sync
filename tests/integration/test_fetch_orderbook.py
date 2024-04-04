@@ -341,7 +341,7 @@ class TestFetchOrderbook(unittest.TestCase):
                 "solver": [
                     "0x4339889fd9dfca20a423fba011e9dff1c856caeb",
                     "0x4339889fd9dfca20a423fba011e9dff1c856caeb",
-                    "0xc74b656bd2EBe313D26d1ac02BcF95b137D1C857",
+                    "0xc74b656bd2ebe313d26d1ac02bcf95b137d1c857",
                 ],
                 "quote_solver": [
                     "0x16c473448e770ff647c69cbe19e28528877fba1b",
