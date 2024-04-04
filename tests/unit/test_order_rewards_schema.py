@@ -27,7 +27,7 @@ class TestModelOrderRewards(unittest.TestCase):
                     12000000000000000,
                 ],
                 "quote_sell_token_price": [1.0, 250000000, 100000000000000.0],
-                "protocol_fee_recipient": None  
+                "protocol_fee_recipient": None,
             }
         )
 
@@ -49,7 +49,7 @@ class TestModelOrderRewards(unittest.TestCase):
                         "quote_buy_amount": "1000",
                         "quote_gas_cost": 5000000000000000.15,
                         "quote_sell_token_price": 1.0,
-                        "protocol_fee_recipient": None  
+                        "protocol_fee_recipient": None,
                     },
                 },
                 {
@@ -68,7 +68,7 @@ class TestModelOrderRewards(unittest.TestCase):
                         "quote_buy_amount": "2000",
                         "quote_gas_cost": 6000000000000000,
                         "quote_sell_token_price": 250000000,
-                        "protocol_fee_recipient": None  
+                        "protocol_fee_recipient": None,
                     },
                 },
                 {
@@ -87,7 +87,7 @@ class TestModelOrderRewards(unittest.TestCase):
                         "quote_buy_amount": "10",
                         "quote_gas_cost": 12000000000000000,
                         "quote_sell_token_price": 100000000000000.0,
-                        "protocol_fee_recipient": None  
+                        "protocol_fee_recipient": None,
                     },
                 },
             ],
