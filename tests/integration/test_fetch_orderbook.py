@@ -338,8 +338,8 @@ class TestFetchOrderbook(unittest.TestCase):
                     "0xac38b37c7821b1c0f0fd631912d7b19581c305c4bdca84dcb6d862da6cf8591cf9d7adfb5bc41283d67db9d71add65162e242f62660e7c82",
                 ],
                 "solver": [
-                    "0x4339889FD9dFCa20a423fbA011e9dfF1C856CAEb",
-                    "0x4339889FD9dFCa20a423fbA011e9dfF1C856CAEb",
+                    "0x4339889fd9dfca20a423fba011e9dff1c856caeb",
+                    "0x4339889fd9dfca20a423fba011e9dff1c856caeb",
                 ],
                 "quote_solver": [
                     "0x16c473448e770ff647c69cbe19e28528877fba1b",
