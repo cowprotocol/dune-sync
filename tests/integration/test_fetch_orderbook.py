@@ -146,6 +146,15 @@ class TestFetchOrderbook(unittest.TestCase):
                     1.0,
                     1.0,
                 ],
+                "protocol_fee_recipient": [
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                ]
             }
         )
 
