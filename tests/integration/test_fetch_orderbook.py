@@ -331,6 +331,7 @@ class TestFetchOrderbook(unittest.TestCase):
             {
                 "block_number": [
                     19581573,
+                    19581573,
                 ],
                 "order_uid": [
                     "0x0f6c83ff144aabed918417f61a92672165bba9b1c90f078fedfc10c2c16d03d09fa3c00a92ec5f96b1ad2527ab41b3932efeda58660e7959",
