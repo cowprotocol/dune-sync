@@ -71,8 +71,8 @@ order_surplus AS (
         AND s.auction_id = oe.auction_id
         LEFT OUTER JOIN order_quotes oq -- contains quote amounts
         ON o.uid = oq.order_uid
-        LEFT OUTER JOIN app_data ad
-        on o.app_data = ad.contract_app_data -- contains full app data
+        LEFT OUTER JOIN app_data ad -- contains full app data
+        on o.app_data = ad.contract_app_data
     WHERE
         ss.block_deadline >= {{start_block}}
         AND ss.block_deadline <= {{end_block}}
