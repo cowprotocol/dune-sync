@@ -392,8 +392,6 @@ class TestFetchOrderbook(unittest.TestCase):
         )
 
         self.assertIsNone(pd.testing.assert_frame_equal(expected, rewards_df))
-    
-
 
 
 if __name__ == "__main__":
