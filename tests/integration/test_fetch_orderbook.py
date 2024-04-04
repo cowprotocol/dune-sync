@@ -324,8 +324,7 @@ class TestFetchOrderbook(unittest.TestCase):
         self.assertIsNone(pd.testing.assert_frame_equal(expected, rewards_df))
 
     def test_get_order_rewards_with_integrator_fee(self):
-        block_number = 19581572
-        block_range = BlockRange(block_number, block_number + 10)
+        block_range = BlockRange(19581572, 19581581)
         rewards_df = OrderbookFetcher.get_order_rewards(block_range)
         expected = pd.DataFrame(
             {
