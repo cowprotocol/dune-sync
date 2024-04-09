@@ -72,7 +72,9 @@ order_surplus AS (
         ON o.uid = oq.order_uid
     WHERE
         ss.block_deadline >= {{start_block}}
-        AND ss.block_deadline <= {{end_block}}
+        -- since this table filtered on block_deadline is joined with another table filtered on block_number
+        -- the bound for this table need to be a bit looser.
+        AND ss.block_deadline <= {{end_block}} + 100
 ),
 order_protocol_fee AS (
     SELECT
