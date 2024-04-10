@@ -75,7 +75,7 @@ order_surplus AS (
         on o.app_data = ad.contract_app_data
     WHERE
         ss.block_deadline >= {{start_block}}
-        AND ss.block_deadline <= {{end_block}}
+        AND ss.block_deadline <= {{end_block}} + 100
 ),
 order_protocol_fee AS (
     SELECT
