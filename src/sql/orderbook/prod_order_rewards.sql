@@ -75,6 +75,8 @@ order_surplus AS (
         on o.app_data = ad.contract_app_data
     WHERE
         ss.block_deadline >= {{start_block}}
+        -- since this table filtered on block_deadline is joined with another table filtered on block_number
+        -- the bound for this table need to be a bit looser.
         AND ss.block_deadline <= {{end_block}} + 100
 ),
 order_protocol_fee AS (
@@ -90,6 +92,7 @@ order_protocol_fee AS (
         os.surplus,
         os.surplus_token,
         convert_from(os.app_data, 'UTF8')::JSONB->'metadata'->'partnerFee'->>'recipient' as protocol_fee_recipient,
+        fp.kind as protocol_fee_kind,
         CASE
             WHEN fp.kind = 'surplus' THEN CASE
                 WHEN os.kind = 'sell' THEN
@@ -154,6 +157,7 @@ order_protocol_fee_prices AS (
         opf.protocol_fee,
         opf.protocol_fee_token,
         opf.protocol_fee_recipient,
+        opf.protocol_fee_kind,
         CASE
             WHEN opf.sell_token != opf.protocol_fee_token THEN (opf.sell_amount - opf.observed_fee) / opf.buy_amount * opf.protocol_fee
             ELSE opf.protocol_fee
@@ -218,7 +222,8 @@ select
     cast(oq.buy_amount as numeric(78, 0)) :: text as quote_buy_amount,
     oq.gas_amount * oq.gas_price as quote_gas_cost,
     oq.sell_token_price as quote_sell_token_price,
-    opfp.protocol_fee_recipient as protocol_fee_recipient
+    opfp.protocol_fee_recipient as protocol_fee_recipient,
+    opfp.protocol_fee_kind
 from
     trade_hashes
     left outer join order_execution o on trade_hashes.order_uid = o.order_uid

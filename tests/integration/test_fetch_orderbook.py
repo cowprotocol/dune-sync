@@ -155,6 +155,15 @@ class TestFetchOrderbook(unittest.TestCase):
                     None,
                     None,
                 ],
+                "protocol_fee_kind": [
+                    None,
+                    None,
+                    "surplus",
+                    None,
+                    None,
+                    None,
+                    None,
+                ],
             }
         )
 
@@ -390,6 +399,11 @@ class TestFetchOrderbook(unittest.TestCase):
                     "0x9FA3c00a92Ec5f96B1Ad2527ab41B3932EFEDa58",
                     None,
                     None,
+                ],
+                "protocol_fee_kind": [
+                    "volume",
+                    "priceimprovement",
+                    "priceimprovement",
                 ],
             }
         )
