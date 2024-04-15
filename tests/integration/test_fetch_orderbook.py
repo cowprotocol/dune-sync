@@ -146,7 +146,7 @@ class TestFetchOrderbook(unittest.TestCase):
                     1.0,
                     1.0,
                 ],
-                "protocol_fee_recipient": [
+                "partner_fee_recipient": [
                     None,
                     None,
                     None,
@@ -395,7 +395,7 @@ class TestFetchOrderbook(unittest.TestCase):
                     0.000234609143374563,
                     0.000160802298220274,
                 ],
-                "protocol_fee_recipient": [
+                "partner_fee_recipient": [
                     "0x9FA3c00a92Ec5f96B1Ad2527ab41B3932EFEDa58",
                     None,
                     None,

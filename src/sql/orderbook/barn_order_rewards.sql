@@ -91,7 +91,7 @@ order_protocol_fee AS (
         os.observed_fee,
         os.surplus,
         os.surplus_token,
-        convert_from(os.app_data, 'UTF8')::JSONB->'metadata'->'partnerFee'->>'recipient' as protocol_fee_recipient,
+        convert_from(os.app_data, 'UTF8')::JSONB->'metadata'->'partnerFee'->>'recipient' as partner_fee_recipient,
         fp.kind as protocol_fee_kind,
         CASE
             WHEN fp.kind = 'surplus' THEN CASE
@@ -156,7 +156,7 @@ order_protocol_fee_prices AS (
         opf.surplus,
         opf.protocol_fee,
         opf.protocol_fee_token,
-        opf.protocol_fee_recipient,
+        opf.partner_fee_recipient,
         opf.protocol_fee_kind,
         CASE
             WHEN opf.sell_token != opf.protocol_fee_token THEN (opf.sell_amount - opf.observed_fee) / opf.buy_amount * opf.protocol_fee
@@ -222,7 +222,7 @@ select
     cast(oq.buy_amount as numeric(78, 0)) :: text as quote_buy_amount,
     oq.gas_amount * oq.gas_price as quote_gas_cost,
     oq.sell_token_price as quote_sell_token_price,
-    opfp.protocol_fee_recipient as protocol_fee_recipient,
+    opfp.partner_fee_recipient as partner_fee_recipient,
     opfp.protocol_fee_kind
 from
     trade_hashes
