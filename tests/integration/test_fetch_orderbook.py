@@ -146,6 +146,24 @@ class TestFetchOrderbook(unittest.TestCase):
                     1.0,
                     1.0,
                 ],
+                "partner_fee_recipient": [
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                ],
+                "protocol_fee_kind": [
+                    None,
+                    None,
+                    "surplus",
+                    None,
+                    None,
+                    None,
+                    None,
+                ],
             }
         )
 
@@ -312,6 +330,84 @@ class TestFetchOrderbook(unittest.TestCase):
                 ],
             },
         )
+        self.assertIsNone(pd.testing.assert_frame_equal(expected, rewards_df))
+
+    def test_get_order_rewards_with_integrator_fee(self):
+        block_range = BlockRange(19581572, 19581581)
+        rewards_df = OrderbookFetcher.get_order_rewards(block_range)
+        expected = pd.DataFrame(
+            {
+                "block_number": [
+                    19581573,
+                    19581573,
+                    19581579,
+                ],
+                "order_uid": [
+                    "0x0f6c83ff144aabed918417f61a92672165bba9b1c90f078fedfc10c2c16d03d09fa3c00a92ec5f96b1ad2527ab41b3932efeda58660e7959",
+                    "0xac38b37c7821b1c0f0fd631912d7b19581c305c4bdca84dcb6d862da6cf8591cf9d7adfb5bc41283d67db9d71add65162e242f62660e7c82",
+                    "0xc9c870decab00c1335babef5a3009186671b1bc69131c7338a4ecb2ed14831c321a01f63b263d93e124471e456578024121a6b78660e7a5b",
+                ],
+                "solver": [
+                    "0x4339889fd9dfca20a423fba011e9dff1c856caeb",
+                    "0x4339889fd9dfca20a423fba011e9dff1c856caeb",
+                    "0xc74b656bd2ebe313d26d1ac02bcf95b137d1c857",
+                ],
+                "quote_solver": [
+                    "0x16c473448e770ff647c69cbe19e28528877fba1b",
+                    "0x16c473448e770ff647c69cbe19e28528877fba1b",
+                    "0x16c473448e770ff647c69cbe19e28528877fba1b",
+                ],
+                "tx_hash": [
+                    "0x13315e833ed3204db3320e3e8d213c84ab21e55e715847514d78198af4f68861",
+                    "0x13315e833ed3204db3320e3e8d213c84ab21e55e715847514d78198af4f68861",
+                    "0x962af6dbd9940249b8a795b48c0c4cbc04c0444555bb5b16fd4d824261e282bf",
+                ],
+                "surplus_fee": [
+                    "958869097252287",
+                    "29812970679943659325",
+                    "31963685928336242096",
+                ],
+                "amount": [0.0, 0.0, 0.0],
+                "protocol_fee": ["346011", "0", "0"],
+                "protocol_fee_token": [
+                    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                ],
+                "protocol_fee_native_price": [
+                    299379646.7519555,
+                    299379646.7519555,
+                    299379646.7519555,
+                ],
+                "quote_sell_amount": [
+                    "11177061073424246",
+                    "30000000000000000000000",
+                    "667000000000000000000",
+                ],
+                "quote_buy_amount": ["37147277", "22954359609", "358516953"],
+                "quote_gas_cost": [
+                    3605211063076992.0,
+                    1982659477433822.0,
+                    2865645675046151.0,
+                ],
+                "quote_sell_token_price": [
+                    1.0,
+                    0.000234609143374563,
+                    0.000160802298220274,
+                ],
+                "partner_fee_recipient": [
+                    "0x9FA3c00a92Ec5f96B1Ad2527ab41B3932EFEDa58",
+                    None,
+                    None,
+                ],
+                "protocol_fee_kind": [
+                    "volume",
+                    "priceimprovement",
+                    "priceimprovement",
+                ],
+            }
+        )
+
         self.assertIsNone(pd.testing.assert_frame_equal(expected, rewards_df))
 
 
