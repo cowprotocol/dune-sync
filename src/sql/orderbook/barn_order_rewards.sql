@@ -365,7 +365,7 @@ select
     cast(oq.buy_amount as numeric(78, 0)) :: text as quote_buy_amount,
     oq.gas_amount * oq.gas_price as quote_gas_cost,
     oq.sell_token_price as quote_sell_token_price,
-    opfp.partner_fee,
+    cast(coalesce(opfp.partner_fee, 0) as numeric(78, 0)) :: text as partner_fee,
     opfp.partner_fee_recipient,
     opfp.protocol_fee_kind
 from
