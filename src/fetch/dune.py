@@ -75,7 +75,9 @@ class DuneFetcher:
             ]
         )
 
-    async def get_app_hashes(self, block_range: BlockRange, chain: str) -> list[DuneRecord]:
+    async def get_app_hashes(
+        self, block_range: BlockRange, chain: str
+    ) -> list[DuneRecord]:
         """
         Executes APP_HASHES query for the given `block_range` and returns the results
         """

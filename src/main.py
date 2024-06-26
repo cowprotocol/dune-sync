@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     if args.sync_table == SyncTable.APP_DATA:
         asyncio.run(
-            sync_app_data(  
+            sync_app_data(
                 aws,
                 dune=DuneFetcher(os.environ["DUNE_API_KEY"]),
                 config=AppDataSyncConfig(
@@ -70,7 +70,7 @@ if __name__ == "__main__":
             )
         )
         asyncio.run(
-            sync_app_data(  
+            sync_app_data(
                 aws,
                 dune=DuneFetcher(os.environ["DUNE_API_KEY"]),
                 config=AppDataSyncConfig(
@@ -83,7 +83,7 @@ if __name__ == "__main__":
                 ),
                 ipfs_access_key=os.environ["IPFS_ACCESS_KEY"],
                 dry_run=args.dry_run,
-                chain="gnosis"
+                chain="gnosis",
             )
         )
     elif args.sync_table == SyncTable.ORDER_REWARDS:
