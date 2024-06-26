@@ -79,20 +79,64 @@ order_surplus AS (
         -- the bound for this table need to be a bit looser.
         AND ss.block_deadline <= {{end_block}} + 100
 ),
-order_protocol_fee AS (
+fee_policies_first_proxy as (
+    select
+        auction_id,
+        order_uid,
+        max(application_order) as application_order,
+        count (*) as num_policies
+    from fee_policies
+    where auction_id in (select auction_id from order_surplus)
+    group by order_uid, auction_id
+),
+fee_policies_first as (
+    select
+        fp.auction_id,
+        fp.order_uid,
+        fp.application_order,
+        fp.kind,
+        fp.surplus_factor,
+        fp.surplus_max_volume_factor,
+        fp.volume_factor,
+        fp.price_improvement_factor,
+        fp.price_improvement_max_volume_factor
+    from fee_policies_first_proxy fpmp join fee_policies fp on fp.auction_id = fpmp.auction_id and fp.order_uid = fpmp.order_uid and fp.application_order = fpmp.application_order
+),
+fee_policies_temp as (
+    select
+        *
+    from fee_policies
+    where auction_id in (select auction_id from order_surplus)
+    except (select * from fee_policies_first )
+),
+fee_policies_second as (
+    select
+        *
+    from fee_policies_temp
+    UNION
+    select
+        auction_id,
+        order_uid,
+        0 as application_order,
+        'volume' as kind,
+        null as surplus_factor,
+        null as surplus_max_volume_factor,
+        0 as volume_factor,
+        null as price_improvement_factor,
+        null as price_improvement_max_volume_factor
+    from fee_policies_first_proxy where num_policies = 1
+),
+order_protocol_fee_first AS (
     SELECT
         os.auction_id,
-        os.solver,
-        os.tx_hash,
         os.order_uid,
         os.sell_amount,
         os.buy_amount,
-        os.sell_token,
-        os.observed_fee,
         os.surplus,
-        os.surplus_token,
+        os.price_improvement,
+        os.kind,
         convert_from(os.app_data, 'UTF8')::JSONB->'metadata'->'partnerFee'->>'recipient' as partner_fee_recipient,
-        fp.kind as protocol_fee_kind,
+        fp.kind as protocol_fee_kind_first,
         CASE
             WHEN fp.kind = 'surplus' THEN CASE
                 WHEN os.kind = 'sell' THEN
@@ -139,11 +183,106 @@ order_protocol_fee AS (
                 WHEN os.kind = 'buy' THEN
                     fp.volume_factor / (1 + fp.volume_factor) * os.sell_amount
             END
-        END AS protocol_fee,
+        END AS protocol_fee_first,
         os.surplus_token AS protocol_fee_token
     FROM
         order_surplus os
-        JOIN fee_policies fp -- contains protocol fee policy
+        JOIN fee_policies_first fp -- contains protocol fee policy
+        ON os.auction_id = fp.auction_id
+        AND os.order_uid = fp.order_uid
+),
+order_surplus_intermediate as (
+    select
+        auction_id,
+        order_uid,
+        CASE
+            WHEN kind = 'sell' then sell_amount
+            ELSE sell_amount - protocol_fee_first
+        END as sell_amount,
+        CASE
+            WHEN kind = 'sell' then buy_amount + protocol_fee_first
+            ELSE buy_amount
+        END as buy_amount,
+        surplus + protocol_fee_first as surplus,
+        price_improvement + protocol_fee_first as price_improvement,
+        protocol_fee_kind_first,
+        protocol_fee_first,
+        partner_fee_recipient
+    from order_protocol_fee_first
+),
+order_protocol_fee as (
+    SELECT
+        os.auction_id,
+        os.solver,
+        os.tx_hash,
+        os.order_uid,
+        os.sell_amount,
+        os.buy_amount,
+        os.sell_token,
+        os.observed_fee,
+        os.surplus,
+        os.surplus_token,
+        protocol_fee_kind_first,
+        fp.kind as protocol_fee_kind_second,
+        protocol_fee_first,
+        CASE
+            WHEN fp.kind = 'surplus' THEN CASE
+                WHEN os.kind = 'sell' THEN
+                -- We assume that the case surplus_factor != 1 always. In
+                -- that case reconstructing the protocol fee would be
+                -- impossible anyways. This query will return a division by
+                -- zero error in that case.
+                protocol_fee_first + LEAST(
+                    fp.surplus_max_volume_factor / (1 - fp.surplus_max_volume_factor) * osi.buy_amount,
+                    -- at most charge a fraction of volume
+                    fp.surplus_factor / (1 - fp.surplus_factor) * osi.surplus -- charge a fraction of surplus
+                )
+                WHEN os.kind = 'buy' THEN protocol_fee_first + LEAST(
+                    fp.surplus_max_volume_factor / (1 + fp.surplus_max_volume_factor) * osi.sell_amount,
+                    -- at most charge a fraction of volume
+                    fp.surplus_factor / (1 - fp.surplus_factor) * osi.surplus -- charge a fraction of surplus
+                )
+            END
+            WHEN fp.kind = 'priceimprovement' THEN CASE
+                WHEN os.kind = 'sell' THEN
+                protocol_fee_first + LEAST(
+                    -- at most charge a fraction of volume
+                    fp.price_improvement_max_volume_factor / (1 - fp.price_improvement_max_volume_factor) * osi.buy_amount,
+                    -- charge a fraction of price improvement, at most 0
+                    GREATEST(
+                        fp.price_improvement_factor / (1 - fp.price_improvement_factor) * osi.price_improvement
+                        ,
+                        0
+                    )
+                )
+                WHEN os.kind = 'buy' THEN protocol_fee_first + LEAST(
+                    -- at most charge a fraction of volume
+                    fp.price_improvement_max_volume_factor / (1 + fp.price_improvement_max_volume_factor) * osi.sell_amount,
+                    -- charge a fraction of price improvement
+                    GREATEST(
+                        fp.price_improvement_factor / (1 - fp.price_improvement_factor) * osi.price_improvement,
+                        0
+                    )
+                )
+            END
+            WHEN fp.kind = 'volume' THEN CASE
+                WHEN os.kind = 'sell' THEN
+                    protocol_fee_first + fp.volume_factor / (1 - fp.volume_factor) * osi.buy_amount
+                WHEN os.kind = 'buy' THEN
+                    protocol_fee_first + fp.volume_factor / (1 + fp.volume_factor) * osi.sell_amount
+            END
+        END AS protocol_fee,
+        osi.partner_fee_recipient,
+        CASE
+            WHEN osi.partner_fee_recipient IS NOT NULL THEN osi.protocol_fee_first
+            ELSE 0
+        END AS partner_fee,
+        os.surplus_token AS protocol_fee_token
+    FROM
+        order_surplus os
+        JOIN order_surplus_intermediate osi
+        ON os.order_uid = osi.order_uid AND os.auction_id = osi.auction_id
+        JOIN fee_policies_second fp -- contains protocol fee policy
         ON os.auction_id = fp.auction_id
         AND os.order_uid = fp.order_uid
 ),
@@ -156,8 +295,12 @@ order_protocol_fee_prices AS (
         opf.surplus,
         opf.protocol_fee,
         opf.protocol_fee_token,
+        CASE
+            WHEN opf.partner_fee_recipient IS NOT NULL THEN opf.protocol_fee_kind_second
+            ELSE opf.protocol_fee_kind_first
+        END AS protocol_fee_kind,
+        opf.partner_fee,
         opf.partner_fee_recipient,
-        opf.protocol_fee_kind,
         CASE
             WHEN opf.sell_token != opf.protocol_fee_token THEN (opf.sell_amount - opf.observed_fee) / opf.buy_amount * opf.protocol_fee
             ELSE opf.protocol_fee
@@ -167,7 +310,7 @@ order_protocol_fee_prices AS (
         ap_protocol.price / pow(10, 18) as protocol_fee_token_native_price,
         ap_sell.price / pow(10, 18) as network_fee_token_native_price
     FROM
-        order_protocol_fee opf
+        order_protocol_fee as opf
         JOIN auction_prices ap_sell -- contains price: sell token
         ON opf.auction_id = ap_sell.auction_id
         AND opf.sell_token = ap_sell.token
@@ -222,7 +365,8 @@ select
     cast(oq.buy_amount as numeric(78, 0)) :: text as quote_buy_amount,
     oq.gas_amount * oq.gas_price as quote_gas_cost,
     oq.sell_token_price as quote_sell_token_price,
-    opfp.partner_fee_recipient as partner_fee_recipient,
+    opfp.partner_fee,
+    opfp.partner_fee_recipient,
     opfp.protocol_fee_kind
 from
     trade_hashes

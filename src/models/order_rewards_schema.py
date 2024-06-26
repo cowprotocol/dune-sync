@@ -1,4 +1,5 @@
 """Model for Order Rewards Data"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -35,6 +36,7 @@ class OrderRewards:
                     "quote_buy_amount": str(row["quote_buy_amount"]),
                     "quote_gas_cost": float(row["quote_gas_cost"]),
                     "quote_sell_token_price": float(row["quote_sell_token_price"]),
+                    "partner_fee": str(row["partner_fee"]),
                     "partner_fee_recipient": row["partner_fee_recipient"],
                     "protocol_fee_kind": row["protocol_fee_kind"],
                 },
