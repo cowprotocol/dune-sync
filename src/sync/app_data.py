@@ -128,6 +128,7 @@ async def sync_app_data(
     config: AppDataSyncConfig,
     ipfs_access_key: str,
     dry_run: bool,
+    chain: str,
 ) -> None:
     """App Data Sync Logic"""
     block_range = BlockRange(

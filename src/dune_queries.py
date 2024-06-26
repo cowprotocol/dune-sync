@@ -41,4 +41,12 @@ QUERIES = {
         name="Latest Possible App Hash Block",
         filename="app_hash_latest_block.sql",
     ),
+    "APP_HASHES_GNOSIS": QueryData(
+        query_id=1610025, name="Unique App Hashes", filename="app_hashes_gnosis.sql"
+    ),
+    "LATEST_APP_HASH_BLOCK_GNOSIS": QueryData(
+        query_id=3865197,
+        name="Latest Possible App Hash Block",
+        filename="app_hash_latest_block_gnosis.sql",
+    ),
 }

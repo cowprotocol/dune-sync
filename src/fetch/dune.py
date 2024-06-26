@@ -75,11 +75,18 @@ class DuneFetcher:
             ]
         )
 
-    async def get_app_hashes(self, block_range: BlockRange) -> list[DuneRecord]:
+    async def get_app_hashes(self, block_range: BlockRange, chain: str) -> list[DuneRecord]:
         """
         Executes APP_HASHES query for the given `block_range` and returns the results
         """
-        app_hash_query = QUERIES["APP_HASHES"].with_params(
-            block_range.as_query_params()
-        )
+        if chain == "mainnet":
+            app_hash_query = QUERIES["APP_HASHES"].with_params(
+                block_range.as_query_params()
+            )
+        else:
+            if chain == "gnosis":
+                app_hash_query = QUERIES["APP_HASHES_GNOSIS"].with_params(
+                    block_range.as_query_params()
+                )
+
         return await self.fetch(app_hash_query)
