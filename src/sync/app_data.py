@@ -142,7 +142,7 @@ async def sync_app_data(  # pylint: disable=too-many-arguments
 
     data_handler = AppDataHandler(
         file_manager=FileIO(config.volume_path / str(SYNC_TABLE)),
-        new_rows=await dune.get_app_hashes(block_range),
+        new_rows=await dune.get_app_hashes(block_range, chain),
         block_range=block_range,
         config=config,
         ipfs_access_key=ipfs_access_key,
