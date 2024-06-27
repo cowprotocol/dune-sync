@@ -1,6 +1,5 @@
 -- App Hashes: https://dune.com/queries/3865206
--- MIN(first_block_seen) = 12153263
--- Nov 16, 2022: Query takes 4 seconds to run for on full block range
+-- MIN(first_block_seen) = 15310317
 with
 app_hashes as (
     select
