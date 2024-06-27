@@ -131,11 +131,16 @@ async def sync_app_data(  # pylint: disable=too-many-arguments
     chain: str,
 ) -> None:
     """App Data Sync Logic"""
+
+    genesis_bl = 15310317
+    if chain == "mainnet":
+        genesis_bl = 12153262
+
     block_range = BlockRange(
         block_from=last_sync_block(
             aws,
             table=SYNC_TABLE,
-            genesis_block=12153262,  # First App Hash Block
+            genesis_block=genesis_bl,  # First App Hash Block
         ),
         block_to=await dune.latest_app_hash_block(chain),
     )
