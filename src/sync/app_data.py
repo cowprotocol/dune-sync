@@ -122,7 +122,7 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
         await self._handle_missing_records(max_retries, give_up_threshold)
 
 
-async def sync_app_data(
+async def sync_app_data(  # pylint: disable=too-many-arguments
     aws: AWSClient,
     dune: DuneFetcher,
     config: AppDataSyncConfig,
@@ -137,7 +137,7 @@ async def sync_app_data(
             table=SYNC_TABLE,
             genesis_block=12153262,  # First App Hash Block
         ),
-        block_to=await dune.latest_app_hash_block(),
+        block_to=await dune.latest_app_hash_block(chain),
     )
 
     data_handler = AppDataHandler(

@@ -1,4 +1,4 @@
--- https://dune.com/queries/1615490
+-- https://dune.com/queries/3865197
 select
   max(call_block_number) as latest_block
 from

@@ -69,6 +69,7 @@ if __name__ == "__main__":
                 chain="mainnet",
             )
         )
+    elif args.sync_table == SyncTable.APP_DATA_GNOSIS:
         asyncio.run(
             sync_app_data(
                 aws,
