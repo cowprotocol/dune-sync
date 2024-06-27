@@ -75,14 +75,13 @@ class DuneFetcher:
                     "latest_block"
                 ]
             )
-        else:
-            return int(
-                # KeyError here means the query has been modified and column no longer exists
-                # IndexError means no results were returned from query (which is unlikely).
-                (await self.fetch(QUERIES["LATEST_APP_HASH_BLOCK_GNOSIS"].query))[0][
-                    "latest_block"
-                ]
-            )
+        return int(
+            # KeyError here means the query has been modified and column no longer exists
+            # IndexError means no results were returned from query (which is unlikely).
+            (await self.fetch(QUERIES["LATEST_APP_HASH_BLOCK_GNOSIS"].query))[0][
+                "latest_block"
+            ]
+        )
 
     async def get_app_hashes(
         self, block_range: BlockRange, chain: str
