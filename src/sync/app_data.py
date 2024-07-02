@@ -17,6 +17,7 @@ from src.sync.upload_handler import UploadHandler
 
 log = set_log(__name__)
 
+
 class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attributes
     """
     This class is responsible for consuming new dune records and missing values from previous runs
@@ -31,7 +32,7 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
         config: SyncConfig,
         ipfs_access_key: str,
         missing_file_name: str,
-        sync_table
+        sync_table: SyncTable,
     ):
         super().__init__(block_range, sync_table, config)
         self.file_manager = file_manager
@@ -151,7 +152,7 @@ async def sync_app_data(  # pylint: disable=too-many-arguments
         config=config,
         ipfs_access_key=ipfs_access_key,
         missing_file_name=config.missing_files_name,
-        sync_table=sync_table
+        sync_table=sync_table,
     )
     await data_handler.fetch_content_and_filter(
         max_retries=config.max_retries, give_up_threshold=config.give_up_threshold
