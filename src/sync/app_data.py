@@ -17,10 +17,6 @@ from src.sync.upload_handler import UploadHandler
 
 log = set_log(__name__)
 
-
-SYNC_TABLE = SyncTable.APP_DATA
-
-
 class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attributes
     """
     This class is responsible for consuming new dune records and missing values from previous runs
@@ -35,8 +31,9 @@ class AppDataHandler(RecordHandler):  # pylint:disable=too-many-instance-attribu
         config: SyncConfig,
         ipfs_access_key: str,
         missing_file_name: str,
+        sync_table
     ):
-        super().__init__(block_range, SYNC_TABLE, config)
+        super().__init__(block_range, sync_table, config)
         self.file_manager = file_manager
         self.ipfs_access_key = ipfs_access_key
 
@@ -132,29 +129,32 @@ async def sync_app_data(  # pylint: disable=too-many-arguments
 ) -> None:
     """App Data Sync Logic"""
 
+    sync_table = SyncTable.APP_DATA_GNOSIS
     genesis_bl = 15310317
     if chain == "mainnet":
         genesis_bl = 12153262
+        sync_table = SyncTable.APP_DATA
 
     block_range = BlockRange(
         block_from=last_sync_block(
             aws,
-            table=SYNC_TABLE,
+            table=sync_table,
             genesis_block=genesis_bl,  # First App Hash Block
         ),
         block_to=await dune.latest_app_hash_block(chain),
     )
 
     data_handler = AppDataHandler(
-        file_manager=FileIO(config.volume_path / str(SYNC_TABLE)),
+        file_manager=FileIO(config.volume_path / str(sync_table)),
         new_rows=await dune.get_app_hashes(block_range, chain),
         block_range=block_range,
         config=config,
         ipfs_access_key=ipfs_access_key,
         missing_file_name=config.missing_files_name,
+        sync_table=sync_table
     )
     await data_handler.fetch_content_and_filter(
         max_retries=config.max_retries, give_up_threshold=config.give_up_threshold
     )
-    UploadHandler(aws, data_handler, table=SYNC_TABLE).write_and_upload_content(dry_run)
+    UploadHandler(aws, data_handler, table=sync_table).write_and_upload_content(dry_run)
     log.info("app_data sync run completed successfully")
