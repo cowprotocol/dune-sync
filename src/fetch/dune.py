@@ -59,7 +59,7 @@ class DuneFetcher:
             log.error(f"Got {err} - Exiting")
             sys.exit()
 
-    async def latest_app_hash_block(self) -> int:
+    async def latest_app_hash_block(self, chain: str) -> int:
         """
         Block Range is used to app hash fetcher where to find the new records.
         block_from: read from file `fname` as a loaded singleton.
@@ -67,19 +67,37 @@ class DuneFetcher:
             - raises RuntimeError if column specified does not exist.
         block_to: fetched from Dune as the last indexed block for "GPv2Settlement_call_settle"
         """
+        if chain == "mainnet":
+            return int(
+                # KeyError here means the query has been modified and column no longer exists
+                # IndexError means no results were returned from query (which is unlikely).
+                (await self.fetch(QUERIES["LATEST_APP_HASH_BLOCK"].query))[0][
+                    "latest_block"
+                ]
+            )
         return int(
             # KeyError here means the query has been modified and column no longer exists
             # IndexError means no results were returned from query (which is unlikely).
-            (await self.fetch(QUERIES["LATEST_APP_HASH_BLOCK"].query))[0][
+            (await self.fetch(QUERIES["LATEST_APP_HASH_BLOCK_GNOSIS"].query))[0][
                 "latest_block"
             ]
         )
 
-    async def get_app_hashes(self, block_range: BlockRange) -> list[DuneRecord]:
+    async def get_app_hashes(
+        self, block_range: BlockRange, chain: str
+    ) -> list[DuneRecord]:
         """
         Executes APP_HASHES query for the given `block_range` and returns the results
         """
-        app_hash_query = QUERIES["APP_HASHES"].with_params(
-            block_range.as_query_params()
-        )
+        app_hash_query: Query
+        if chain == "mainnet":
+            app_hash_query = QUERIES["APP_HASHES"].with_params(
+                block_range.as_query_params()
+            )
+        else:
+            if chain == "gnosis":
+                app_hash_query = QUERIES["APP_HASHES_GNOSIS"].with_params(
+                    block_range.as_query_params()
+                )
+
         return await self.fetch(app_hash_query)

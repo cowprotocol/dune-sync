@@ -6,6 +6,7 @@ class SyncTable(Enum):
     """Enum for Deployment Supported Table Sync"""
 
     APP_DATA = "app_data"
+    APP_DATA_GNOSIS = "app_data_gnosis"
     ORDER_REWARDS = "order_rewards"
     BATCH_REWARDS = "batch_rewards"
     INTERNAL_IMBALANCE = "internal_imbalance"
