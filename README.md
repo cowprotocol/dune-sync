@@ -5,7 +5,8 @@ Components for syncing off-chain data with Dune Community Sources
 # Local Development
 
 1. Clone Repo `git clone git@github.com:cowprotocol/dune-sync.git`
-2. Several Makefile Commands `make XXX`
+2. If using VS Conde, open in devcontainer to ensure same setup as the final container
+3. Several Makefile Commands `make XXX`
    Key make commands are; `install, check, test`
 
 # Docker
