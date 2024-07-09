@@ -9,6 +9,12 @@ Components for syncing off-chain data with Dune Community Sources
 3. Several Makefile Commands `make XXX`
    Key make commands are; `install, check, test`
 
+To execute the main binary (inside the container) run
+
+```
+python3 -m src.main --sync-table <job>
+```
+
 # Docker
 
 ### Build
