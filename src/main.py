@@ -51,13 +51,14 @@ if __name__ == "__main__":
     args = ScriptArgs()
     aws = AWSClient.new_from_environment()
     dune = DuneClient(os.environ["DUNE_API_KEY"])
+    orderbook = OrderbookFetcher()
 
     if args.sync_table == SyncTable.APP_DATA:
         asyncio.run(
             sync_app_data(
-                orderbook=OrderbookFetcher(),
+                orderbook,
                 dune=dune,
-                config=AppDataSyncConfig(),
+                config=AppDataSyncConfig(table=f'app_data_{orderbook.database()}'),
                 dry_run=args.dry_run,
             )
         )
@@ -65,14 +66,14 @@ if __name__ == "__main__":
         sync_order_rewards(
             aws,
             config=SyncConfig(volume_path),
-            fetcher=OrderbookFetcher(),
+            fetcher=orderbook,
             dry_run=args.dry_run,
         )
     elif args.sync_table == SyncTable.BATCH_REWARDS:
         sync_batch_rewards(
             aws,
             config=SyncConfig(volume_path),
-            fetcher=OrderbookFetcher(),
+            fetcher=orderbook,
             dry_run=args.dry_run,
         )
     else:

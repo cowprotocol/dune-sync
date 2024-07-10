@@ -63,6 +63,15 @@ class OrderbookFetcher:
         return barn, prod
 
     @classmethod
+    def database(cls) -> Engine:
+        """Returns a the current database name"""
+        query = "SELECT current_database()"
+        barn, prod = cls._query_both_dbs(query, query)
+        assert barn.current_database[0] == prod.current_database[0], "Expecting databases to match"
+
+        return prod.current_database[0]
+    
+    @classmethod
     def get_latest_block(cls) -> int:
         """
         Fetches the latest mutually synced block from orderbook databases (with REORG protection)
