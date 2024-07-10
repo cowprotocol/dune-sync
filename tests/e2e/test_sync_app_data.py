@@ -12,6 +12,7 @@ from src.fetch.orderbook import OrderbookFetcher
 from src.sync import sync_app_data
 from src.sync.config import AppDataSyncConfig
 
+
 class TestSyncAppData(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         load_dotenv()
@@ -26,8 +27,7 @@ class TestSyncAppData(IsolatedAsyncioTestCase):
 
     def tearDown(self) -> None:
         self.dune.delete_table(
-          namespace=self.namespace,
-          table_name="dataset_" + self.config.table
+            namespace=self.namespace, table_name="dataset_" + self.config.table
         )
         self.dune.archive_query(self.query.base.query_id)
 
@@ -45,6 +45,7 @@ class TestSyncAppData(IsolatedAsyncioTestCase):
         result = self.dune.run_query(self.query.base).result.rows
         print(f"Found {len(result)} results")
         self.assertGreater(len(result), 0)
+
 
 if __name__ == "__main__":
     unittest.main()
