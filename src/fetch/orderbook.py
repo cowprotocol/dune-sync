@@ -61,7 +61,7 @@ class OrderbookFetcher:
         barn = cls._read_query_for_env(query_barn, OrderbookEnv.BARN, data_types)
         prod = cls._read_query_for_env(query_prod, OrderbookEnv.PROD, data_types)
         return barn, prod
-    
+
     @classmethod
     def get_latest_block(cls) -> int:
         """
