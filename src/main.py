@@ -54,11 +54,13 @@ if __name__ == "__main__":
     orderbook = OrderbookFetcher()
 
     if args.sync_table == SyncTable.APP_DATA:
+        table = os.environ["APP_DATA_TARGET_TABLE"]
+        assert table, "APP_DATA sync needs a DUNE_NETWORK_NAME env"
         asyncio.run(
             sync_app_data(
                 orderbook,
                 dune=dune,
-                config=AppDataSyncConfig(table=f'app_data_{orderbook.database()}'),
+                config=AppDataSyncConfig(table),
                 dry_run=args.dry_run,
             )
         )
