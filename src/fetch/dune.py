@@ -25,13 +25,12 @@ class DuneFetcher:
 
     def __init__(
         self,
-        api_key: str,
+        dune: DuneClient,
     ) -> None:
         """
         Class constructor.
-        Builds DuneClient from `api_key` along with a logger and FileIO object.
         """
-        self.dune = DuneClient(api_key)
+        self.dune = dune
 
     async def fetch(self, query: QueryBase) -> list[DuneRecord]:
         """Async Dune Fetcher with some exception handling."""
