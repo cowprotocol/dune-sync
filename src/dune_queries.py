@@ -6,7 +6,7 @@ from __future__ import annotations
 from copy import copy
 from dataclasses import dataclass
 
-from dune_client.query import Query
+from dune_client.query import QueryBase
 from dune_client.types import QueryParameter
 
 
@@ -15,14 +15,14 @@ class QueryData:
     """Stores name and a version of the query for each query."""
 
     name: str
-    query: Query
+    query: QueryBase
 
     def __init__(self, name: str, query_id: int, filename: str) -> None:
         self.name = name
         self.filepath = filename
-        self.query = Query(query_id, name)
+        self.query = QueryBase(query_id, name)
 
-    def with_params(self, params: list[QueryParameter]) -> Query:
+    def with_params(self, params: list[QueryParameter]) -> QueryBase:
         """
         Copies the query and adds parameters to it, returning the copy.
         """
