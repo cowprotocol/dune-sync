@@ -7,7 +7,6 @@ from unittest import IsolatedAsyncioTestCase
 from dotenv import load_dotenv
 from dune_client.client import DuneClient
 
-from src.fetch.dune import DuneFetcher
 from src.fetch.orderbook import OrderbookFetcher
 from src.sync import sync_app_data
 from src.sync.config import AppDataSyncConfig
@@ -17,7 +16,6 @@ class TestSyncAppData(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         load_dotenv()
         self.dune = DuneClient(os.environ["DUNE_API_KEY"])
-        self.fetcher = DuneFetcher(self.dune)
         self.namespace = "cowprotocol"
         self.config = AppDataSyncConfig(table="app_data_test")
         self.query = self.dune.create_query(
