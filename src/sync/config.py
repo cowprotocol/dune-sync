@@ -19,12 +19,12 @@ class SyncConfig:
 
 
 @dataclass
-class AppDataSyncConfig(SyncConfig):
-    """Additional data field for app data sync."""
+class AppDataSyncConfig:
+    """Configuration for app data sync."""
 
-    # Maximum number of retries on a single run
-    max_retries: int = 3
-    # Total number of accumulated attempts before we assume no content
-    give_up_threshold: int = 100
-    # Persisted file where we store the missing results and number of attempts.
-    missing_files_name: str = "missing_app_hashes.json"
+    # The name of the table to upload to
+    table: str = "app_data_test"
+    # Description of the table (for creation)
+    description: str = (
+        "Table containing known CoW Protocol appData hashes and their pre-images"
+    )
