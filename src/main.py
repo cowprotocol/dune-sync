@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     if args.sync_table == SyncTable.APP_DATA:
         table = os.environ["APP_DATA_TARGET_TABLE"]
-        assert table, "APP_DATA sync needs a DUNE_NETWORK_NAME env"
+        assert table, "APP_DATA sync needs a APP_DATA_TARGET_TABLE env"
         asyncio.run(
             sync_app_data(
                 orderbook,
