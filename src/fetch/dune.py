@@ -7,7 +7,7 @@ import asyncio
 import sys
 
 from dune_client.client import DuneClient
-from dune_client.query import Query
+from dune_client.query import QueryBase
 from dune_client.types import DuneRecord
 from requests import HTTPError
 
@@ -25,15 +25,14 @@ class DuneFetcher:
 
     def __init__(
         self,
-        api_key: str,
+        dune: DuneClient,
     ) -> None:
         """
         Class constructor.
-        Builds DuneClient from `api_key` along with a logger and FileIO object.
         """
-        self.dune = DuneClient(api_key)
+        self.dune = dune
 
-    async def fetch(self, query: Query) -> list[DuneRecord]:
+    async def fetch(self, query: QueryBase) -> list[DuneRecord]:
         """Async Dune Fetcher with some exception handling."""
         log.debug(f"Executing {query}")
 

@@ -151,3 +151,14 @@ class OrderbookFetcher:
         if not barn.empty:
             return barn.copy()
         return pd.DataFrame()
+
+    @classmethod
+    def get_app_hashes(cls) -> DataFrame:
+        """
+        Fetches all appData hashes and preimages from Prod and Staging DB
+        """
+        app_data_query = open_query("app_hashes.sql")
+        barn, prod = cls._query_both_dbs(app_data_query, app_data_query)
+
+        # We are only interested in unique app data
+        return pd.concat([prod, barn]).drop_duplicates().reset_index(drop=True)
