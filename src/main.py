@@ -47,9 +47,7 @@ class ScriptArgs:
 
 if __name__ == "__main__":
     load_dotenv()
-    volume_path = Path(os.environ["VOLUME_PATH"])
     args = ScriptArgs()
-    aws = AWSClient.new_from_environment()
     dune = DuneClient(os.environ["DUNE_API_KEY"])
     orderbook = OrderbookFetcher()
 
@@ -65,6 +63,8 @@ if __name__ == "__main__":
             )
         )
     elif args.sync_table == SyncTable.ORDER_REWARDS:
+        aws = AWSClient.new_from_environment()
+        volume_path = Path(os.environ["VOLUME_PATH"])
         sync_order_rewards(
             aws,
             config=SyncConfig(volume_path),
@@ -72,6 +72,8 @@ if __name__ == "__main__":
             dry_run=args.dry_run,
         )
     elif args.sync_table == SyncTable.BATCH_REWARDS:
+        aws = AWSClient.new_from_environment()
+        volume_path = Path(os.environ["VOLUME_PATH"])
         sync_batch_rewards(
             aws,
             config=SyncConfig(volume_path),
