@@ -417,7 +417,10 @@ SELECT
         when tx_hash is NULL then NULL
         else concat('0x', encode(tx_hash, 'hex'))
     end as tx_hash,
-    concat('0x', encode(solver, 'hex')) as solver,
+    CASE
+        WHEN solver = '\x008300082C3000009e63680088f8c7f4D3ff2E87' THEN concat('0x', encode('\x8E8C00aD7011AabEa0E06e984cfA7194CF8b16b0', 'hex')) -- workaround for week where Copium used a single account for testing colocation in staging and then used the same account for prod
+        ELSE concat('0x', encode(solver, 'hex'))
+    END as solver,
     execution_cost :: text as execution_cost,
     surplus :: text as surplus,
     protocol_fee :: text as protocol_fee,
