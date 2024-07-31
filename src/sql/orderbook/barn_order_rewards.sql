@@ -323,11 +323,8 @@ order_protocol_fee_prices AS (
 ),
 winning_quotes as (
     SELECT
-    CASE
-        WHEN solver = '\x008300082C3000009e63680088f8c7f4D3ff2E87' THEN concat('0x', encode('\x8E8C00aD7011AabEa0E06e984cfA7194CF8b16b0', 'hex')) -- workaround for week where Copium used a single account for testing colocation in staging and then used the same account for prod
-        ELSE concat('0x', encode(solver, 'hex'))
-    END as quote_solver,
-    oq.order_uid
+        concat('0x', encode(oq.solver, 'hex')) as quote_solver,
+        oq.order_uid
     FROM
         trades t
         INNER JOIN orders o ON order_uid = uid
@@ -354,10 +351,7 @@ winning_quotes as (
 select
     trade_hashes.block_number as block_number,
     concat('0x', encode(trade_hashes.order_uid, 'hex')) as order_uid,
-    CASE
-        WHEN trade_hashes.solver = '\x008300082C3000009e63680088f8c7f4D3ff2E87' THEN concat('0x', encode('\x8E8C00aD7011AabEa0E06e984cfA7194CF8b16b0', 'hex')) -- workaround for week where Copium used a single account for testing colocation in staging and then used the same account for prod
-        ELSE concat('0x', encode(trade_hashes.solver, 'hex'))
-    END as solver,
+    concat('0x', encode(oq.solver, 'hex')) as solver,
     quote_solver,
     concat('0x', encode(trade_hashes.tx_hash, 'hex')) as tx_hash,
     coalesce(surplus_fee, 0) :: text as surplus_fee,
