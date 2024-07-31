@@ -417,7 +417,7 @@ SELECT
         when tx_hash is NULL then NULL
         else concat('0x', encode(tx_hash, 'hex'))
     end as tx_hash,
-    concat('0x', encode(solver, 'hex')) as solver
+    concat('0x', encode(solver, 'hex')) as solver,
     execution_cost :: text as execution_cost,
     surplus :: text as surplus,
     protocol_fee :: text as protocol_fee,
