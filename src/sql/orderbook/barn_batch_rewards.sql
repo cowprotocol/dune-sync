@@ -405,7 +405,10 @@ SELECT
         when tx_hash is NULL then NULL
         else concat('0x', encode(tx_hash, 'hex'))
     end as tx_hash,
-    concat('0x', encode(solver, 'hex')) as solver,
+    CASE
+        WHEN solver ='\xC7899Ff6A3aC2FF59261bD960A8C880DF06E1041' THEN concat('0x', encode('\x5f7A6aeec3D3E80558278632954DA4b730996F83', 'hex')) -- workaround for week where Barter used a single account for testing colocation in staging and then used the same account for prod
+        ELSE concat('0x', encode(solver, 'hex'))
+    END as solver,
     execution_cost :: text as execution_cost,
     surplus :: text as surplus,
     protocol_fee :: text as protocol_fee,

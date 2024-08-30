@@ -323,8 +323,11 @@ order_protocol_fee_prices AS (
 ),
 winning_quotes as (
     SELECT
-        concat('0x', encode(oq.solver, 'hex')) as quote_solver,
-        oq.order_uid
+    CASE
+        WHEN solver ='\xC7899Ff6A3aC2FF59261bD960A8C880DF06E1041' THEN concat('0x', encode('\x5f7A6aeec3D3E80558278632954DA4b730996F83', 'hex')) -- workaround for week where Barter used a single account for testing colocation in staging and then used the same account for prod
+        ELSE concat('0x', encode(solver, 'hex'))
+    END as quote_solver,
+    oq.order_uid
     FROM
         trades t
         INNER JOIN orders o ON order_uid = uid
@@ -351,7 +354,10 @@ winning_quotes as (
 select
     trade_hashes.block_number as block_number,
     concat('0x', encode(trade_hashes.order_uid, 'hex')) as order_uid,
-    concat('0x', encode(oq.solver, 'hex')) as solver,
+    CASE
+        WHEN trade_hashes.solver ='\xC7899Ff6A3aC2FF59261bD960A8C880DF06E1041' THEN concat('0x', encode('\x5f7A6aeec3D3E80558278632954DA4b730996F83', 'hex')) -- workaround for week where Barter used a single account for testing colocation in staging and then used the same account for prod
+        ELSE concat('0x', encode(trade_hashes.solver, 'hex'))
+    END as solver,
     quote_solver,
     concat('0x', encode(trade_hashes.tx_hash, 'hex')) as tx_hash,
     coalesce(surplus_fee, 0) :: text as surplus_fee,
