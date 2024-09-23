@@ -20,7 +20,7 @@ log = set_log(__name__)
 
 class OrderbookDataHandler(
     RecordHandler
-):  # pylint:disable=too-few-public-methods,too-many-arguments
+):  # pylint:disable=too-few-public-methods,too-many-arguments,too-many-positional-arguments
     """
     This class is responsible for consuming new dune records and missing values from previous runs
     it attempts to fetch content for them and filters them into "found" and "not found" as necessary
@@ -103,7 +103,7 @@ def sync_batch_rewards(
     )
 
 
-def sync_orderbook_data(  # pylint:disable=too-many-arguments
+def sync_orderbook_data(  # pylint:disable=too-many-arguments,too-many-positional-arguments
     aws: AWSClient,
     block_range: BlockRange,
     config: SyncConfig,
