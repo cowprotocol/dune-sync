@@ -1,0 +1,32 @@
+services:
+  prefect-server:
+    image: prefecthq/prefect:2-python3.10
+    environment:
+      - PREFECT_SERVER_API_HOST=0.0.0.0
+      - PREFECT_SERVER__TELEMETRY__ENABLED=false
+    command: prefect server start
+    ports:
+      - "80:4200"
+    networks:
+      - internal
+
+  prefect-deployments:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.prefect
+    environment:
+      - PREFECT_API_URL=http://prefect-server:4200/api
+      - PREFECT_SERVER__TELEMETRY__ENABLED=false
+      - PREFECT_SERVER_API_HOST=0.0.0.0
+      - PREFECT_LOGGING_LEVEL=INFO
+      - BARN_DB_URL
+      - PROD_DB_URL
+    depends_on:
+      - prefect-server
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
