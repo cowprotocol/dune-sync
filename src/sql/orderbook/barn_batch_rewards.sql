@@ -193,7 +193,6 @@ reward_data AS (
         ) as network_fee
     FROM
         settlement_scores ss
-        -- If there are reported scores,
         -- outer joins made in order to capture non-existent settlements.
         LEFT OUTER JOIN observed_settlements os ON os.auction_id = ss.auction_id
         LEFT OUTER JOIN batch_protocol_fees bpf ON bpf.tx_hash = os.tx_hash
