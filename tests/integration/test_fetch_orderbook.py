@@ -31,9 +31,9 @@ class TestFetchOrderbook(unittest.TestCase):
                 ],
                 "order_uid": [
                     "0xc129dbf2f44b67a570a161860de24074a739c6d95d23eee736149f6ea55d84ac36eb8d32526284fa6f2dd151b982e52988d7b5f86707bc6b",
-                    "0xe9464aea08101cd1c5ecb6e896554b502e7e9759e9f7159189311790aae698c28a1f2c41f6f96730623d860c45ec01a8a63b3ff86707bc95",
-                    "0x1579de80933bfe2397a685d246e309ea4a9b8696597b8b957cabe0921f3eb8b9dc1e9a21b7ed8dfb87c997e7d0405e2cfcfa89386707bcca",
                     "0x8eb73ae608594d507a5cfb0d90088d6cf2ec431dca46505a460fbd3dbaf07acf04fbb30283c28fa7e989ed5c91a2fc338973f34e6707b7fe",
+                    "0x1579de80933bfe2397a685d246e309ea4a9b8696597b8b957cabe0921f3eb8b9dc1e9a21b7ed8dfb87c997e7d0405e2cfcfa89386707bcca",
+                    "0xe9464aea08101cd1c5ecb6e896554b502e7e9759e9f7159189311790aae698c28a1f2c41f6f96730623d860c45ec01a8a63b3ff86707bc95",
                     "0xf933af0bcf500b5499d9802f01f85dd13d0cde0e48aa08cefadb738438a2b06540a50cf069e992aa4536211b23f286ef88752187ffffffff",
                     "0xe04adff20d737ca106ba70856bf7e0cc1800d5de1783a5dbc49c555e3fc6463940a50cf069e992aa4536211b23f286ef88752187ffffffff",
                     "0xb0b69286396dd53acb74e9fb25d6a9a72dd81189e3d301140c9f0cb5f2fb988b3e4aea5c2e1433910621b4378dfa541264fc145b6707bcfb",
@@ -84,7 +84,6 @@ class TestFetchOrderbook(unittest.TestCase):
                     0.0,
                 ],
                 "protocol_fee": [
-                    "0",
                     "0",
                     "0",
                     "467895383394304",

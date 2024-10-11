@@ -233,3 +233,4 @@ from
     left outer join trade_data_processed_with_prices tdpwp on trade_hashes.order_uid = tdpwp.order_uid
     and trade_hashes.auction_id = tdpwp.auction_id
     left outer join order_quotes oq on trade_hashes.order_uid = oq.order_uid
+    order by trade_hashes.block_number asc
