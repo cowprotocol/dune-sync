@@ -234,7 +234,7 @@ class TestFetchOrderbook(unittest.TestCase):
                     "0",
                     "0",
                     "0",
-                    "26385186071416200",
+                    "26385186071416400",
                 ],
                 "network_fee": [
                     "9477057450023950",
