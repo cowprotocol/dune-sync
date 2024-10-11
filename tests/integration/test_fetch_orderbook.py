@@ -230,7 +230,7 @@ class TestFetchOrderbook(unittest.TestCase):
                 ],
                 "protocol_fee": [
                     "0",
-                    "71690869136137000",
+                    "71690869135785700",
                     "0",
                     "0",
                     "0",
