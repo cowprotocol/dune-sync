@@ -179,7 +179,7 @@ class TestFetchOrderbook(unittest.TestCase):
         self.assertIsNone(pd.testing.assert_frame_equal(expected, rewards_df))
 
     def test_get_batch_rewards(self):
-        block_number = 20936270
+        block_number = 20936269
         block_range = BlockRange(block_number, block_number + 10)
         rewards_df = OrderbookFetcher.get_batch_rewards(block_range)
         expected = pd.DataFrame(
