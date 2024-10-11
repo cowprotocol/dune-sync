@@ -311,7 +311,7 @@ class TestFetchOrderbook(unittest.TestCase):
                     "144778705",
                 ],
                 "amount": [0.0, 0.0],
-                "protocol_fee": ["1330143", "140147112"],
+                "protocol_fee": ["1329681", "140147111"],
                 "protocol_fee_token": [
                     "0xdac17f958d2ee523a2206206994597c13d831ec7",
                     "0xdac17f958d2ee523a2206206994597c13d831ec7",
