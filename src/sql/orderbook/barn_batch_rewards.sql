@@ -73,7 +73,7 @@ trade_data_unprocessed AS (
         LEFT OUTER JOIN app_data ad -- contains full app data
         ON od.app_data = ad.contract_app_data
     WHERE
-        ss.block_deadline >= {{start_block}}
+        ss.block_deadline > {{start_block}}
         AND ss.block_deadline <= {{end_block}}
 ),
 -- processed trade data:
@@ -101,11 +101,11 @@ trade_data_processed AS (
 ),
 price_data AS (
     SELECT
-        os.auction_id,
-        os.order_uid,
-        ap_surplus.price / pow(10, 18) as surplus_token_native_price,
-        ap_protocol.price / pow(10, 18) as protocol_fee_token_native_price,
-        ap_sell.price / pow(10, 18) as network_fee_token_native_price
+        tdp.auction_id,
+        tdp.order_uid,
+        ap_surplus.price / pow(10, 18) AS surplus_token_native_price,
+        ap_protocol.price / pow(10, 18) AS protocol_fee_token_native_price,
+        ap_sell.price / pow(10, 18) AS network_fee_token_native_price
     FROM
         trade_data_processed AS tdp
         LEFT OUTER JOIN auction_prices ap_sell -- contains price: sell token
@@ -194,14 +194,12 @@ reward_data AS (
     FROM
         settlement_scores ss
         -- If there are reported scores,
-        -- there will always be a record of auction participants
-        JOIN auction_participation ap ON ss.auction_id = ap.auction_id
         -- outer joins made in order to capture non-existent settlements.
         LEFT OUTER JOIN observed_settlements os ON os.auction_id = ss.auction_id
         LEFT OUTER JOIN batch_protocol_fees bpf ON bpf.tx_hash = os.tx_hash
         LEFT OUTER JOIN batch_network_fees bnf ON bnf.tx_hash = os.tx_hash
         WHERE
-            ss.block_deadline >= {{start_block}}
+            ss.block_deadline > {{start_block}}
             AND ss.block_deadline <= {{end_block}}
 ),
 reward_per_auction as (
