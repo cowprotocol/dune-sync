@@ -282,80 +282,66 @@ class TestFetchOrderbook(unittest.TestCase):
         self.assertIsNone(pd.testing.assert_frame_equal(expected, rewards_df))
 
     def test_get_order_rewards_with_integrator_fee(self):
-        block_range = BlockRange(19581572, 19581581)
+        block_range = BlockRange(20934805, 20934809)
         rewards_df = OrderbookFetcher.get_order_rewards(block_range)
         expected = pd.DataFrame(
             {
                 "block_number": [
-                    19581573,
-                    19581573,
-                    19581579,
+                    20934806,
+                    20934808,
                 ],
                 "order_uid": [
-                    "0x0f6c83ff144aabed918417f61a92672165bba9b1c90f078fedfc10c2c16d03d09fa3c00a92ec5f96b1ad2527ab41b3932efeda58660e7959",
-                    "0xac38b37c7821b1c0f0fd631912d7b19581c305c4bdca84dcb6d862da6cf8591cf9d7adfb5bc41283d67db9d71add65162e242f62660e7c82",
-                    "0xc9c870decab00c1335babef5a3009186671b1bc69131c7338a4ecb2ed14831c321a01f63b263d93e124471e456578024121a6b78660e7a5b",
+                    "0x3d388aacd736a1043ca403b0ecfd9cd4fd1a46cebab99f74637d7d1bfd08200631d7916593d1ed6cdb3b1ff2a1f656a2eb2a23816707bbfd",
+                    "0xad7064d19ab9398fc4a0f17e57bea8d4ed83a71d91c1798e3da01199540b970eecf1c70100107017c5da1ff4bbcc482809e396ee6707ba81",
                 ],
                 "solver": [
-                    "0x4339889fd9dfca20a423fba011e9dff1c856caeb",
-                    "0x4339889fd9dfca20a423fba011e9dff1c856caeb",
-                    "0xc74b656bd2ebe313d26d1ac02bcf95b137d1c857",
+                    "0x755bae1cd46c9c27a3230aef0ce923bda13d29f7",
+                    "0xd1508a211d98bb81195dc1f9533edcdf68adf036",
                 ],
                 "quote_solver": [
-                    "0x16c473448e770ff647c69cbe19e28528877fba1b",
-                    "0x16c473448e770ff647c69cbe19e28528877fba1b",
-                    "0x16c473448e770ff647c69cbe19e28528877fba1b",
+                    "0x4fc4a61a3b99a1ad4a61b03f3752ca12b4a17646",
+                    "0xd1508a211d98bb81195dc1f9533edcdf68adf036",
                 ],
                 "tx_hash": [
-                    "0x13315e833ed3204db3320e3e8d213c84ab21e55e715847514d78198af4f68861",
-                    "0x13315e833ed3204db3320e3e8d213c84ab21e55e715847514d78198af4f68861",
-                    "0x962af6dbd9940249b8a795b48c0c4cbc04c0444555bb5b16fd4d824261e282bf",
+                    "0x08f51e088100f4afddf4012e7b6b26d292861ceda92723fd764fff3e1af49c0d",
+                    "0x6ea58eb10d57134c0fb0701c208292eade107870029d0653404a2371d63588fa",
                 ],
                 "surplus_fee": [
-                    "958869097252287",
-                    "29812970679943659325",
-                    "31963685928336242096",
+                    "7606",
+                    "144778705",
                 ],
-                "amount": [0.0, 0.0, 0.0],
-                "protocol_fee": ["346011", "0", "0"],
+                "amount": [0.0, 0.0],
+                "protocol_fee": ["1330143", "140147112"],
                 "protocol_fee_token": [
-                    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "0xdac17f958d2ee523a2206206994597c13d831ec7",
+                    "0xdac17f958d2ee523a2206206994597c13d831ec7",
                 ],
                 "protocol_fee_native_price": [
-                    299379646.7519555,
-                    299379646.7519555,
-                    299379646.7519555,
+                    417562067.399692,
+                    417562067.399692,
                 ],
                 "quote_sell_amount": [
-                    "11177061073424246",
-                    "30000000000000000000000",
-                    "667000000000000000000",
+                    "2500000",
+                    "200000000000",
                 ],
-                "quote_buy_amount": ["37147277", "22954359609", "358516953"],
+                "quote_buy_amount": ["1523804298", "200214933429"],
                 "quote_gas_cost": [
-                    3605211063076992.0,
-                    1982659477433822.0,
-                    2865645675046151.0,
+                    1808592978505935,
+                    1516678038740264.2,
                 ],
                 "quote_sell_token_price": [
-                    1.0,
-                    0.000234609143374563,
-                    0.000160802298220274,
+                    254238788483.4054,
+                    417824591.695399,
                 ],
                 "partner_fee": [
-                    "346011",
                     "0",
-                    "0",
+                    "140147112",
                 ],
                 "partner_fee_recipient": [
-                    "0x9FA3c00a92Ec5f96B1Ad2527ab41B3932EFEDa58",
                     None,
-                    None,
+                    "0x63695Eee2c3141BDE314C5a6f89B98E62808d716",
                 ],
                 "protocol_fee_kind": [
-                    "volume",
                     "priceimprovement",
                     "priceimprovement",
                 ],
