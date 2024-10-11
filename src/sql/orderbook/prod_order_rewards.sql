@@ -55,20 +55,15 @@ order_data AS (
         app_data
     FROM jit_orders
 ),
-protocol_fee_policies_application_order AS (
-    SELECT
-        fp.auction_id,
-        fp.order_uid,
-        MIN(fp.application_order) as application_order
-    FROM fee_policies fp JOIN trade_hashes th ON fp.auction_id = th.auction_id AND fp.order_uid = th.order_uid
-    GROUP BY fp.auction_id, fp.order_uid
-),
 protocol_fee_kind AS (
-    SELECT
+    SELECT DISTINCT ON (fp.auction_id, fp.order_uid)
         fp.auction_id,
         fp.order_uid,
         fp.kind
-    FROM fee_policies fp JOIN protocol_fee_policies_application_order pfpao ON fp.auction_id = pfpao.auction_id AND fp.order_uid = pfpao.order_uid AND fp.application_order = pfpao.application_order
+    FROM fee_policies fp
+        JOIN trade_hashes th
+        ON fp.auction_id = th.auction_id AND fp.order_uid = th.order_uid
+    ORDER BY fp.auction_id, fp.order_uid, fp.application_order
 ),
 -- unprocessed trade data
 trade_data_unprocessed AS (
