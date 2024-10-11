@@ -129,7 +129,9 @@ trade_data_processed AS (
         tdu.surplus_token AS protocol_fee_token,
         pfk.kind as protocol_fee_kind
     FROM
-        trade_data_unprocessed tdu LEFT OUTER JOIN protocol_fee_kind pfk ON tdu.order_uid = pfk.order_uid AND tdu.auction_id = pfk.auction_id 
+        trade_data_unprocessed tdu
+            LEFT OUTER JOIN protocol_fee_kind pfk
+            ON tdu.order_uid = pfk.order_uid AND tdu.auction_id = pfk.auction_id 
 ),
 price_data AS (
     SELECT
