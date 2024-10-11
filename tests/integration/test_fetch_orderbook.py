@@ -335,7 +335,7 @@ class TestFetchOrderbook(unittest.TestCase):
                 ],
                 "partner_fee": [
                     "0",
-                    "140147112",
+                    "140147111",
                 ],
                 "partner_fee_recipient": [
                     None,
