@@ -287,56 +287,6 @@ class TestFetchOrderbook(unittest.TestCase):
                     "211383961488066",
                     "3660406604881491",
                 ],
-                "participating_solvers": [
-                    [
-                        "0x16c473448e770ff647c69cbe19e28528877fba1b",
-                        "0x4fc4a61a3b99a1ad4a61b03f3752ca12b4a17646",
-                        "0x9b7e7f21d98f21c0354035798c40e9040e25787f",
-                        "0xb9332b6301e5983272c30dd5b48a4e3b1664511b",
-                        "0xbf54079c9bc879ae4dd6bc79bce11d3988fd9c2b",
-                        "0xc9f2e6ea1637e499406986ac50ddc92401ce1f58",
-                        "0xd1508a211d98bb81195dc1f9533edcdf68adf036",
-                        "0xd50ecb485dcf5d97266122dfed979587dd8923ac",
-                    ],
-                    [
-                        "0x16c473448e770ff647c69cbe19e28528877fba1b",
-                        "0xbf54079c9bc879ae4dd6bc79bce11d3988fd9c2b",
-                        "0xc74b656bd2ebe313d26d1ac02bcf95b137d1c857",
-                        "0xc9f2e6ea1637e499406986ac50ddc92401ce1f58",
-                        "0xd1508a211d98bb81195dc1f9533edcdf68adf036",
-                    ],
-                    [
-                        "0x16c473448e770ff647c69cbe19e28528877fba1b",
-                        "0xc74b656bd2ebe313d26d1ac02bcf95b137d1c857",
-                        "0xc9f2e6ea1637e499406986ac50ddc92401ce1f58",
-                        "0xd1508a211d98bb81195dc1f9533edcdf68adf036",
-                    ],
-                    [
-                        "0x16c473448e770ff647c69cbe19e28528877fba1b",
-                        "0xc74b656bd2ebe313d26d1ac02bcf95b137d1c857",
-                        "0xc9f2e6ea1637e499406986ac50ddc92401ce1f58",
-                        "0xd1508a211d98bb81195dc1f9533edcdf68adf036",
-                    ],
-                    [
-                        "0x16c473448e770ff647c69cbe19e28528877fba1b",
-                        "0xc74b656bd2ebe313d26d1ac02bcf95b137d1c857",
-                        "0xc9f2e6ea1637e499406986ac50ddc92401ce1f58",
-                        "0xd1508a211d98bb81195dc1f9533edcdf68adf036",
-                    ],
-                    [
-                        "0xc74b656bd2ebe313d26d1ac02bcf95b137d1c857",
-                        "0xc9f2e6ea1637e499406986ac50ddc92401ce1f58",
-                        "0xd1508a211d98bb81195dc1f9533edcdf68adf036",
-                    ],
-                    [
-                        "0x0ddcb0769a3591230caa80f85469240b71442089",
-                        "0x4339889fd9dfca20a423fba011e9dff1c856caeb",
-                        "0x4fc4a61a3b99a1ad4a61b03f3752ca12b4a17646",
-                        "0x9b7e7f21d98f21c0354035798c40e9040e25787f",
-                        "0xc74b656bd2ebe313d26d1ac02bcf95b137d1c857",
-                        "0xd1508a211d98bb81195dc1f9533edcdf68adf036",
-                    ],
-                ],
             },
         )
         self.assertIsNone(pd.testing.assert_frame_equal(expected, rewards_df))
