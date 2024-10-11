@@ -57,17 +57,18 @@ order_data AS (
 ),
 protocol_fee_policies_application_order AS (
     SELECT
-        auction_id,
-        order_uid,
+        fp.auction_id,
+        fp.order_uid,
         MIN(fp.application_order) as application_order
-    FROM fee_policies fp join trade_hashes th on fp.auction_id = th.auction_id and fp.order_uid = th.order_uid
+    FROM fee_policies fp JOIN trade_hashes th ON fp.auction_id = th.auction_id AND fp.order_uid = th.order_uid
+    GROUP BY fp.auction_id, fp.order_uid
 ),
 protocol_fee_kind AS (
     SELECT
         fp.auction_id,
         fp.order_uid,
         fp.kind
-    FROM fee_policies fp join protocol_fee_policies_application_order pfpao on fp.auction_id = pfpao.auction and fp.order_uid = pfpao.order_uid and fp.application_order = pfpao.application_order
+    FROM fee_policies fp JOIN protocol_fee_policies_application_order pfpao ON fp.auction_id = pfpao.auction_id AND fp.order_uid = pfpao.order_uid AND fp.application_order = pfpao.application_order
 ),
 -- unprocessed trade data
 trade_data_unprocessed AS (
@@ -104,7 +105,7 @@ trade_data_unprocessed AS (
         ON od.app_data = ad.contract_app_data
     WHERE
         s.block_number > {{start_block}}
-        and s.block_number <= {{end_block}}
+        AND s.block_number <= {{end_block}}
 ),
 -- processed trade data:
 trade_data_processed AS (
