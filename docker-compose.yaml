@@ -27,6 +27,16 @@ services:
     networks:
       - internal
 
+  prefect-agent:
+    image: prefecthq/prefect:2-python3.10
+    environment:
+      - PREFECT_API_URL=http://prefect-server:4200/api
+    command: prefect agent start -q default
+    depends_on:
+      - prefect-server
+    networks:
+      - internal
+
 networks:
   internal:
     driver: bridge

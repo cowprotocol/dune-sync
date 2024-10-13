@@ -2,27 +2,58 @@ import os
 import sys
 import logging
 import pandas as pd
+from io import StringIO
+from datetime import datetime, timedelta, timezone
+from dune_client.client import DuneClient
 
 deployments_path = os.path.abspath("/deployments")
 if deployments_path not in sys.path:
     sys.path.insert(0, deployments_path)
 
 from typing import Any
-from dotenv import load_dotenv
-from sqlalchemy import create_engine, text
 from prefect import flow, task, get_run_logger
-from prefect.logging import get_logger
+from prefect.deployments import Deployment
+from prefect.filesystems import GitHub
 
 from src.models.block_range import BlockRange
 from src.fetch.orderbook import OrderbookFetcher
-from src.sync.order_rewards import sync_order_rewards
 from src.models.order_rewards_schema import OrderRewards
+
+def get_last_monday_midnight_utc():
+    now = datetime.now(timezone.utc)
+    current_weekday = now.weekday()
+    days_since_last_monday = current_weekday if current_weekday != 0 else 7
+    last_monday = now - timedelta(days=days_since_last_monday)
+    last_monday_midnight = last_monday.replace(hour=0, minute=0, second=0, microsecond=0)
+    timestamp = int(last_monday_midnight.timestamp())
+    return timestamp
 
 
 @task
 def get_block_range() -> BlockRange:
-    start = 20913994
-    end = 20921169
+    etherscan_api = "https://api.etherscan.io/api"
+    api_key = os.environ["ETHERSCAN_API_KEY"]
+    start = requests.get(
+            etherscan_api, 
+            {
+              "module": "block",
+              "action": "getblocknobytime",
+              "timestamp": get_last_monday_midnight_utc(),
+              "closest": "before",
+              "apikey": api_key
+            }
+    ).json().get('result')
+    end = requests.get(
+            etherscan_api, 
+            {
+              "module": "block",
+              "action": "getblocknobytime",
+              "timestamp": int(datetime.now(timezone.utc).timestamp()),
+              "closest": "before",
+              "apikey": api_key
+            }
+    ).json().get('result')
+
     blockrange = BlockRange(block_from=start, block_to=end)
     return blockrange
 
@@ -31,31 +62,50 @@ def fetch_orderbook(blockrange: BlockRange) -> pd.DataFrame:
     orderbook = OrderbookFetcher()
     return orderbook.get_order_rewards(blockrange)
 
-@task
-def cast_orderbook_to_dune_records(orderbook: pd.DataFrame) -> list[dict[str, Any]]:
-    return OrderRewards.from_pdf_to_dune_records(orderbook)
 
 @task
-def upload_data_to_dune():
+def cast_orderbook_to_dune_string(orderbook: pd.DataFrame) -> str:
+    csv_buffer = StringIO()
+    orderbook.to_csv(csv_buffer, index=False)
+    return csv_buffer.getvalue()
+
+
+@task
+def upload_data_to_dune(data: str, block_start: int, block_end: int):
+    table_name = f"order_rewards_{block_start}"
+    dune = DuneClient.from_env()
+    dune.upload_csv(
+            data=data,
+            description=f"Order rewards data for blocks {block_start}-{block_end}",
+            table_name=table_name,
+            is_pravate=False,
+    )
+    return table_name
+
+
+@task
+def update_aggregate_query(table_name: str):
     pass
 
-@task
-def update_aggregate_query():
-    pass
 
-
-@flow(retries=3, retry_delay_seconds=60)
+@flow(retries=3, retry_delay_seconds=60, log_prints=True)
 def order_rewards():
+    logger = get_run_logger()
     blockrange = get_block_range()
     orderbook = fetch_orderbook(blockrange)
-    dune_records = cast_orderbook_to_dune_records(orderbook)
+    data = cast_orderbook_to_dune_string(orderbook)
+    table_name = upload_data_to_dune(data, blockrange.block_from, blockrange.block_to)
+    update_aggregate_query(table_name)
 
 
 if __name__ == "__main__":
-    order_rewards.serve(
+    github_block = GitHub.load("dune-sync")
+    deployment = Deployment.build_from_flow(
+        flow=order_rewards,
         name="dune-sync-prod-order-rewards",
-        cron="*/10 * * * *", # Every 10 minutes
+        storage=github_block,
         tags=["solver", "dune-sync"],
         description="Run the dune sync order_rewards query",
         version="0.0.1",
-        )
+    )
+    deployment.apply()
