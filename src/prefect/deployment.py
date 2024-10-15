@@ -9,13 +9,8 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 from dune_client.client import DuneClient
 
-deployments_path = os.path.abspath("/deployments")
-if deployments_path not in sys.path:
-    sys.path.insert(0, deployments_path)
-
 from typing import Any
 from prefect import flow, task, get_run_logger
-from prefect.deployments import Deployment
 from prefect_github.repository import GitHubRepository
 
 from src.models.block_range import BlockRange
@@ -132,7 +127,7 @@ def order_rewards():
 
 if __name__ == "__main__":
     github_repository_block = GitHubRepository.load("dune-sync")
-    deployment = Deployment.build_from_flow(
+    deployment = order_rewards.deploy(
         flow=order_rewards,
         name="dune-sync-prod-order-rewards",
         schedule=(CronSchedule(cron="0 */3 * * *")), # Once every 3 hours
