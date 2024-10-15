@@ -88,9 +88,9 @@ def update_aggregate_query(table_name: str):
     """
     Query example:
     WITH aggregate AS (
-        SELECT * FROM dune.cowswapbram.dataset_order_rewards_20921069_20921169
+        SELECT * FROM dune.cowprotocol.order_rewards_1
         UNION ALL
-        SELECT * FROM dune.cowswapbram.dataset_testtable
+        SELECT * FROM dune.cowprotocol.order_rewards_2
     )
 
     SELECT DISTINCT * FROM aggregate;
@@ -129,9 +129,9 @@ if __name__ == "__main__":
     github_repository_block = GitHubRepository.load("dune-sync")
     deployment = order_rewards.deploy(
         flow=order_rewards,
-        name="dune-sync-prod-order-rewards",
-        schedule=(CronSchedule(cron="0 */3 * * *")), # Once every 3 hours
-        storage=github_block,
+        name="dune-sync-order-rewards",
+        cron="0 */3 * * *"), # Once every 3 hours
+        storage=github_repository_block,
         tags=["solver", "dune-sync"],
         description="Run the dune sync order_rewards query",
         version="0.0.1",
