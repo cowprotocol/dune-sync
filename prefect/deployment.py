@@ -1,14 +1,18 @@
 import os
+import re
 import sys
 import logging
 import pandas as pd
 from io import StringIO
+from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 from dune_client.client import DuneClient
 
+"""
 deployments_path = os.path.abspath("/deployments")
 if deployments_path not in sys.path:
     sys.path.insert(0, deployments_path)
+"""
 
 from typing import Any
 from prefect import flow, task, get_run_logger
@@ -18,6 +22,8 @@ from prefect.filesystems import GitHub
 from src.models.block_range import BlockRange
 from src.fetch.orderbook import OrderbookFetcher
 from src.models.order_rewards_schema import OrderRewards
+
+load_dotenv()
 
 def get_last_monday_midnight_utc():
     now = datetime.now(timezone.utc)
@@ -85,7 +91,34 @@ def upload_data_to_dune(data: str, block_start: int, block_end: int):
 
 @task
 def update_aggregate_query(table_name: str):
-    pass
+    """
+    Query example:
+    WITH aggregate AS (
+        SELECT * FROM dune.cowswapbram.dataset_order_rewards_20921069_20921169
+        UNION ALL
+        SELECT * FROM dune.cowswapbram.dataset_testtable
+    )
+
+    SELECT DISTINCT * FROM aggregate;
+    """
+
+    logger = get_run_logger()
+    dune = DuneClient.from_env()
+    query_id = os.environ['AGGREGATE_QUERY_ID']
+    query = dune.get_query(query_id)
+    sql_query = query.sql
+
+    if table_name not in sql_query:
+        logger.info(f"Table name not found, updating table with {table_name}")
+        insertion_point = insertion_point = sql_query.rfind(")")
+        updated_sql_query = (
+            sql_query[:insertion_point].strip() +
+            f"\n    UNION ALL\n    SELECT * FROM {table_name}\n" +
+            sql_query[insertion_point:]
+        )
+        dune.update_query(query_sql=updated_sql_query)
+    else:
+        logger.info(f"Table already in query, not updating query")
 
 
 @flow(retries=3, retry_delay_seconds=60, log_prints=True)
