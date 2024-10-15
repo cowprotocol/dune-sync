@@ -78,7 +78,7 @@ def upload_data_to_dune(data: str, block_start: int, block_end: int):
             data=data,
             description=f"Order rewards data for blocks {block_start}-{block_end}",
             table_name=table_name,
-            is_pravate=False,
+            is_private=False,
     )
     return table_name
 
