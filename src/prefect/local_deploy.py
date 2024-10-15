@@ -1,8 +1,17 @@
 import os
+from prefect import flow, get_run_logger
 from dotenv import load_dotenv
-from src.prefect.deployment import order_rewards
+from src.prefect.deployment import get_block_range, fetch_orderbook, cast_orderbook_to_dune_string, upload_data_to_dune
 
 load_dotenv()
+
+@flow()
+def order_rewards():
+    logger = get_run_logger()
+    blockrange = get_block_range()
+    orderbook = fetch_orderbook(blockrange)
+    data = cast_orderbook_to_dune_string(orderbook)
+    table_name = upload_data_to_dune(data, blockrange.block_from, blockrange.block_to)
 
 if __name__ == "__main__":
     # Not ideal, but this script is for local testing
