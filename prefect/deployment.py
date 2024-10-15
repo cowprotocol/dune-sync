@@ -2,17 +2,16 @@ import os
 import re
 import sys
 import logging
+import requests
 import pandas as pd
 from io import StringIO
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 from dune_client.client import DuneClient
 
-"""
 deployments_path = os.path.abspath("/deployments")
 if deployments_path not in sys.path:
     sys.path.insert(0, deployments_path)
-"""
 
 from typing import Any
 from prefect import flow, task, get_run_logger
@@ -116,7 +115,7 @@ def update_aggregate_query(table_name: str):
             f"\n    UNION ALL\n    SELECT * FROM {table_name}\n" +
             sql_query[insertion_point:]
         )
-        dune.update_query(query_sql=updated_sql_query)
+        dune.update_query(query_sql=updated_sql_query, query_id=query_id)
     else:
         logger.info(f"Table already in query, not updating query")
 
@@ -132,13 +131,10 @@ def order_rewards():
 
 
 if __name__ == "__main__":
-    github_block = GitHub.load("dune-sync")
-    deployment = Deployment.build_from_flow(
-        flow=order_rewards,
-        name="dune-sync-prod-order-rewards",
-        storage=github_block,
-        tags=["solver", "dune-sync"],
-        description="Run the dune sync order_rewards query",
-        version="0.0.1",
-    )
-    deployment.apply()
+        order_rewards.serve(
+            name="dune-sync-prod-order-rewards",
+            cron="*/30 * * * *", # Every 30 minutes
+            tags=["solver", "dune-sync"],
+            description="Run the dune sync order_rewards query",
+            version="0.0.1",
+        )
