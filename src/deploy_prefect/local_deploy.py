@@ -21,7 +21,6 @@ def order_rewards() -> None:
     orderbook = fetch_orderbook(blockrange)
     data = cast_orderbook_to_dune_string(orderbook)
     upload_data_to_dune(data, blockrange.block_from, blockrange.block_to)
-    return None
 
 
 if __name__ == "__main__":
