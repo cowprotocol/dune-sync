@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from dune_client.client import DuneClient
 
 # pylint: disable=import-error
-from prefect import flow, task, get_run_logger # type: ignore
+from prefect import flow, task, get_run_logger  # type: ignore
 
 # pylint: disable=import-error
 from prefect_github.repository import GitHubRepository  # type: ignore
@@ -34,7 +34,7 @@ def get_last_monday_midnight_utc() -> int:
     return timestamp
 
 
-@task # type: ignore[misc]
+@task  # type: ignore[misc]
 def get_block_range() -> BlockRange:
     """Returns the blockrange from last monday midnight until now"""
     etherscan_api = "https://api.etherscan.io/api"
@@ -74,14 +74,14 @@ def get_block_range() -> BlockRange:
     return blockrange
 
 
-@task # type: ignore[misc]
+@task  # type: ignore[misc]
 def fetch_orderbook(blockrange: BlockRange) -> pd.DataFrame:
     """Runs the query to get the order book for a specified blockrange"""
     orderbook = OrderbookFetcher()
     return orderbook.get_order_rewards(blockrange)
 
 
-@task # type: ignore[misc]
+@task  # type: ignore[misc]
 def cast_orderbook_to_dune_string(orderbook: pd.DataFrame) -> str:
     """Casts the dataframe to a string in csv format for uploading to Dune"""
     csv_buffer = StringIO()
@@ -89,7 +89,7 @@ def cast_orderbook_to_dune_string(orderbook: pd.DataFrame) -> str:
     return csv_buffer.getvalue()
 
 
-@task # type: ignore[misc]
+@task  # type: ignore[misc]
 def upload_data_to_dune(data: str, block_start: int, block_end: int) -> str:
     """
     Uploads the order rewards data to Dune,
@@ -106,7 +106,7 @@ def upload_data_to_dune(data: str, block_start: int, block_end: int) -> str:
     return table_name
 
 
-@task # type: ignore[misc]
+@task  # type: ignore[misc]
 def update_aggregate_query(table_name: str) -> None:
     """
     Query example:
