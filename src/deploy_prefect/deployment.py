@@ -136,7 +136,7 @@ def update_aggregate_query(table_name: str) -> None:
                           query_id=query_id) # type: ignore[attr-defined]
     else:
         logger.info("Table already in query, not updating query")
-    return
+    return None
 
 
 @flow(retries=3, retry_delay_seconds=60, log_prints=True)
@@ -147,7 +147,7 @@ def order_rewards() -> None:
     data = cast_orderbook_to_dune_string(orderbook)
     table_name = upload_data_to_dune(data, blockrange.block_from, blockrange.block_to)
     update_aggregate_query(table_name)
-    return
+    return None
 
 
 if __name__ == "__main__":
