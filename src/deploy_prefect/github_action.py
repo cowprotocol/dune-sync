@@ -148,20 +148,3 @@ def order_rewards() -> None:
     data = cast_orderbook_to_dune_string(orderbook)
     table_name = upload_data_to_dune(data, blockrange.block_from, blockrange.block_to)
     update_aggregate_query(table_name)
-
-
-if __name__ == "__main__":
-    github_repository_block = GitHubRepository.load("dune-sync")
-    flow.from_source(
-            source=github_repository_block,
-            entrypoint="src/deploy_prefect/github_action.py:order_rewards",
-            ).deploy(
-        name="dune-sync-prod-order-rewards",
-        work_pool_name="cowbarn",
-        storage=github_repository_block,
-        cron="*/30 * * * *",  # Every 30 minutes
-        tags=["solver", "dune-sync"],
-        description="Run the dune sync order_rewards query",
-        version="0.0.1",
-    )
-
