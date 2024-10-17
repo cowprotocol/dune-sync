@@ -1,13 +1,9 @@
 """Prefect Deployment for Order Rewards Data"""
 import os
-import re
-import sys
-import logging
-import requests
-from typing import Any
 from io import StringIO
 from datetime import datetime, timedelta, timezone
 
+import requests
 import pandas as pd
 from dotenv import load_dotenv
 from dune_client.client import DuneClient
@@ -17,7 +13,6 @@ from prefect_github.repository import GitHubRepository # pylint: disable=import-
 
 from src.models.block_range import BlockRange
 from src.fetch.orderbook import OrderbookFetcher
-from src.models.order_rewards_schema import OrderRewards
 
 load_dotenv()
 
@@ -124,7 +119,7 @@ def update_aggregate_query(table_name: str):
         )
         dune.update_query(query_sql=updated_sql_query, query_id=query_id)
     else:
-        logger.info(f"Table already in query, not updating query")
+        logger.info("Table already in query, not updating query")
 
 
 @flow(retries=3, retry_delay_seconds=60, log_prints=True)

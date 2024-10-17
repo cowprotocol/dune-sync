@@ -1,6 +1,6 @@
 """Code for Local Testing of Order Rewards Deployment"""
 import os
-from prefect import flow
+from prefect import flow # pylint: disable=import-error
 from dotenv import load_dotenv
 from src.deploy_prefect.deployment import (
         get_block_range,
