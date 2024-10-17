@@ -158,7 +158,6 @@ if __name__ == "__main__":
             ).deploy(
         name="dune-sync-prod-order-rewards",
         work_pool_name="cowbarn",
-        storage=github_repository_block,
         cron="*/30 * * * *",  # Every 30 minutes
         tags=["solver", "dune-sync"],
         description="Run the dune sync order_rewards query",
