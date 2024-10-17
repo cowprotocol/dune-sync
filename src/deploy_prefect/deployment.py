@@ -10,7 +10,8 @@ from dotenv import load_dotenv
 from dune_client.client import DuneClient
 
 # pylint: disable=import-error
-from prefect import flow, task, get_run_logger # type: ignore
+from prefect import flow, task, get_run_logger  # type: ignore
+
 # pylint: disable=import-error
 from prefect_github.repository import GitHubRepository  # type: ignore
 
@@ -96,7 +97,7 @@ def upload_data_to_dune(data: str, block_start: int, block_end: int) -> str:
     """
     table_name = f"order_rewards_{block_start}"
     dune = DuneClient.from_env()
-    dune.upload_csv( # type: ignore[attr-defined]
+    dune.upload_csv(  # type: ignore[attr-defined]
         data=data,
         description=f"Order rewards data for blocks {block_start}-{block_end}",
         table_name=table_name,
@@ -121,7 +122,7 @@ def update_aggregate_query(table_name: str) -> None:
     logger = get_run_logger()
     dune = DuneClient.from_env()
     query_id = os.environ["AGGREGATE_QUERY_ID"]
-    query = dune.get_query(query_id) # type: ignore[attr-defined]
+    query = dune.get_query(query_id)  # type: ignore[attr-defined]
     sql_query = query.sql
 
     if table_name not in sql_query:
@@ -132,8 +133,9 @@ def update_aggregate_query(table_name: str) -> None:
             + f"\n    UNION ALL\n    SELECT * FROM {table_name}\n"
             + sql_query[insertion_point:]
         )
-        dune.update_query(query_sql=updated_sql_query,
-                          query_id=query_id) # type: ignore[attr-defined]
+        dune.update_query(
+            query_sql=updated_sql_query, query_id=query_id
+        )  # type: ignore[attr-defined]
     else:
         logger.info("Table already in query, not updating query")
 
