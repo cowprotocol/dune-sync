@@ -153,7 +153,6 @@ def order_rewards() -> None:
 if __name__ == "__main__":
     github_repository_block = GitHubRepository.load("dune-sync")
     deployment = order_rewards.deploy(
-        flow=order_rewards,
         name="dune-sync-order-rewards",
         cron="0 */3 * * *",  # Once every 3 hours
         storage=github_repository_block,
