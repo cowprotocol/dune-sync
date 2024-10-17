@@ -65,5 +65,5 @@ deployment:
 	else \
 		pip install -r requirements/prefect.txt; \
 		pip install -r requirements/prod.txt; \
-		python -m src.prefect.local_deploy; \
+		python -m src.deploy_prefect.local_deploy; \
 	fi
