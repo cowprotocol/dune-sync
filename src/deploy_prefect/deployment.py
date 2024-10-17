@@ -154,7 +154,7 @@ if __name__ == "__main__":
     github_repository_block = GitHubRepository.load("dune-sync")
     flow.from_source(
             source=github_repository_block,
-            entrypoint="src/deploy_prefect/github_action.py:order_rewards",
+            entrypoint="src/deploy_prefect/deployment.py:order_rewards",
             ).deploy(
         name="dune-sync-prod-order-rewards",
         work_pool_name="cowbarn",
