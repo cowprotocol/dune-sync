@@ -140,7 +140,7 @@ def update_aggregate_query(table_name: str) -> None:
         logger.info("Table already in query, not updating query")
 
 
-@flow(retries=3, retry_delay_seconds=60, log_prints=True)
+@flow(retries=3, retry_delay_seconds=60, log_prints=True)  # type: ignore[misc]
 def order_rewards() -> None:
     """Defines a flow for updating the order_rewards table"""
     blockrange = get_block_range()
@@ -161,4 +161,4 @@ if __name__ == "__main__":
         description="Run the dune sync order_rewards query",
         version="0.0.1",
     )
-    deployment.apply()  # type: ignore
+    deployment.apply()
