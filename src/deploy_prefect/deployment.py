@@ -12,8 +12,8 @@ import pandas as pd
 from dotenv import load_dotenv
 from dune_client.client import DuneClient
 
-from prefect import flow, task, get_run_logger
-from prefect_github.repository import GitHubRepository
+from prefect import flow, task, get_run_logger # pylint: disable=import-error
+from prefect_github.repository import GitHubRepository # pylint: disable=import-error
 
 from src.models.block_range import BlockRange
 from src.fetch.orderbook import OrderbookFetcher
