@@ -1,5 +1,6 @@
 import os
 import re
+"""Prefect Deployment for Order Rewards Data"""
 import sys
 import logging
 import requests
@@ -34,7 +35,7 @@ def get_block_range() -> BlockRange:
     etherscan_api = "https://api.etherscan.io/api"
     api_key = os.environ["ETHERSCAN_API_KEY"]
     start = requests.get(
-            etherscan_api, 
+            etherscan_api,
             {
               "module": "block",
               "action": "getblocknobytime",
@@ -44,7 +45,7 @@ def get_block_range() -> BlockRange:
             }
     ).json().get('result')
     end = requests.get(
-            etherscan_api, 
+            etherscan_api,
             {
               "module": "block",
               "action": "getblocknobytime",
@@ -117,7 +118,6 @@ def update_aggregate_query(table_name: str):
 
 @flow(retries=3, retry_delay_seconds=60, log_prints=True)
 def order_rewards():
-    logger = get_run_logger()
     blockrange = get_block_range()
     orderbook = fetch_orderbook(blockrange)
     data = cast_orderbook_to_dune_string(orderbook)
