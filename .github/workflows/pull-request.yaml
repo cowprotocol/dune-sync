@@ -50,6 +50,8 @@ jobs:
           PROD_DB_URL: ${{ secrets.PROD_DB_URL }}
           BARN_DB_URL: ${{ secrets.BARN_DB_URL }}
 
+  prefect:
+    runs-on: ubuntu-latest
       - uses: actions/setup-python@v2
         with:
           python-version: '3.12'
