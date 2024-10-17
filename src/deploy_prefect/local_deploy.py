@@ -1,15 +1,17 @@
 """Code for Local Testing of Order Rewards Deployment"""
+
 import os
-from prefect import flow # pylint: disable=import-error
+from prefect import flow  # pylint: disable=import-error
 from dotenv import load_dotenv
 from src.deploy_prefect.deployment import (
-        get_block_range,
-        fetch_orderbook,
-        cast_orderbook_to_dune_string,
-        upload_data_to_dune
+    get_block_range,
+    fetch_orderbook,
+    cast_orderbook_to_dune_string,
+    upload_data_to_dune,
 )
 
 load_dotenv()
+
 
 @flow()
 def order_rewards():
@@ -18,6 +20,7 @@ def order_rewards():
     orderbook = fetch_orderbook(blockrange)
     data = cast_orderbook_to_dune_string(orderbook)
     upload_data_to_dune(data, blockrange.block_from, blockrange.block_to)
+
 
 if __name__ == "__main__":
     # Not ideal, but this script is for local testing
@@ -28,8 +31,8 @@ if __name__ == "__main__":
 
     order_rewards.serve(
         name="dune-sync-prod-order-rewards",
-        cron="*/30 * * * *", # Every 30 minutes
+        cron="*/30 * * * *",  # Every 30 minutes
         tags=["solver", "dune-sync"],
         description="Run the dune sync order_rewards query",
         version="0.0.1",
-        )
+    )

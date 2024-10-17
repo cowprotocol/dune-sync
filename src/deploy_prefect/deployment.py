@@ -1,4 +1,5 @@
 """Prefect Deployment for Order Rewards Data"""
+
 import os
 from io import StringIO
 from datetime import datetime, timedelta, timezone
@@ -8,13 +9,14 @@ import pandas as pd
 from dotenv import load_dotenv
 from dune_client.client import DuneClient
 
-from prefect import flow, task, get_run_logger # pylint: disable=import-error
-from prefect_github.repository import GitHubRepository # pylint: disable=import-error
+from prefect import flow, task, get_run_logger  # pylint: disable=import-error
+from prefect_github.repository import GitHubRepository  # pylint: disable=import-error
 
 from src.models.block_range import BlockRange
 from src.fetch.orderbook import OrderbookFetcher
 
 load_dotenv()
+
 
 def get_last_monday_midnight_utc() -> int:
     """Get the timestamp of last monday at midnight UTC"""
@@ -22,7 +24,9 @@ def get_last_monday_midnight_utc() -> int:
     current_weekday = now.weekday()
     days_since_last_monday = current_weekday if current_weekday != 0 else 7
     last_monday = now - timedelta(days=days_since_last_monday)
-    last_monday_midnight = last_monday.replace(hour=0, minute=0, second=0, microsecond=0)
+    last_monday_midnight = last_monday.replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
     timestamp = int(last_monday_midnight.timestamp())
     return timestamp
 
@@ -32,31 +36,40 @@ def get_block_range() -> BlockRange:
     """Returns the blockrange from last monday midnight until now"""
     etherscan_api = "https://api.etherscan.io/api"
     api_key = os.environ["ETHERSCAN_API_KEY"]
-    start = requests.get(
+    start = (
+        requests.get(
             etherscan_api,
             {
-              "module": "block",
-              "action": "getblocknobytime",
-              "timestamp": get_last_monday_midnight_utc(),
-              "closest": "before",
-              "apikey": api_key
+                "module": "block",
+                "action": "getblocknobytime",
+                "timestamp": get_last_monday_midnight_utc(),
+                "closest": "before",
+                "apikey": api_key,
             },
-            timeout=60
-    ).json().get('result')
-    end = requests.get(
+            timeout=60,
+        )
+        .json()
+        .get("result")
+    )
+    end = (
+        requests.get(
             etherscan_api,
             {
-              "module": "block",
-              "action": "getblocknobytime",
-              "timestamp": int(datetime.now(timezone.utc).timestamp()),
-              "closest": "before",
-              "apikey": api_key
+                "module": "block",
+                "action": "getblocknobytime",
+                "timestamp": int(datetime.now(timezone.utc).timestamp()),
+                "closest": "before",
+                "apikey": api_key,
             },
-            timeout=60
-    ).json().get('result')
+            timeout=60,
+        )
+        .json()
+        .get("result")
+    )
 
     blockrange = BlockRange(block_from=start, block_to=end)
     return blockrange
+
 
 @task
 def fetch_orderbook(blockrange: BlockRange) -> pd.DataFrame:
@@ -82,10 +95,10 @@ def upload_data_to_dune(data: str, block_start: int, block_end: int):
     table_name = f"order_rewards_{block_start}"
     dune = DuneClient.from_env()
     dune.upload_csv(
-            data=data,
-            description=f"Order rewards data for blocks {block_start}-{block_end}",
-            table_name=table_name,
-            is_private=False,
+        data=data,
+        description=f"Order rewards data for blocks {block_start}-{block_end}",
+        table_name=table_name,
+        is_private=False,
     )
     return table_name
 
@@ -105,7 +118,7 @@ def update_aggregate_query(table_name: str):
 
     logger = get_run_logger()
     dune = DuneClient.from_env()
-    query_id = os.environ['AGGREGATE_QUERY_ID']
+    query_id = os.environ["AGGREGATE_QUERY_ID"]
     query = dune.get_query(query_id)
     sql_query = query.sql
 
@@ -113,9 +126,9 @@ def update_aggregate_query(table_name: str):
         logger.info(f"Table name not found, updating table with {table_name}")
         insertion_point = insertion_point = sql_query.rfind(")")
         updated_sql_query = (
-            sql_query[:insertion_point].strip() +
-            f"\n    UNION ALL\n    SELECT * FROM {table_name}\n" +
-            sql_query[insertion_point:]
+            sql_query[:insertion_point].strip()
+            + f"\n    UNION ALL\n    SELECT * FROM {table_name}\n"
+            + sql_query[insertion_point:]
         )
         dune.update_query(query_sql=updated_sql_query, query_id=query_id)
     else:
@@ -137,7 +150,7 @@ if __name__ == "__main__":
     deployment = order_rewards.deploy(
         flow=order_rewards,
         name="dune-sync-order-rewards",
-        cron="0 */3 * * *", # Once every 3 hours
+        cron="0 */3 * * *",  # Once every 3 hours
         storage=github_repository_block,
         tags=["solver", "dune-sync"],
         description="Run the dune sync order_rewards query",
