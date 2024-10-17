@@ -4,13 +4,14 @@ import re
 import sys
 import logging
 import requests
-import pandas as pd
+from typing import Any
 from io import StringIO
-from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
+
+import pandas as pd
+from dotenv import load_dotenv
 from dune_client.client import DuneClient
 
-from typing import Any
 from prefect import flow, task, get_run_logger
 from prefect_github.repository import GitHubRepository
 
@@ -20,7 +21,8 @@ from src.models.order_rewards_schema import OrderRewards
 
 load_dotenv()
 
-def get_last_monday_midnight_utc():
+def get_last_monday_midnight_utc() -> int:
+    """Get the timestamp of last monday at midnight UTC"""
     now = datetime.now(timezone.utc)
     current_weekday = now.weekday()
     days_since_last_monday = current_weekday if current_weekday != 0 else 7
@@ -32,6 +34,7 @@ def get_last_monday_midnight_utc():
 
 @task
 def get_block_range() -> BlockRange:
+    """Returns the blockrange from last monday midnight until now"""
     etherscan_api = "https://api.etherscan.io/api"
     api_key = os.environ["ETHERSCAN_API_KEY"]
     start = requests.get(
@@ -42,7 +45,8 @@ def get_block_range() -> BlockRange:
               "timestamp": get_last_monday_midnight_utc(),
               "closest": "before",
               "apikey": api_key
-            }
+            },
+            timeout=60
     ).json().get('result')
     end = requests.get(
             etherscan_api,
@@ -52,7 +56,8 @@ def get_block_range() -> BlockRange:
               "timestamp": int(datetime.now(timezone.utc).timestamp()),
               "closest": "before",
               "apikey": api_key
-            }
+            },
+            timeout=60
     ).json().get('result')
 
     blockrange = BlockRange(block_from=start, block_to=end)
@@ -60,12 +65,14 @@ def get_block_range() -> BlockRange:
 
 @task
 def fetch_orderbook(blockrange: BlockRange) -> pd.DataFrame:
+    """Runs the query to get the order book for a specified blockrange"""
     orderbook = OrderbookFetcher()
     return orderbook.get_order_rewards(blockrange)
 
 
 @task
 def cast_orderbook_to_dune_string(orderbook: pd.DataFrame) -> str:
+    """Casts the dataframe to a string in csv format for uploading to Dune"""
     csv_buffer = StringIO()
     orderbook.to_csv(csv_buffer, index=False)
     return csv_buffer.getvalue()
@@ -73,6 +80,10 @@ def cast_orderbook_to_dune_string(orderbook: pd.DataFrame) -> str:
 
 @task
 def upload_data_to_dune(data: str, block_start: int, block_end: int):
+    """
+    Uploads the order rewards data to Dune,
+    either creating a new query or updating an existing one
+    """
     table_name = f"order_rewards_{block_start}"
     dune = DuneClient.from_env()
     dune.upload_csv(
@@ -118,6 +129,7 @@ def update_aggregate_query(table_name: str):
 
 @flow(retries=3, retry_delay_seconds=60, log_prints=True)
 def order_rewards():
+    """Defines a flow for updating the order_rewards table"""
     blockrange = get_block_range()
     orderbook = fetch_orderbook(blockrange)
     data = cast_orderbook_to_dune_string(orderbook)
