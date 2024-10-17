@@ -12,6 +12,9 @@ from dune_client.client import DuneClient
 # pylint: disable=import-error
 from prefect import flow, task, get_run_logger  # type: ignore
 
+# pylint: disable=import-error
+from prefect_github.repository import GitHubRepository  # type: ignore
+
 from src.models.block_range import BlockRange
 from src.fetch.orderbook import OrderbookFetcher
 
@@ -148,9 +151,11 @@ def order_rewards() -> None:
 
 
 if __name__ == "__main__":
+    github_repository_block = GitHubRepository.load("dune-sync")
     order_rewards.deploy(
         name="dune-sync-prod-order-rewards",
         work_pool_name="cowbarn",
+        storage=github_repository_block,
         cron="*/30 * * * *",  # Every 30 minutes
         tags=["solver", "dune-sync"],
         description="Run the dune sync order_rewards query",
