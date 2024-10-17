@@ -130,7 +130,7 @@ if __name__ == "__main__":
     deployment = order_rewards.deploy(
         flow=order_rewards,
         name="dune-sync-order-rewards",
-        cron="0 */3 * * *"), # Once every 3 hours
+        cron="0 */3 * * *", # Once every 3 hours
         storage=github_repository_block,
         tags=["solver", "dune-sync"],
         description="Run the dune sync order_rewards query",
