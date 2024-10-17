@@ -47,4 +47,4 @@ jobs:
         run: |
           prefect config set PREFECT_API_URL=$PREFECT_API_URL
 
-      - run: python src/deploy_prefect/deployment.py
+      - run: python -m src.deploy_prefect.deployment

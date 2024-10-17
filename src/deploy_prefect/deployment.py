@@ -14,6 +14,7 @@ from prefect import flow, task, get_run_logger  # type: ignore
 
 # pylint: disable=import-error
 from prefect_github.repository import GitHubRepository  # type: ignore
+from prefect.runner.storage import GitRepository
 
 from src.models.block_range import BlockRange
 from src.fetch.orderbook import OrderbookFetcher
@@ -151,9 +152,11 @@ def order_rewards() -> None:
 
 
 if __name__ == "__main__":
-    github_repository_block = GitHubRepository.load("dune-sync")
+    git_source = GitRepository(
+        url="https://github.com/cowprotocol/dune-sync.git",
+    )
     flow.from_source(
-            source=github_repository_block,
+            source=git_source,
             entrypoint="src/deploy_prefect/deployment.py:order_rewards",
             ).deploy(
         name="dune-sync-prod-order-rewards",
