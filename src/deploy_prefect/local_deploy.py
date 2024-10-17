@@ -15,7 +15,7 @@ from src.deploy_prefect.deployment import (
 load_dotenv()
 
 
-@flow()
+@flow() # type: ignore[misc]
 def order_rewards() -> None:
     """Local flow for testing the order rewards deployment"""
     blockrange = get_block_range()
