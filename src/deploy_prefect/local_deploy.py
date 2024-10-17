@@ -1,7 +1,8 @@
 """Code for Local Testing of Order Rewards Deployment"""
 
 import os
-from prefect import flow  # pylint: disable=import-error
+# pylint: disable=import-error
+from prefect import flow # type: ignore
 from dotenv import load_dotenv
 from src.deploy_prefect.deployment import (
     get_block_range,
@@ -14,12 +15,13 @@ load_dotenv()
 
 
 @flow()
-def order_rewards():
+def order_rewards() -> None:
     """Local flow for testing the order rewards deployment"""
     blockrange = get_block_range()
     orderbook = fetch_orderbook(blockrange)
     data = cast_orderbook_to_dune_string(orderbook)
     upload_data_to_dune(data, blockrange.block_from, blockrange.block_to)
+    return
 
 
 if __name__ == "__main__":

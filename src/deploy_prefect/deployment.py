@@ -9,8 +9,10 @@ import pandas as pd
 from dotenv import load_dotenv
 from dune_client.client import DuneClient
 
-from prefect import flow, task, get_run_logger  # pylint: disable=import-error
-from prefect_github.repository import GitHubRepository  # pylint: disable=import-error
+# pylint: disable=import-error
+from prefect import flow, task, get_run_logger # type: ignore
+# pylint: disable=import-error
+from prefect_github.repository import GitHubRepository  # type: ignore
 
 from src.models.block_range import BlockRange
 from src.fetch.orderbook import OrderbookFetcher
@@ -87,14 +89,14 @@ def cast_orderbook_to_dune_string(orderbook: pd.DataFrame) -> str:
 
 
 @task
-def upload_data_to_dune(data: str, block_start: int, block_end: int):
+def upload_data_to_dune(data: str, block_start: int, block_end: int) -> str:
     """
     Uploads the order rewards data to Dune,
     either creating a new query or updating an existing one
     """
     table_name = f"order_rewards_{block_start}"
     dune = DuneClient.from_env()
-    dune.upload_csv(
+    dune.upload_csv( # type: ignore[attr-defined]
         data=data,
         description=f"Order rewards data for blocks {block_start}-{block_end}",
         table_name=table_name,
@@ -104,7 +106,7 @@ def upload_data_to_dune(data: str, block_start: int, block_end: int):
 
 
 @task
-def update_aggregate_query(table_name: str):
+def update_aggregate_query(table_name: str) -> None:
     """
     Query example:
     WITH aggregate AS (
@@ -119,7 +121,7 @@ def update_aggregate_query(table_name: str):
     logger = get_run_logger()
     dune = DuneClient.from_env()
     query_id = os.environ["AGGREGATE_QUERY_ID"]
-    query = dune.get_query(query_id)
+    query = dune.get_query(query_id) # type: ignore[attr-defined]
     sql_query = query.sql
 
     if table_name not in sql_query:
@@ -130,19 +132,22 @@ def update_aggregate_query(table_name: str):
             + f"\n    UNION ALL\n    SELECT * FROM {table_name}\n"
             + sql_query[insertion_point:]
         )
-        dune.update_query(query_sql=updated_sql_query, query_id=query_id)
+        dune.update_query(query_sql=updated_sql_query,
+                          query_id=query_id) # type: ignore[attr-defined]
     else:
         logger.info("Table already in query, not updating query")
+    return
 
 
 @flow(retries=3, retry_delay_seconds=60, log_prints=True)
-def order_rewards():
+def order_rewards() -> None:
     """Defines a flow for updating the order_rewards table"""
     blockrange = get_block_range()
     orderbook = fetch_orderbook(blockrange)
     data = cast_orderbook_to_dune_string(orderbook)
     table_name = upload_data_to_dune(data, blockrange.block_from, blockrange.block_to)
     update_aggregate_query(table_name)
+    return
 
 
 if __name__ == "__main__":
