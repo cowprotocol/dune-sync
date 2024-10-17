@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from dune_client.client import DuneClient
 
 # pylint: disable=import-error
-from prefect import flow, task, get_run_logger  # type: ignore
+from prefect import flow, task, get_run_logger
 
 # pylint: disable=import-error
 from prefect_github.repository import GitHubRepository  # type: ignore
@@ -42,7 +42,7 @@ def get_block_range() -> BlockRange:
     start = (
         requests.get(
             etherscan_api,
-            {
+            {  # type: ignore
                 "module": "block",
                 "action": "getblocknobytime",
                 "timestamp": get_last_monday_midnight_utc(),
@@ -57,7 +57,7 @@ def get_block_range() -> BlockRange:
     end = (
         requests.get(
             etherscan_api,
-            {
+            {  # type: ignore
                 "module": "block",
                 "action": "getblocknobytime",
                 "timestamp": int(datetime.now(timezone.utc).timestamp()),
@@ -133,9 +133,9 @@ def update_aggregate_query(table_name: str) -> None:
             + f"\n    UNION ALL\n    SELECT * FROM {table_name}\n"
             + sql_query[insertion_point:]
         )
-        dune.update_query(
+        dune.update_query(  # type: ignore[attr-defined]
             query_sql=updated_sql_query, query_id=query_id
-        )  # type: ignore[attr-defined]
+        )
     else:
         logger.info("Table already in query, not updating query")
 
@@ -161,4 +161,4 @@ if __name__ == "__main__":
         description="Run the dune sync order_rewards query",
         version="0.0.1",
     )
-    deployment.apply()
+    deployment.apply()  # type: ignore
