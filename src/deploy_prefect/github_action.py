@@ -12,7 +12,8 @@ from dune_client.client import DuneClient
 # pylint: disable=import-error
 from prefect import flow, task, get_run_logger  # type: ignore
 
-from prefect.runner.storage import GitRepository
+# pylint: disable=import-error
+from prefect_github.repository import GitHubRepository  # type: ignore
 
 from src.models.block_range import BlockRange
 from src.fetch.orderbook import OrderbookFetcher
@@ -147,21 +148,3 @@ def order_rewards() -> None:
     data = cast_orderbook_to_dune_string(orderbook)
     table_name = upload_data_to_dune(data, blockrange.block_from, blockrange.block_to)
     update_aggregate_query(table_name)
-
-
-if __name__ == "__main__":
-    git_source = GitRepository(
-        url="https://github.com/cowprotocol/dune-sync.git",
-    )
-    flow.from_source(
-            source=git_source,
-            entrypoint="src/deploy_prefect/deployment.py:order_rewards",
-            ).deploy(
-        name="dune-sync-prod-order-rewards",
-        work_pool_name="cowbarn",
-        cron="*/30 * * * *",  # Every 30 minutes
-        tags=["solver", "dune-sync"],
-        description="Run the dune sync order_rewards query",
-        version="0.0.1",
-    )
-
