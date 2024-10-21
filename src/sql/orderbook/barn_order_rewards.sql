@@ -355,8 +355,8 @@ select
     trade_hashes.block_number as block_number,
     concat('0x', encode(trade_hashes.order_uid, 'hex')) as order_uid,
     case
-        when solver='\x9DFc9Bb0FfF2dc96728D2bb94eaCee6ba3592351' then concat('0x', encode('\x26B5e3bF135D3Dd05A220508dD61f25BF1A47cBD', 'hex'))
-        else concat('0x', encode(solver, 'hex'))
+        when oq.solver='\x9DFc9Bb0FfF2dc96728D2bb94eaCee6ba3592351' then concat('0x', encode('\x26B5e3bF135D3Dd05A220508dD61f25BF1A47cBD', 'hex'))
+        else concat('0x', encode(oq.solver, 'hex'))
     end as solver,
     quote_solver,
     concat('0x', encode(trade_hashes.tx_hash, 'hex')) as tx_hash,
