@@ -454,7 +454,10 @@ SELECT
         when tx_hash is NULL then NULL
         else concat('0x', encode(tx_hash, 'hex'))
     end as tx_hash,
-    concat('0x', encode(solver, 'hex')) as solver,
+    case
+        when solver='\x9DFc9Bb0FfF2dc96728D2bb94eaCee6ba3592351' then concat('0x', encode('\x26B5e3bF135D3Dd05A220508dD61f25BF1A47cBD', 'hex'))
+        else concat('0x', encode(solver, 'hex'))
+    end as solver,
     execution_cost :: text as execution_cost,
     surplus :: text as surplus,
     protocol_fee :: text as protocol_fee,

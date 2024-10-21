@@ -323,7 +323,10 @@ order_protocol_fee_prices AS (
 ),
 winning_quotes as (
     SELECT
-        concat('0x', encode(oq.solver, 'hex')) as quote_solver,
+        case
+            when oq.solver='\x9DFc9Bb0FfF2dc96728D2bb94eaCee6ba3592351' then concat('0x', encode('\x26B5e3bF135D3Dd05A220508dD61f25BF1A47cBD', 'hex'))
+            else concat('0x', encode(oq.solver, 'hex'))
+        end as quote_solver,
         oq.order_uid
     FROM
         trades t
@@ -351,7 +354,10 @@ winning_quotes as (
 select
     trade_hashes.block_number as block_number,
     concat('0x', encode(trade_hashes.order_uid, 'hex')) as order_uid,
-    concat('0x', encode(oq.solver, 'hex')) as solver,
+    case
+        when solver='\x9DFc9Bb0FfF2dc96728D2bb94eaCee6ba3592351' then concat('0x', encode('\x26B5e3bF135D3Dd05A220508dD61f25BF1A47cBD', 'hex'))
+        else concat('0x', encode(solver, 'hex'))
+    end as solver,
     quote_solver,
     concat('0x', encode(trade_hashes.tx_hash, 'hex')) as tx_hash,
     coalesce(surplus_fee, 0) :: text as surplus_fee,
