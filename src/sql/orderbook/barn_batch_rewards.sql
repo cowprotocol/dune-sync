@@ -16,8 +16,6 @@ WITH observed_settlements AS (
     WHERE
         ss.block_deadline > {{start_block}}
         AND ss.block_deadline <= {{end_block}}
-        AND s.tx_hash != '\x7087eb55854228a30c864a9ee4d6c4072d37d53bf4d0404f1064c5b33b7aa96d'
-        AND s.tx_hash != '\x84eb7aef07139e9558f08ac92b857b727f64c0f44d92a572078f45b7d77ebe74'
 ),
 auction_participation as (
     SELECT
@@ -362,9 +360,6 @@ combined_order_data AS (
         JOIN price_data pd
         ON os.auction_id = pd.auction_id
         AND os.order_uid = pd.order_uid
-    WHERE
-        os.order_uid != '\xfcc2f208d101874047a7a4c70720dc93bc910873c92d47004dc724da7270a562a9470ca2737fd3a3fbf55a524f25a3ba531df03a67164e10'
-        AND os.order_uid != '\x770ad918a42807c5465d2b13263e5c760119ecb17e262d6caf2fd8e63f62e26ea9470ca2737fd3a3fbf55a524f25a3ba531df03a670fa25a'
 ),
 batch_protocol_fees AS (
     SELECT
