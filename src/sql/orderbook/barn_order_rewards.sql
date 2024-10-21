@@ -323,10 +323,7 @@ order_protocol_fee_prices AS (
 ),
 winning_quotes as (
     SELECT
-        case
-            when oq.solver='\x9DFc9Bb0FfF2dc96728D2bb94eaCee6ba3592351' then concat('0x', encode('\x26B5e3bF135D3Dd05A220508dD61f25BF1A47cBD', 'hex'))
-            else concat('0x', encode(oq.solver, 'hex'))
-        end as quote_solver,
+        concat('0x', encode(oq.solver, 'hex')) as quote_solver,
         oq.order_uid
     FROM
         trades t
