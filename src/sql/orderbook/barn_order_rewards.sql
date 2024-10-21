@@ -379,3 +379,5 @@ from
 where
     trade_hashes.tx_hash != '\x7087eb55854228a30c864a9ee4d6c4072d37d53bf4d0404f1064c5b33b7aa96d'
     AND trade_hashes.tx_hash != '\x84eb7aef07139e9558f08ac92b857b727f64c0f44d92a572078f45b7d77ebe74'
+    AND trade_hashes.solver != '\x9DFc9Bb0FfF2dc96728D2bb94eaCee6ba3592351'
+
