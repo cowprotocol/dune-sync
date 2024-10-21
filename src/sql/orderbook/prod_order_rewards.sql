@@ -32,8 +32,6 @@ with trade_hashes as (
     where
         settlement.block_number > {{start_block}}
         and settlement.block_number <= {{end_block}}
-        and settlement.tx_hash != '\x7087eb55854228a30c864a9ee4d6c4072d37d53bf4d0404f1064c5b33b7aa96d'
-        and settlement.tx_hash != '\x84eb7aef07139e9558f08ac92b857b727f64c0f44d92a572078f45b7d77ebe74'
 ),
 order_surplus AS (
     SELECT
