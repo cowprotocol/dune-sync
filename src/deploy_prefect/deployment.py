@@ -164,4 +164,3 @@ if __name__ == "__main__":
         description="Run the dune sync order_rewards query",
         version="0.0.1",
     )
-
