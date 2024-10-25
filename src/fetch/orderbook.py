@@ -157,8 +157,6 @@ class OrderbookFetcher:
                 f"{set(prod.solver).intersection(set(barn.solver))} part of both prod and barn"
             )
 
-        return pd.concat([prod, barn])
-
         if not prod.empty and not barn.empty:
             return pd.concat([prod, barn])
         if not prod.empty:
