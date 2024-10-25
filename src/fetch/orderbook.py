@@ -105,13 +105,7 @@ class OrderbookFetcher:
                 f"{set(prod.solver).intersection(set(barn.solver))} part of both prod and barn"
             )
 
-        if not prod.empty and not barn.empty:
-            return pd.concat([prod, barn])
-        if not prod.empty:
-            return prod.copy()
-        if not barn.empty:
-            return barn.copy()
-        return pd.DataFrame()
+        return pd.concat([prod, barn])
 
     @classmethod
     def get_batch_rewards(cls, block_range: BlockRange) -> DataFrame:
@@ -157,13 +151,7 @@ class OrderbookFetcher:
                 f"{set(prod.solver).intersection(set(barn.solver))} part of both prod and barn"
             )
 
-        if not prod.empty and not barn.empty:
-            return pd.concat([prod, barn])
-        if not prod.empty:
-            return prod.copy()
-        if not barn.empty:
-            return barn.copy()
-        return pd.DataFrame()
+        return pd.concat([prod, barn])
 
     @classmethod
     def get_app_hashes(cls) -> DataFrame:
