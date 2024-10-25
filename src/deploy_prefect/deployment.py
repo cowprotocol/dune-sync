@@ -12,7 +12,7 @@ from dune_client.client import DuneClient
 # pylint: disable=import-error
 from prefect import flow, task, get_run_logger  # type: ignore
 
-from prefect.runner.storage import GitRepository
+from prefect.runner.storage import GitRepository # type: ignore
 
 from src.models.block_range import BlockRange
 from src.fetch.orderbook import OrderbookFetcher
