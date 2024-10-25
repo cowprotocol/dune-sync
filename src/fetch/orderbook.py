@@ -98,8 +98,8 @@ class OrderbookFetcher:
             cow_reward_query_prod, cow_reward_query_barn, data_types
         )
 
-        # Solvers do not appear in both environments!
-        if set(prod.solver).isdisjoint(set(barn.solver)):
+        # Warn if solver appear in both environments.
+        if not set(prod.solver).isdisjoint(set(barn.solver)):
             log.warning(
                 f"solver overlap in {block_range}: solvers "
                 f"{set(prod.solver).intersection(set(barn.solver))} part of both prod and barn"
@@ -150,8 +150,8 @@ class OrderbookFetcher:
             cow_reward_query_prod, cow_reward_query_barn, data_types
         )
 
-        # Solvers do not appear in both environments!
-        if set(prod.solver).isdisjoint(set(barn.solver)):
+        # Warn if solver appear in both environments.
+        if not set(prod.solver).isdisjoint(set(barn.solver)):
             log.warning(
                 f"solver overlap in {block_range}: solvers "
                 f"{set(prod.solver).intersection(set(barn.solver))} part of both prod and barn"
