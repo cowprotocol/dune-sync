@@ -154,9 +154,9 @@ if __name__ == "__main__":
         url="https://github.com/cowprotocol/dune-sync.git",
     )
     flow.from_source(
-            source=git_source,
-            entrypoint="src/deploy_prefect/deployment.py:order_rewards",
-            ).deploy(
+        source=git_source,
+        entrypoint="src/deploy_prefect/deployment.py:order_rewards",
+    ).deploy(
         name="dune-sync-prod-order-rewards",
         work_pool_name="cowbarn",
         cron="*/30 * * * *",  # Every 30 minutes
