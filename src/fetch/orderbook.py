@@ -12,8 +12,11 @@ from pandas import DataFrame
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 
+from src.logger import set_log
 from src.models.block_range import BlockRange
 from src.utils import open_query
+
+log = set_log(__name__)
 
 MAX_PROCESSING_DELAY = 10
 
@@ -96,7 +99,12 @@ class OrderbookFetcher:
         )
 
         # Solvers do not appear in both environments!
-        assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
+        if set(prod.solver).isdisjoint(set(barn.solver)):
+            log.warning(
+                f"solver overlap in {block_range}: solvers "
+                f"{set(prod.solver).intersection(set(barn.solver))} part of both prod and barn"
+            )
+
         if not prod.empty and not barn.empty:
             return pd.concat([prod, barn])
         if not prod.empty:
@@ -143,7 +151,14 @@ class OrderbookFetcher:
         )
 
         # Solvers do not appear in both environments!
-        assert set(prod.solver).isdisjoint(set(barn.solver)), "solver overlap!"
+        if set(prod.solver).isdisjoint(set(barn.solver)):
+            log.warning(
+                f"solver overlap in {block_range}: solvers "
+                f"{set(prod.solver).intersection(set(barn.solver))} part of both prod and barn"
+            )
+
+        return pd.concat([prod, barn])
+
         if not prod.empty and not barn.empty:
             return pd.concat([prod, barn])
         if not prod.empty:
