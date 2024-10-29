@@ -129,7 +129,7 @@ def update_aggregate_query(table_name: str) -> None:
         insertion_point = insertion_point = sql_query.rfind(")")
         updated_sql_query = (
             sql_query[:insertion_point].strip()
-            + f"\n    UNION ALL\n    SELECT * FROM {table_name}\n"
+            + f"\n    UNION ALL\n    SELECT * FROM dune.cowprotocol.dataset_{table_name}\n"
             + sql_query[insertion_point:]
         )
         dune.update_query(  # type: ignore[attr-defined]
