@@ -1,4 +1,4 @@
-name: prefect
+name: pull request
 on:
   pull_request:
   push:
@@ -9,7 +9,6 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10", "3.11"]
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -24,14 +23,13 @@ jobs:
         run: black --check ./
       - name: Type Check (mypy)
         run: mypy src --strict
-
   tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.12"]
 
-  steps:
+    steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
