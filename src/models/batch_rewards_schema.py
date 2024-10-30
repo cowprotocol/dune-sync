@@ -35,7 +35,6 @@ class BatchRewards:
                     "fee": int(row["network_fee"]),
                     "winning_score": int(row["winning_score"]),
                     "reference_score": int(row["reference_score"]),
-                    "participating_solvers": row["participating_solvers"],
                 },
             }
             for row in rewards_df.to_dict(orient="records")
