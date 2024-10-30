@@ -1,6 +1,7 @@
-name: deploy
+name: prefect
 
 on:
+  pull_request:
   push:
     branches: [main]
 
@@ -15,6 +16,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '3.12'
+
       - env:
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
       - run: |
