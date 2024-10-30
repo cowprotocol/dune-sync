@@ -1,22 +1,21 @@
 name: prefect
-
 on:
   pull_request:
   push:
-    branches: [main]
-
+    branches: [ main ]
 jobs:
-  deploy:
+  prefect:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    strategy:
+      matrix:
+        python-version: ["3.12"]
 
     steps:
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.12'
-
+          python-version: ${{ matrix.python-version }}
       - env:
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
       - run: |
