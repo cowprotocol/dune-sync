@@ -1,9 +1,9 @@
-name: prefect
+name: prefect-prod
 on:
   push:
     branches: [ main ]
 jobs:
-  deployment:
+  prod-deployment:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -24,4 +24,4 @@ jobs:
           pip install -r requirements/prefect.txt
           pip install -r requirements/prod.txt
           prefect config set PREFECT_API_URL=$PREFECT_API_URL
-          python -m src.deploy_prefect.deployment
+          python -m src.deploy_prefect.prod_deployment
