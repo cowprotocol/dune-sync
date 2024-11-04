@@ -5,7 +5,7 @@ import os
 # pylint: disable=import-error
 from prefect import flow  # type: ignore
 from dotenv import load_dotenv
-from src.deploy_prefect.deployment import (
+from src.deploy_prefect.tasks import (
     get_block_range,
     fetch_orderbook,
     cast_orderbook_to_dune_string,

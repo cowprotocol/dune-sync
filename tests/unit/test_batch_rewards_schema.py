@@ -34,21 +34,6 @@ class TestModelBatchRewards(unittest.TestCase):
                 "capped_payment": [-1000000000000000, -1000000000000000],
                 "winning_score": [123456 * ONE_ETH, 6789 * ONE_ETH],
                 "reference_score": [ONE_ETH, 2 * ONE_ETH],
-                "participating_solvers": [
-                    [
-                        "0x51",
-                        "0x52",
-                        "0x53",
-                    ],
-                    [
-                        "0x51",
-                        "0x52",
-                        "0x53",
-                        "0x54",
-                        "0x55",
-                        "0x56",
-                    ],
-                ],
             }
         )
 
@@ -61,7 +46,6 @@ class TestModelBatchRewards(unittest.TestCase):
                         "capped_payment": -1000000000000000,
                         "execution_cost": 9999000000000000000000,
                         "fee": 1000000000000000,
-                        "participating_solvers": ["0x51", "0x52", "0x53"],
                         "protocol_fee": 2000000000000000,
                         "reference_score": 1000000000000000000,
                         "surplus": 2000000000000000000,
@@ -78,14 +62,6 @@ class TestModelBatchRewards(unittest.TestCase):
                         "capped_payment": -1000000000000000,
                         "execution_cost": 1,
                         "fee": max_uint,
-                        "participating_solvers": [
-                            "0x51",
-                            "0x52",
-                            "0x53",
-                            "0x54",
-                            "0x55",
-                            "0x56",
-                        ],
                         "protocol_fee": 0,
                         "reference_score": 2000000000000000000,
                         "surplus": 3000000000000000000,
