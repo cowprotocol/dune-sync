@@ -37,4 +37,6 @@ class PriceFeedSyncConfig:
     # The name of the table to upload to
     table: str = "price_feed_test"
     # Description of the table (for creation)
-    description: str = "Table containing prices and timestamps from multiple price feeds"
+    description: str = (
+        "Table containing prices and timestamps from multiple price feeds"
+    )
