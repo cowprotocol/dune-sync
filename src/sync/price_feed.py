@@ -1,4 +1,4 @@
-"""Main Entry point for app_hash sync"""
+"""Main Entry point for price feed sync"""
 
 from dune_client.client import DuneClient
 
