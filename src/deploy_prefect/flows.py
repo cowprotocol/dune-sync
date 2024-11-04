@@ -20,7 +20,9 @@ def dev_order_rewards() -> None:
     blockrange = get_block_range()
     orderbook = fetch_orderbook(blockrange)
     data = cast_orderbook_to_dune_string(orderbook)
-    table_name = upload_data_to_dune(data, blockrange.block_from, blockrange.block_to)
+    table_name = upload_data_to_dune(
+        data, blockrange.block_from, blockrange.block_to, config
+    )
     update_aggregate_query(table_name, config)
 
 
@@ -31,5 +33,7 @@ def prod_order_rewards() -> None:
     blockrange = get_block_range()
     orderbook = fetch_orderbook(blockrange)
     data = cast_orderbook_to_dune_string(orderbook)
-    table_name = upload_data_to_dune(data, blockrange.block_from, blockrange.block_to)
+    table_name = upload_data_to_dune(
+        data, blockrange.block_from, blockrange.block_to, config
+    )
     update_aggregate_query(table_name, config)
