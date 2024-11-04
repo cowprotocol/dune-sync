@@ -13,7 +13,8 @@ from src.logger import set_log
 from src.models.tables import SyncTable
 from src.post.aws import AWSClient
 from src.sync import sync_app_data
-from src.sync.config import SyncConfig, AppDataSyncConfig
+from src.sync import sync_price_feed
+from src.sync.config import SyncConfig, AppDataSyncConfig, PriceFeedSyncConfig
 from src.sync.order_rewards import sync_order_rewards, sync_batch_rewards
 
 log = set_log(__name__)
@@ -59,6 +60,17 @@ if __name__ == "__main__":
                 orderbook,
                 dune=dune,
                 config=AppDataSyncConfig(table),
+                dry_run=args.dry_run,
+            )
+        )
+    elif args.sync_table == SyncTable.PRICE_FEED:
+        table = os.environ["PRICE_FEED_TARGET_TABLE"]
+        assert table, "PRICE FEED sync needs a PRICE_FEED_TARGET_TABLE env"
+        asyncio.run(
+            sync_price_feed(
+                orderbook,
+                dune=dune,
+                config=PriceFeedSyncConfig(table),
                 dry_run=args.dry_run,
             )
         )
