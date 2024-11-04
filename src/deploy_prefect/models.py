@@ -90,11 +90,11 @@ class Config:
         return self._dune_query_id
 
     @property
-    def env(self) ->:
+    def env(self) -> str:
         """ENV Getter"""
         return self._env
 
     @property
-    def chain(self) ->:
+    def chain(self) -> str:
         """Chain Getter"""
         return self._chain
