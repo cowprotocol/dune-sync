@@ -76,12 +76,14 @@ def cast_orderbook_to_dune_string(orderbook: pd.DataFrame) -> str:
 
 
 @task  # type: ignore[misc]
-def upload_data_to_dune(data: str, block_start: int, block_end: int) -> str:
+def upload_data_to_dune(
+    data: str, block_start: int, block_end: int, config: Config
+) -> str:
     """
     Uploads the order rewards data to Dune,
     either creating a new query or updating an existing one
     """
-    table_name = f"order_rewards_{block_start}"
+    table_name = f"order_rewards_{config.env}_{block_start}"
     dune = DuneClient.from_env()
     dune.upload_csv(  # type: ignore[attr-defined]
         data=data,

@@ -81,10 +81,20 @@ class Config:
 
     @property
     def etherscan_api_key(self) -> str:
-        """Etherscan API key getter"""
+        """Etherscan API Key Getter"""
         return self._etherscan_api_key
 
     @property
     def dune_query_id(self) -> str:
         """Dune Aggregate Query Getter"""
         return self._dune_query_id
+
+    @property
+    def env(self) ->:
+        """ENV Getter"""
+        return self._env
+
+    @property
+    def chain(self) ->:
+        """Chain Getter"""
+        return self._chain
