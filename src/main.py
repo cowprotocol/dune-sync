@@ -49,7 +49,10 @@ class ScriptArgs:
 if __name__ == "__main__":
     load_dotenv()
     args = ScriptArgs()
-    dune = DuneClient(os.environ["DUNE_API_KEY"])
+    dune = DuneClient(
+        api_key=os.environ["DUNE_API_KEY"],
+        request_timeout=float(os.environ.get("DUNE_API_REQUEST_TIMEOUT", 10)),
+    )
     orderbook = OrderbookFetcher()
 
     if args.sync_table == SyncTable.APP_DATA:
