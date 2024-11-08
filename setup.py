@@ -1,12 +1,12 @@
-from setuptools import setup
+from setuptools import setup, find_packages
+
+subpackages = find_packages('src')
+packages = ['dune_sync'] + ['dune_sync.' + p for p in subpackages]
 
 setup(
-    name="dune-sync",
-    version="0.1",
-    description="Components for syncing off-chain data with Dune Community Sources ",
-    url="https://github.com/cowprotocol/dune-sync",
-    author="cowprotocol",
-    author_email="info@cow.fi",
-    packages=["src"],
-    zip_safe=False,
+    name='dune_sync',
+    version='1.6.4',
+    packages=packages,
+    package_dir={'dune_sync': 'src'},
+    include_package_data=True,
 )
