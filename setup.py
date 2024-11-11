@@ -21,4 +21,3 @@ setup(
         "SQLAlchemy<2.0",
     ],
 )
-
