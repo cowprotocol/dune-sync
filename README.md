@@ -15,6 +15,12 @@ To execute the main binary (inside the container) run
 python3 -m src.main --sync-table <job>
 ```
 
+Another way to install the repo is with pip:
+``
+pip install git+https://github.com/cowprotocol/dune-sync.git@<branch-name>
+```
+This allows you to install the repo as a module to your local environment as a module and automatically install the required dependencies.
+
 # Docker
 
 ### Build
