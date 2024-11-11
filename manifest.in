@@ -1,0 +1,2 @@
+include logging.conf
+include requirements/prod.txt
