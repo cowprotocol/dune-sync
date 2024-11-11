@@ -19,7 +19,7 @@ Another way to install the repo is with pip:
 ``
 pip install git+https://github.com/cowprotocol/dune-sync.git@<branch-name>
 ```
-This allows you to install the repo as a module to your local environment as a module and automatically install the required dependencies.
+This allows you to install the repo as a module to your local environment and automatically install the required dependencies.
 
 # Docker
 
