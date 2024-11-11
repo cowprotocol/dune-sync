@@ -4,7 +4,7 @@ subpackages = find_packages("src")
 packages = ["dune_sync"] + ["dune_sync." + p for p in subpackages]
 
 setup(
-    name="dune_sync",
+    name="src",
     version="1.6.4",
     packages=packages,
     package_dir={"dune_sync": "src"},
