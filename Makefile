@@ -48,22 +48,3 @@ build-image:
 run-image:
 	echo "using ${PWD}/data"
 	docker run -v ${PWD}/data:/app/data --env-file .env local_dune_sync
-
-prefect:
-	@if [ -z "$(VIRTUAL_ENV)" ]; then \
-		echo "Error: Not in a virtual environment. Please activate a virtual environment before running this command."; \
-		exit 1; \
-	else \
-		pip install -r requirements/prefect.txt; \
-		prefect server start; \
-	fi
-
-deployment:
-	@if [ -z "$(VIRTUAL_ENV)" ]; then \
-		echo "Error: Not in a virtual environment. Please activate a virtual environment before running this command."; \
-		exit 1; \
-	else \
-		pip install -r requirements/prefect.txt; \
-		pip install -r requirements/prod.txt; \
-		python -m src.deploy_prefect.local_deploy; \
-	fi
