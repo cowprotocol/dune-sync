@@ -1,13 +1,13 @@
 from setuptools import setup, find_packages
 
 subpackages = find_packages("src")
-packages = ["dune_sync"] + ["dune_sync." + p for p in subpackages]
+packages = ["src"] + ["src." + p for p in subpackages]
 
 setup(
     name="src",
     version="1.6.4",
     packages=packages,
-    package_dir={"dune_sync": "src"},
+    package_dir={"dune_sync": "src/dune_sync"},
     include_package_data=True,
     install_requires=[
         "dune-client==1.7.4",
@@ -21,3 +21,4 @@ setup(
         "SQLAlchemy<2.0",
     ],
 )
+
