@@ -28,6 +28,7 @@ class OrderbookEnv(Enum):
 
     BARN = "BARN"
     PROD = "PROD"
+    ANALYTICS = "ANALYTICS"
 
     def __str__(self) -> str:
         return str(self.value)
@@ -175,3 +176,11 @@ class OrderbookFetcher:
 
         # We are only interested in unique app data
         return pd.concat([prod, barn]).drop_duplicates().reset_index(drop=True)
+
+    @classmethod
+    def get_price_feed(cls) -> DataFrame:
+        """
+        Fetches prices from multiple price feeds from the analytics db
+        """
+        prices_query = open_query("prices.sql")
+        return cls._read_query_for_env(prices_query, OrderbookEnv.ANALYTICS)
