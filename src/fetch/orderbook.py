@@ -192,4 +192,3 @@ class OrderbookFetcher:
         """
         prices_query = open_query("prices.sql")
         return cls._read_query_for_env(prices_query, OrderbookEnv.ANALYTICS)
-
