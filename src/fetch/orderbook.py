@@ -10,7 +10,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from pandas import DataFrame
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine, Connection
+from sqlalchemy.engine import Engine
 
 from src.logger import set_log
 from src.models.block_range import BlockRange
@@ -49,19 +49,11 @@ class OrderbookFetcher:
         db_string = f"postgresql+psycopg2://{db_url}"
         return create_engine(db_string)
 
-    @staticmethod
-    def _get_connection(db_env: OrderbookEnv) -> Connection:
-        """Returns a database connection"""
-        engine = OrderbookFetcher._pg_engine(db_env)
-        return engine.connect()
-
     @classmethod
     def _read_query_for_env(
         cls, query: str, env: OrderbookEnv, data_types: Optional[dict[str, str]] = None
     ) -> DataFrame:
-        """Reads a query with a connection object"""
-        with cls._get_connection(env) as conn:
-            return pd.read_sql_query(query, con=conn, dtype=data_types)
+        return pd.read_sql_query(query, con=cls._pg_engine(env), dtype=data_types)
 
     @classmethod
     def _query_both_dbs(
