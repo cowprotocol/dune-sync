@@ -10,7 +10,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from pandas import DataFrame
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine import Engine, Connection
 
 from src.logger import set_log
 from src.models.block_range import BlockRange
@@ -50,7 +50,7 @@ class OrderbookFetcher:
         return create_engine(db_string)
 
     @staticmethod
-    def _get_connection(db_env: OrderbookEnv):
+    def _get_connection(db_env: OrderbookEnv) -> Connection:
         """Returns a database connection"""
         engine = OrderbookFetcher._pg_engine(db_env)
         return engine.connect()
