@@ -49,11 +49,19 @@ class OrderbookFetcher:
         db_string = f"postgresql+psycopg2://{db_url}"
         return create_engine(db_string)
 
+    @staticmethod
+    def _get_connection(db_env: OrderbookEnv):
+        """Returns a database connection"""
+        engine = OrderbookFetcher._pg_engine(db_env)
+        return engine.connect()
+
     @classmethod
     def _read_query_for_env(
         cls, query: str, env: OrderbookEnv, data_types: Optional[dict[str, str]] = None
     ) -> DataFrame:
-        return pd.read_sql_query(query, con=cls._pg_engine(env), dtype=data_types)
+        """Reads a query with a connection object"""
+        with cls._get_connection(env) as conn:
+            return pd.read_sql_query(query, con=conn, dtype=data_types)
 
     @classmethod
     def _query_both_dbs(
@@ -184,3 +192,4 @@ class OrderbookFetcher:
         """
         prices_query = open_query("prices.sql")
         return cls._read_query_for_env(prices_query, OrderbookEnv.ANALYTICS)
+
