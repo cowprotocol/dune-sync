@@ -10,6 +10,7 @@ def read_requirements(filename):
         return [line.strip() for line in f.readlines() if line.strip()]
 
 
+
 def get_sql_files(directory):
     sql_files = []
     for root, _, files in os.walk(directory):
