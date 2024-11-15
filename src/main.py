@@ -46,7 +46,10 @@ class ScriptArgs:
         self.dry_run: bool = arguments.dry_run
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """
+    Main function
+    """
     load_dotenv()
     args = ScriptArgs()
     dune = DuneClient(
@@ -97,3 +100,7 @@ if __name__ == "__main__":
         )
     else:
         log.error(f"unsupported sync_table '{args.sync_table}'")
+
+
+if __name__ == "__main__":
+    main()
