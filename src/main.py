@@ -46,6 +46,9 @@ class ScriptArgs:
         self.dry_run: bool = arguments.dry_run
 
 def main() -> None:
+    """
+    Main function
+    """
     load_dotenv()
     args = ScriptArgs()
     dune = DuneClient(
