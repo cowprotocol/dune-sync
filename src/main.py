@@ -2,6 +2,7 @@
 import argparse
 import asyncio
 import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -51,6 +52,12 @@ def main() -> None:
     Main function
     """
     load_dotenv()
+    # These env variables are only needed when the main function
+    # is called from our Prefect infrastructure
+    if "arg" in os.environ and "table" in os.environ:
+        new_list = [sys.argv[0], os.environ["arg"], os.environ["table"]]
+        sys.argv = new_list
+
     args = ScriptArgs()
     dune = DuneClient(
         api_key=os.environ["DUNE_API_KEY"],
