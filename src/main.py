@@ -45,6 +45,7 @@ class ScriptArgs:
         self.sync_table: SyncTable = arguments.sync_table
         self.dry_run: bool = arguments.dry_run
 
+
 def main() -> None:
     """
     Main function
@@ -99,6 +100,7 @@ def main() -> None:
         )
     else:
         log.error(f"unsupported sync_table '{args.sync_table}'")
+
 
 if __name__ == "__main__":
     main()
