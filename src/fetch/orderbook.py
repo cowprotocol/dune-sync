@@ -193,7 +193,7 @@ class OrderbookFetcher:
             .replace(
                 "{{EPSILON_UPPER}}", "12000000000000000"
             )  # upper ETH cap for payment (in WEI)
-            .replace("{{env}}", "prod")
+            .replace("{{env}}", "barn")
         )
         data_types = {
             # According to this: https://stackoverflow.com/a/11548224
