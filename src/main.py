@@ -15,7 +15,12 @@ from src.models.tables import SyncTable
 from src.post.aws import AWSClient
 from src.sync import sync_app_data
 from src.sync import sync_price_feed
-from src.sync.config import SyncConfig, AppDataSyncConfig, PriceFeedSyncConfig
+from src.sync.config import (
+    SyncConfig,
+    AppDataSyncConfig,
+    PriceFeedSyncConfig,
+    BatchDataSyncConfig,
+)
 from src.sync.order_rewards import sync_order_rewards, sync_batch_rewards
 from src.sync.batch_data import sync_batch_data
 
@@ -109,7 +114,7 @@ def main() -> None:
                 web3,
                 orderbook,
                 dune=dune,
-                config=PriceFeedSyncConfig(table),
+                config=BatchDataSyncConfig(table),
                 dry_run=args.dry_run,
             )
         )
