@@ -8,6 +8,7 @@ class SyncTable(Enum):
     APP_DATA = "app_data"
     ORDER_REWARDS = "order_rewards"
     BATCH_REWARDS = "batch_rewards"
+    BATCH_DATA = "batch_data"
     INTERNAL_IMBALANCE = "internal_imbalance"
     PRICE_FEED = "price_feed"
 

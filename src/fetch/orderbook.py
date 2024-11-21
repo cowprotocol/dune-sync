@@ -167,6 +167,82 @@ class OrderbookFetcher:
         return pd.DataFrame()
 
     @classmethod
+    def run_batch_data_sql(cls, block_range: BlockRange) -> DataFrame:
+        """
+        Fetches and validates Batch data DataFrame as concatenation from Prod and Staging DB
+        """
+        batch_data_query_prod = (
+            open_query("orderbook/batch_data.sql")
+            .replace("{{start_block}}", str(block_range.block_from))
+            .replace("{{end_block}}", str(block_range.block_to))
+            .replace(
+                "{{EPSILON_LOWER}}", "10000000000000000"
+            )  # lower ETH cap for payment (in WEI)
+            .replace(
+                "{{EPSILON_UPPER}}", "12000000000000000"
+            )  # upper ETH cap for payment (in WEI)
+            .replace("{{env}}", "prod")
+        )
+        batch_data_query_barn = (
+            open_query("orderbook/batch_data.sql")
+            .replace("{{start_block}}", str(block_range.block_from))
+            .replace("{{end_block}}", str(block_range.block_to))
+            .replace(
+                "{{EPSILON_LOWER}}", "10000000000000000"
+            )  # lower ETH cap for payment (in WEI)
+            .replace(
+                "{{EPSILON_UPPER}}", "12000000000000000"
+            )  # upper ETH cap for payment (in WEI)
+            .replace("{{env}}", "prod")
+        )
+        data_types = {
+            # According to this: https://stackoverflow.com/a/11548224
+            # capitalized int64 means `Optional<Integer>` and it appears to work.
+            "block_number": "Int64",
+            "block_deadline": "int64",
+        }
+        barn, prod = cls._query_both_dbs(
+            batch_data_query_prod, batch_data_query_barn, data_types
+        )
+
+        # Warn if solver appear in both environments.
+        if not set(prod.solver).isdisjoint(set(barn.solver)):
+            log.warning(
+                f"solver overlap in {block_range}: solvers "
+                f"{set(prod.solver).intersection(set(barn.solver))} part of both prod and barn"
+            )
+
+        if not prod.empty and not barn.empty:
+            return pd.concat([prod, barn])
+        if not prod.empty:
+            return prod.copy()
+        if not barn.empty:
+            return barn.copy()
+        return pd.DataFrame()
+
+    @classmethod
+    def get_batch_data(cls, block_range: BlockRange) -> DataFrame:
+        """
+        Decomposes the block range into buckets of 10k blocks each,
+        so as to ensure the batch data query runs fast enough.
+        At the end, it concatenates everything into one data frame
+        """
+        start = block_range.block_from
+        end = block_range.block_to
+        bucket_size = 10000
+        res = []
+        while start < end:
+            size = min(end - start, bucket_size)
+            log.info(f"About to process block range ({start}, {start + size})")
+            res.append(
+                cls.run_batch_data_sql(
+                    BlockRange(block_from=start, block_to=start + size)
+                )
+            )
+            start = start + size
+        return pd.concat(res)
+
+    @classmethod
     def get_app_hashes(cls) -> DataFrame:
         """
         Fetches all appData hashes and preimages from Prod and Staging DB

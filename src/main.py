@@ -7,6 +7,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from dune_client.client import DuneClient
+from web3 import Web3
 
 from src.fetch.orderbook import OrderbookFetcher
 from src.logger import set_log
@@ -16,6 +17,7 @@ from src.sync import sync_app_data
 from src.sync import sync_price_feed
 from src.sync.config import SyncConfig, AppDataSyncConfig, PriceFeedSyncConfig
 from src.sync.order_rewards import sync_order_rewards, sync_batch_rewards
+from src.sync.batch_data import sync_batch_data
 
 log = set_log(__name__)
 
@@ -57,6 +59,7 @@ def main() -> None:
         request_timeout=float(os.environ.get("DUNE_API_REQUEST_TIMEOUT", 10)),
     )
     orderbook = OrderbookFetcher()
+    web3 = Web3(Web3.HTTPProvider(os.environ.get("NODE_URL")))
 
     if args.sync_table == SyncTable.APP_DATA:
         table = os.environ["APP_DATA_TARGET_TABLE"]
@@ -97,6 +100,18 @@ def main() -> None:
             config=SyncConfig(volume_path),
             fetcher=orderbook,
             dry_run=args.dry_run,
+        )
+    elif args.sync_table == SyncTable.BATCH_DATA:
+        table = os.environ["BATCH_DATA_TARGET_TABLE"]
+        assert table, "BATCH DATA sync needs a BATCH_DATA_TARGET_TABLE env"
+        asyncio.run(
+            sync_batch_data(
+                web3,
+                orderbook,
+                dune=dune,
+                config=PriceFeedSyncConfig(table),
+                dry_run=args.dry_run,
+            )
         )
     else:
         log.error(f"unsupported sync_table '{args.sync_table}'")

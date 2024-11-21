@@ -40,3 +40,13 @@ class PriceFeedSyncConfig:
     description: str = (
         "Table containing prices and timestamps from multiple price feeds"
     )
+
+
+@dataclass
+class BatchDataSyncConfig:
+    """Configuration for batch data sync."""
+
+    # The name of the table to upload to
+    table: str = "batch_data_test"
+    # Description of the table (for creation)
+    description: str = "Table containing raw batch data"
