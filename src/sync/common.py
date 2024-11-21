@@ -56,14 +56,6 @@ def find_block_with_timestamp(node, time_stamp):
             return block.number
 
 
-def compute_block_range_from_timestamps(node, start_timestamp, end_timestamp):
-    start_block = find_block_with_timestamp(node, start_timestamp)
-    end_block = find_block_with_timestamp(node, end_timestamp)
-    if node.eth.get_block(end_block).timestamp > end_timestamp:
-        end_block = end_block - 1
-    return start_block, end_block
-
-
 def compute_block_and_month_range(node: Web3):
     # We first compute the relevant block range
     # Here, we assume that the job runs at least once every 24h
