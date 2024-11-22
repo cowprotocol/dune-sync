@@ -1,7 +1,7 @@
-"""Main Entry point for price feed sync"""
+"""Main Entry point for batch data sync"""
+import os
 from dune_client.client import DuneClient
 import web3
-import os
 from src.fetch.orderbook import OrderbookFetcher
 from src.logger import set_log
 from src.sync.config import BatchDataSyncConfig

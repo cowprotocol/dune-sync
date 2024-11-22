@@ -95,7 +95,16 @@ def compute_block_and_month_range(node: Web3):
                 current_month_end_datetime.year - 1, 12, 1, 00, 00
             )
         else:
-            previous_month = f"{current_month_end_datetime.year}_{current_month_end_datetime.month - 1}"
+            previous_month = f"""{current_month_end_datetime.year}_
+                {current_month_end_datetime.month - 1}
+            """
+            previous_month_start_datetime = datetime(
+                current_month_end_datetime.year,
+                current_month_end_datetime.month - 1,
+                1,
+                00,
+                00,
+            )
         months_list.append(previous_month)
         previous_month_start_timestamp = previous_month_start_datetime.replace(
             tzinfo=timezone.utc
