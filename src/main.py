@@ -65,6 +65,7 @@ def main() -> None:
     )
     orderbook = OrderbookFetcher()
     network = os.environ.get("NETWORK", "mainnet")
+    log.info(f"Network is set to: {network}")
     if network == "mainnet":
         node_suffix = "MAINNET"
     else:
