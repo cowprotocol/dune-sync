@@ -21,13 +21,20 @@ async def sync_batch_data(
 ) -> None:
     """Batch data Sync Logic"""
     network = os.environ["NETWORK"]
+
     if network == "mainnet":
-        network = "ethereum"
+        network_name = "ethereum"
+    else:
+        if network == "xdai":
+            network_name = "gnosis"
+        else:
+            network_name = "arbitrum"
+
     block_range_list, months_list = compute_block_and_month_range(node)
     for i in range(len(block_range_list)):
         start_block = block_range_list[i][0]
         end_block = block_range_list[i][1]
-        table_name = config.table + "_" + network + "_" + months_list[i]
+        table_name = config.table + "_" + network_name + "_" + months_list[i]
         block_range = BlockRange(block_from=start_block, block_to=end_block)
         log.info(
             f"About to process block range ({start_block}, {end_block}) for month {months_list[i]}"
@@ -41,6 +48,6 @@ async def sync_batch_data(
                 description=config.description,
                 is_private=False,
             )
-        log.info(
-            f"batch data sync run completed successfully for month {months_list[i]}"
-        )
+            log.info(
+                f"batch data sync run completed successfully for month {months_list[i]}"
+            )
