@@ -64,7 +64,16 @@ def main() -> None:
         request_timeout=float(os.environ.get("DUNE_API_REQUEST_TIMEOUT", 10)),
     )
     orderbook = OrderbookFetcher()
-    web3 = Web3(Web3.HTTPProvider(os.environ.get("NODE_URL")))
+    network = os.environ.get("NETWORK", "mainnet")
+    if network == "mainnet":
+        node_suffix = "MAINNET"
+    else:
+        if network == "xdai":
+            node_suffix = "GNOSIS"
+        else:
+            if network == "arbitrum-one":
+                node_suffix = "ARBITRUM"
+    web3 = Web3(Web3.HTTPProvider(os.environ.get("NODE_URL" + "_" + node_suffix)))
 
     if args.sync_table == SyncTable.APP_DATA:
         table = os.environ["APP_DATA_TARGET_TABLE"]

@@ -45,7 +45,9 @@ class OrderbookFetcher:
     def _pg_engine(db_env: OrderbookEnv) -> Engine:
         """Returns a connection to postgres database"""
         load_dotenv()
-        db_url = os.environ[f"{db_env}_DB_URL"] + "/" + os.environ["NETWORK"]
+        db_url = (
+            os.environ[f"{db_env}_DB_URL"] + "/" + os.environ.get("NETWORK", "mainnet")
+        )
         db_string = f"postgresql+psycopg2://{db_url}"
         return create_engine(db_string)
 
