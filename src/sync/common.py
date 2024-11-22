@@ -1,7 +1,5 @@
 """Shared methods between both sync scripts."""
 from datetime import datetime, timezone
-import time
-from dateutil import tz
 from web3 import Web3
 from src.logger import set_log
 from src.models.tables import SyncTable
@@ -23,7 +21,7 @@ def last_sync_block(aws: AWSClient, table: SyncTable, genesis_block: int = 0) ->
     return block_from
 
 
-def find_block_with_timestamp(node, time_stamp):
+def find_block_with_timestamp(node, time_stamp) -> int:
     """
     This implements binary search and returns the smallest block number
     whose timestamp is at least as large as the time_stamp argument passed in the function
@@ -57,6 +55,10 @@ def find_block_with_timestamp(node, time_stamp):
 
 
 def compute_block_and_month_range(node: Web3):
+    """
+    This determines the block range and the relevant months
+    for which we will compute and upload data on Dune.
+    """
     # We first compute the relevant block range
     # Here, we assume that the job runs at least once every 24h
     # Because of that, if it is the first day of month, we also
