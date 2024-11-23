@@ -63,6 +63,9 @@ def find_block_with_timestamp(node: Web3, time_stamp: float) -> int:
         block_time_stamp = block.timestamp
         if block_time_stamp >= time_stamp:
             return int(block.number)
+    # fallback in case correct block number hasn't been found
+    # in that case, we will include some more blocks than necessary
+    return mid_block_number + 200
 
 
 def compute_block_and_month_range(node: Web3):  # pylint: disable=too-many-locals
