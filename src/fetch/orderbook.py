@@ -200,10 +200,10 @@ class OrderbookFetcher:
             .replace("{{start_block}}", str(block_range.block_from))
             .replace("{{end_block}}", str(block_range.block_to))
             .replace(
-                "{{EPSILON_LOWER}}", "10000000000000000"
+                "{{EPSILON_LOWER}}", epsilon_lower
             )  # lower ETH cap for payment (in WEI)
             .replace(
-                "{{EPSILON_UPPER}}", "12000000000000000"
+                "{{EPSILON_UPPER}}", epsilon_upper
             )  # upper ETH cap for payment (in WEI)
             .replace("{{env}}", "barn")
         )
