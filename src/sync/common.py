@@ -1,5 +1,6 @@
 """Shared methods between both sync scripts."""
 from datetime import datetime, timezone
+from typing import List, Tuple
 from web3 import Web3
 from src.logger import set_log
 from src.models.tables import SyncTable
@@ -39,14 +40,14 @@ def find_block_with_timestamp(node: Web3, time_stamp: float) -> int:
     This implements binary search and returns the smallest block number
     whose timestamp is at least as large as the time_stamp argument passed in the function
     """
-    end_block_number = node.eth.get_block("finalized").number
+    end_block_number = node.eth.get_block("finalized")["number"]
     start_block_number = 1
     close_in_seconds = 30
 
     while True:
         mid_block_number = (start_block_number + end_block_number) // 2
         block = node.eth.get_block(mid_block_number)
-        block_time = block.timestamp
+        block_time = block["timestamp"]
         difference_in_seconds = int((time_stamp - block_time))
 
         if abs(difference_in_seconds) < close_in_seconds:
@@ -60,15 +61,17 @@ def find_block_with_timestamp(node: Web3, time_stamp: float) -> int:
     ## we now brute-force to ensure we have found the right block
     for b in range(mid_block_number - 200, mid_block_number + 200):
         block = node.eth.get_block(b)
-        block_time_stamp = block.timestamp
+        block_time_stamp = block["timestamp"]
         if block_time_stamp >= time_stamp:
-            return int(block.number)
+            return int(block["number"])
     # fallback in case correct block number hasn't been found
     # in that case, we will include some more blocks than necessary
-    return mid_block_number + 200
+    return int(mid_block_number + 200)
 
 
-def compute_block_and_month_range(node: Web3):  # pylint: disable=too-many-locals
+def compute_block_and_month_range(
+    node: Web3,
+) -> Tuple[List[Tuple[int, int]], List[str]]:  # pylint: disable=too-many-locals
     """
     This determines the block range and the relevant months
     for which we will compute and upload data on Dune.
