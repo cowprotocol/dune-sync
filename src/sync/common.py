@@ -69,9 +69,9 @@ def find_block_with_timestamp(node: Web3, time_stamp: float) -> int:
     return int(mid_block_number + 200)
 
 
-def compute_block_and_month_range( # pylint: disable=too-many-locals
+def compute_block_and_month_range(  # pylint: disable=too-many-locals
     node: Web3,
-) -> Tuple[List[Tuple[int, int]], List[str]]:  
+) -> Tuple[List[Tuple[int, int]], List[str]]:
     """
     This determines the block range and the relevant months
     for which we will compute and upload data on Dune.
