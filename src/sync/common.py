@@ -22,14 +22,15 @@ def last_sync_block(aws: AWSClient, table: SyncTable, genesis_block: int = 0) ->
 
 
 def node_suffix(network: str) -> str:
+    """
+    Converts network internal name to name used for nodes and dune tables
+    """
     if network == "mainnet":
         return "MAINNET"
-    else:
-        if network == "xdai":
-            return "GNOSIS"
-        else:
-            if network == "arbitrum-one":
-                return "ARBITRUM"
+    if network == "xdai":
+        return "GNOSIS"
+    if network == "arbitrum-one":
+        return "ARBITRUM"
     return ""
 
 
@@ -38,20 +39,18 @@ def find_block_with_timestamp(node, time_stamp) -> int:
     This implements binary search and returns the smallest block number
     whose timestamp is at least as large as the time_stamp argument passed in the function
     """
-    block_found = False
     end_block_number = node.eth.get_block("finalized").number
     start_block_number = 1
     close_in_seconds = 30
 
-    while not block_found:
+    while True:
         mid_block_number = (start_block_number + end_block_number) // 2
         block = node.eth.get_block(mid_block_number)
         block_time = block.timestamp
         difference_in_seconds = int((time_stamp - block_time))
 
         if abs(difference_in_seconds) < close_in_seconds:
-            block_found = True
-            continue
+            break
 
         if difference_in_seconds < 0:
             end_block_number = mid_block_number - 1
@@ -59,7 +58,7 @@ def find_block_with_timestamp(node, time_stamp) -> int:
             start_block_number = mid_block_number + 1
 
     ## we now brute-force to ensure we have found the right block
-    for b in range(mid_block_number - 100, mid_block_number + 100):
+    for b in range(mid_block_number - 200, mid_block_number + 200):
         block = node.eth.get_block(b)
         block_time_stamp = block.timestamp
         if block_time_stamp >= time_stamp:

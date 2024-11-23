@@ -26,7 +26,7 @@ async def sync_batch_data(
     network_name = node_suffix(network).lower()
 
     block_range_list, months_list = compute_block_and_month_range(node)
-    for i in range(len(block_range_list)):
+    for i, _ in enumerate(block_range_list):
         start_block = block_range_list[i][0]
         end_block = block_range_list[i][1]
         table_name = config.table + "_" + network_name + "_" + months_list[i]
