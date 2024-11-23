@@ -83,8 +83,8 @@ def compute_block_and_month_range(  # pylint: disable=too-many-locals
 
     latest_finalized_block = node.eth.get_block("finalized")
 
-    current_month_end_block = latest_finalized_block.number
-    current_month_end_timestamp = latest_finalized_block.timestamp
+    current_month_end_block = latest_finalized_block["number"]
+    current_month_end_timestamp = latest_finalized_block["timestamp"]
 
     current_month_end_datetime = datetime.fromtimestamp(
         current_month_end_timestamp, tz=timezone.utc
