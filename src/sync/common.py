@@ -63,9 +63,11 @@ def find_block_with_timestamp(node, time_stamp) -> int:
         block_time_stamp = block.timestamp
         if block_time_stamp >= time_stamp:
             return block.number
+    # fallback if correct block is not found
+    return mid_block_number + 200
 
 
-def compute_block_and_month_range(node: Web3):
+def compute_block_and_month_range(node: Web3):  # pylint: disable=too-many-locals
     """
     This determines the block range and the relevant months
     for which we will compute and upload data on Dune.
