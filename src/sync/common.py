@@ -40,7 +40,7 @@ def find_block_with_timestamp(node: Web3, time_stamp: float) -> int:
     This implements binary search and returns the smallest block number
     whose timestamp is at least as large as the time_stamp argument passed in the function
     """
-    end_block_number = node.eth.get_block("finalized")["number"]
+    end_block_number = int(node.eth.get_block("finalized")["number"])
     start_block_number = 1
     close_in_seconds = 30
 
@@ -83,7 +83,7 @@ def compute_block_and_month_range(  # pylint: disable=too-many-locals
 
     latest_finalized_block = node.eth.get_block("finalized")
 
-    current_month_end_block = latest_finalized_block["number"]
+    current_month_end_block = int(latest_finalized_block["number"])
     current_month_end_timestamp = latest_finalized_block["timestamp"]
 
     current_month_end_datetime = datetime.fromtimestamp(
