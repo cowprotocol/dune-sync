@@ -2,7 +2,7 @@
 import os
 from dotenv import load_dotenv
 from dune_client.client import DuneClient
-import web3
+from web3 import Web3
 from src.fetch.orderbook import OrderbookFetcher
 from src.logger import set_log
 from src.sync.config import BatchDataSyncConfig
@@ -14,7 +14,7 @@ log = set_log(__name__)
 
 
 async def sync_batch_data(
-    node: web3,
+    node: Web3,
     orderbook: OrderbookFetcher,
     dune: DuneClient,
     config: BatchDataSyncConfig,

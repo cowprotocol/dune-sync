@@ -34,7 +34,7 @@ def node_suffix(network: str) -> str:
     return ""
 
 
-def find_block_with_timestamp(node, time_stamp) -> int:
+def find_block_with_timestamp(node: Web3, time_stamp: float) -> int:
     """
     This implements binary search and returns the smallest block number
     whose timestamp is at least as large as the time_stamp argument passed in the function
@@ -62,9 +62,7 @@ def find_block_with_timestamp(node, time_stamp) -> int:
         block = node.eth.get_block(b)
         block_time_stamp = block.timestamp
         if block_time_stamp >= time_stamp:
-            return block.number
-    # fallback if correct block is not found
-    return mid_block_number + 200
+            return int(block.number)
 
 
 def compute_block_and_month_range(node: Web3):  # pylint: disable=too-many-locals
