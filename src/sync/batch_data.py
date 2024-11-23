@@ -1,11 +1,12 @@
 """Main Entry point for batch data sync"""
 import os
+from dotenv import load_dotenv
 from dune_client.client import DuneClient
 import web3
 from src.fetch.orderbook import OrderbookFetcher
 from src.logger import set_log
 from src.sync.config import BatchDataSyncConfig
-from src.sync.common import compute_block_and_month_range
+from src.sync.common import compute_block_and_month_range, node_suffix
 from src.models.block_range import BlockRange
 
 
@@ -20,15 +21,9 @@ async def sync_batch_data(
     dry_run: bool,
 ) -> None:
     """Batch data Sync Logic"""
+    load_dotenv()
     network = os.environ["NETWORK"]
-
-    if network == "mainnet":
-        network_name = "ethereum"
-    else:
-        if network == "xdai":
-            network_name = "gnosis"
-        else:
-            network_name = "arbitrum"
+    network_name = node_suffix(network).lower()
 
     block_range_list, months_list = compute_block_and_month_range(node)
     for i in range(len(block_range_list)):

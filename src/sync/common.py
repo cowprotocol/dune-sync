@@ -21,6 +21,18 @@ def last_sync_block(aws: AWSClient, table: SyncTable, genesis_block: int = 0) ->
     return block_from
 
 
+def node_suffix(network: str) -> str:
+    if network == "mainnet":
+        return "MAINNET"
+    else:
+        if network == "xdai":
+            return "GNOSIS"
+        else:
+            if network == "arbitrum-one":
+                return "ARBITRUM"
+    return ""
+
+
 def find_block_with_timestamp(node, time_stamp) -> int:
     """
     This implements binary search and returns the smallest block number

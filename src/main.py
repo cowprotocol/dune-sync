@@ -23,6 +23,7 @@ from src.sync.config import (
 )
 from src.sync.order_rewards import sync_order_rewards, sync_batch_rewards
 from src.sync.batch_data import sync_batch_data
+from src.sync.common import node_suffix
 
 log = set_log(__name__)
 
@@ -66,15 +67,9 @@ def main() -> None:
     orderbook = OrderbookFetcher()
     network = os.environ.get("NETWORK", "mainnet")
     log.info(f"Network is set to: {network}")
-    if network == "mainnet":
-        node_suffix = "MAINNET"
-    else:
-        if network == "xdai":
-            node_suffix = "GNOSIS"
-        else:
-            if network == "arbitrum-one":
-                node_suffix = "ARBITRUM"
-    web3 = Web3(Web3.HTTPProvider(os.environ.get("NODE_URL" + "_" + node_suffix)))
+    web3 = Web3(
+        Web3.HTTPProvider(os.environ.get("NODE_URL" + "_" + node_suffix(network)))
+    )
 
     if args.sync_table == SyncTable.APP_DATA:
         table = os.environ["APP_DATA_TARGET_TABLE"]

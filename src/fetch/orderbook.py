@@ -19,6 +19,7 @@ from src.utils import open_query
 log = set_log(__name__)
 
 MAX_PROCESSING_DELAY = 10
+BUCKET_SIZE = {"mainnet": 10000, "xdai": 30000, "arbitrum-one": 1000000}
 
 
 class OrderbookEnv(Enum):
@@ -229,9 +230,10 @@ class OrderbookFetcher:
         so as to ensure the batch data query runs fast enough.
         At the end, it concatenates everything into one data frame
         """
+        load_dotenv()
         start = block_range.block_from
         end = block_range.block_to
-        bucket_size = 20000
+        bucket_size = BUCKET_SIZE[os.environ.get("NETWORK", "mainnet")]
         res = []
         while start < end:
             size = min(end - start, bucket_size)
