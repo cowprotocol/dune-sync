@@ -14,7 +14,7 @@ from sqlalchemy.engine import Engine
 
 from src.logger import set_log
 from src.models.block_range import BlockRange
-from src.utils import open_query
+from src.utils import open_query, node_suffix
 
 log = set_log(__name__)
 
@@ -179,15 +179,19 @@ class OrderbookFetcher:
         """
         Fetches and validates Batch data DataFrame as concatenation from Prod and Staging DB
         """
+        load_dotenv()
+        network = node_suffix(os.environ["NETWORK"])
+        epsilon_upper = str(os.environ[f"EPSILON_UPPER_{network}"])
+        epsilon_lower = str(os.environ[f"EPSILON_LOWER_{network}"])
         batch_data_query_prod = (
             open_query("orderbook/batch_data.sql")
             .replace("{{start_block}}", str(block_range.block_from))
             .replace("{{end_block}}", str(block_range.block_to))
             .replace(
-                "{{EPSILON_LOWER}}", "10000000000000000"
+                "{{EPSILON_LOWER}}", epsilon_lower
             )  # lower ETH cap for payment (in WEI)
             .replace(
-                "{{EPSILON_UPPER}}", "12000000000000000"
+                "{{EPSILON_UPPER}}", epsilon_upper
             )  # upper ETH cap for payment (in WEI)
             .replace("{{env}}", "prod")
         )

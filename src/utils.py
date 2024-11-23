@@ -13,3 +13,16 @@ def open_query(filename: str) -> str:
 def query_file(filename: str) -> str:
     """Returns proper path for filename in QUERY_PATH"""
     return os.path.join(QUERY_PATH, filename)
+
+
+def node_suffix(network: str) -> str:
+    """
+    Converts network internal name to name used for nodes and dune tables
+    """
+    if network == "mainnet":
+        return "ETHEREUM"
+    if network == "xdai":
+        return "GNOSIS"
+    if network == "arbitrum-one":
+        return "ARBITRUM"
+    return ""

@@ -6,8 +6,9 @@ from web3 import Web3
 from src.fetch.orderbook import OrderbookFetcher
 from src.logger import set_log
 from src.sync.config import BatchDataSyncConfig
-from src.sync.common import compute_block_and_month_range, node_suffix
+from src.sync.common import compute_block_and_month_range
 from src.models.block_range import BlockRange
+from src.utils import node_suffix
 
 
 log = set_log(__name__)

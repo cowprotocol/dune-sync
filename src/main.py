@@ -23,7 +23,7 @@ from src.sync.config import (
 )
 from src.sync.order_rewards import sync_order_rewards, sync_batch_rewards
 from src.sync.batch_data import sync_batch_data
-from src.sync.common import node_suffix
+from src.utils import node_suffix
 
 log = set_log(__name__)
 
